@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="zh-CN">
 <head>
 <meta charset="utf-8">
 <title>HTML</title>
@@ -81,7 +81,21 @@ src用于替换当前内容;
 </div>
 
 <div id="tags">
-<h2>标签集</h2><textarea>
+<h2>标签集</h2><pre>
+【 lang属性 css国际化 】
+＜html lang="zh | zh-CN | EN">＜/html> 
+lang属性被使用的场景：Chrome的内置翻译，针对特定语言的内容的搜索引擎及屏幕阅读器,可以以适当的口音和正确的发音读出内容
+一般指导原则是html元素必须始终具有lang属性集，然后该属性将被所有其他元素继承
+在同一页面上看到不同语言的内容并不罕见,这种情况下可以使用span>或div包装该内容，并将正确的lang属性应用于该包装元素。
+< p>The fourth animal in the Chinese Zodiac is Rabbit (< span lang="zh">兔子< /span>).< /p>
+
+[lang="zh] 属性选择器只匹配zh
+[lang^="zh"] 将匹配 zh, zh-HK, zh-Hans, zhong, zh123… 前两个字
+[lang|="zh"] 将匹配 zh, zh-HK, zh-Hans, zh-amazing, zh-123
+:lang() 伪类选择器
+
+
+</pre><textarea>
 ＜base href="https//www.baidu.com" target="_blank"＞ 为页面上所有的链接包括link标签规定默认地址或目标
 
 <hr> 横线

@@ -12,12 +12,12 @@
 
 <main>
 <nav>
-	<ul>
-		<li class="home">
+  <ul>
+    <li class="home">
       <a href="#" onclick="location = location.hostname == 'localhost' ? '../' : './';return false;">STUDY</a>
     </li>
-		<li class="it"><a href="javascript:;">CSS</a></li>
-	</ul>
+    <li class="it"><a href="javascript:;">CSS</a></li>
+  </ul>
 </nav>
 
 <pre>
@@ -106,12 +106,97 @@ vh and vw：相对于视口的高度和宽度,而不是父元素的(CSS百分比
 vmax相对于视口的宽度或高度中较大的那个,其中最大的那个被均分为100单位的vmax。
 vmin相对于视口的宽度或高度中较小的那个,其中最小的那个被均分为100单位的vmin。
 
+视口单位基于页面的根元素，而百分比则基于它们所在的容器
+
+CSS视口单位非常适合响应式排版
+.title { font-size: 5vw; }
+标题的font-size将根据视口宽度增加或缩小,就像提供的字体大小是视口宽度的5％一样
+但字体大小在移动大小中变得很小，这对可访问性和用户体验不利。移动设备上的最小字体大小不应该超过14px,在GIF中字体大小低于10px
+要解决该问题，需要为标题提供最小字体大小，使其不能低于该大小
+.title { font-size: calc(14px + 2vw); }
+另一重要事项是字体大小在大屏幕（如27英寸iMac）上的行为,字体大小达到95px左右，这是一个巨大的价值。为了避免这种情况，应该在某些断点处使用媒体查询并更改重置font-size大小确保大小不会太大
+@media (min-width: 1800px) {
+  .title { font-size: 40px; }
+}
+
+以占据视口高度的100％即全屏部分
+.section {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+粘性页脚
+在大屏幕上网站内容很短，并且页脚没有停留在底部
+为了解决这个问题，需要使主要内容的高度等于viewport height - (header + footer)。动态地进行操作很棘手，但使用CSS视口单元，这非常容易。
+
+1.第一个解决方案：计算和视口单位
+如果页眉和页脚的高度固定，则可以将CSS calc() 函数与视口单位结合使用。方法如下：
+header, footer { height: 70px; }
+main { height: calc(100vh - 70px - 70px); }
+不能保证此解决方案始终有效，尤其是对于页脚没有使用固定高度的页脚，因为在例如不同的屏幕尺寸下，此页脚是不可行的。
+
+2.第二种解决方案：Flexbox和视口单元（推荐）
+通过将100vh添加为body元素的高度，然后可以使用flexbox来使main元素占用剩余空间。
+body { min-height: 100vh; display: flex; flex-direction: column; }
+main { flex-grow: 1; }
+
 移动端用rem布局时候根据不同的屏幕宽度要设置不同的font-size来做到适配,要写一坨JS来设置,能不能不用JS呢？
 例如：以750px设计稿作为基准,根节点设置font-size为100px,只考虑DPR为2的情况,只考虑最简单的情况
 document.querySelector('html').style.fontSize = `${window.innerWidth / 7.5 }px`;
 现在移动端css3单位vw,wh兼容性已经很不错了,在不需要兼容太低版本的安卓机情况下可以这样来：
 html{font-size: calc(100vw / 7.5)}
 
+</pre>响应式布局: grid和视口单位<pre class="css">
+<div class="wrapper">
+  <div class="device laptop"></div>
+  <div class="device mobile"></div>
+  <div class="device tablet"></div>
+</div>
+
+.wrapper {
+  display: grid;
+  grid-template-columns: repeat(20, 5vw); 
+  grid-auto-rows: 6vw;
+}
+
+.mobile { 
+  position: relative;
+  z-index: 1;
+  grid-column: 2 / span 3;
+  grid-row: 3 / span 5;
+}
+  
+.tablet {
+  position: relative;
+  z-index: 1;
+  grid-column: 13 / span 7; 
+  grid-row: 4 / span 4;
+  border-bottom: 1vw solid #a9B9dd;
+  border-right: solid 3vw #a9B9dd;
+}
+  
+.laptop {
+  position: relative;
+  grid-column: 3/span 13;
+  grid-row: 2 / span 8;
+}
+
+/* 视口单元用于底部、左侧、右侧、高度和边框半径
+.laptop:after {
+  content:"";
+  position:absolute;
+  bottom: -3vw;
+  left: -5.5vw;
+  right: -5.5vw;
+  height: 3vw;
+  background-color: #a9B9dd;
+  border-radius: 0 0 1vw 1vw;
+}
+
+</pre><pre>
 【 数学表达式calc() 】
 calc是calculate计算的缩写,允许使用+、-、*、/四种运算符,可以混合使用%、px、em、rem等单位进行计算
 +和-运算符两边一定要有空白符
@@ -134,7 +219,7 @@ width: calc(10px - 20px);
 *{margin:0;padding:0;font-size:14px;box-sizing:border-box;}
 
 h1,h2,h3,h4,h5,h6,p,div,ul,li,ol,dl,dt,dd,table,tr,td,th,header,nav,main,section,aside,srticle,footer{
-	margin:0;padding:0;box-sizing:border-box;
+  margin:0;padding:0;box-sizing:border-box;
 }
 
 </pre>
@@ -151,7 +236,7 @@ h1,h2,h3,h4,h5,h6,p,div,ul,li,ol,dl,dt,dd,table,tr,td,th,header,nav,main,section
 可以使用style标签在文档头部head定义内部样式表
 
 ＜style>
-	p{font-size: 16px;}
+  p{font-size: 16px;}
 ＜/style>
 
 3、内联样式表：当样式仅需要在一个元素上应用一次时,
@@ -255,9 +340,9 @@ body {
 
 // 为了兼容ie6和ie7,*代表是专给ie6/7写的,引文它们不能兼容display:inline-block;
 div.ib{
-	display:inline-block;
-	*display:inline;
-	*zoom:1;
+  display:inline-block;
+  *display:inline;
+  *zoom:1;
 }
 
 </pre><pre>
@@ -455,10 +540,10 @@ CSS计数器的2个属性和1个方法：
 
 </pre><pre class="css">
 .counter {
-	counter-reset: wangxiaoer 2 wangxiaosan 3;
-	counter-increment: wangxiaoer;
-	font: "Microsoft YaHei" normal bold 2rem; color: #cd0000;
-	font:italic bold 12px/20px arial,sans-serif;
+  counter-reset: wangxiaoer 2 wangxiaosan 3;
+  counter-increment: wangxiaoer;
+  font: "Microsoft YaHei" normal bold 2rem; color: #cd0000;
+  font:italic bold 12px/20px arial,sans-serif;
 }
 .counter:before { content: counter(wangxiaoer); }  /*默认递增一次,值为3*/
 .counter:after { content: counter(wangxiaosan); }  /*值为3,因为没有设置counter-increment*/
@@ -662,9 +747,9 @@ input[type="text"]{ width:150px; display:block; margin-bottom:10px; background-c
 input[type="button"]{ width:120px; margin-left:35px; display:block; font-family: Verdana, Arial; }
 
 <form name="input" action="" method="get">
-	<input type="text" name="Name" value="Bill" size="20">
-	<input type="text" name="Name" value="Gates" size="20">
-	<input type="button" value="Example Button">
+  <input type="text" name="Name" value="Bill" size="20">
+  <input type="text" name="Name" value="Gates" size="20">
+  <input type="button" value="Example Button">
 </form>
 
 </pre><pre>
@@ -845,13 +930,13 @@ input:indeterminate {background-color: grey;} //介于选中和未选中的模�
 .more,
 .hide,
 .checkbox:checked ~ .label .show {
-	position:absolute;
-	left: -999em;
+  position:absolute;
+  left: -999em;
 }
 
 .checkbox:checked ~ .more,
 .checkbox:checked ~ .label .hide {
-	position: static;
+  position: static;
 }
 
 <input type="checkbox" id="ToggleCheckbox" class="checkbox" />
@@ -867,35 +952,35 @@ input:indeterminate {background-color: grey;} //介于选中和未选中的模�
 .label { display: block; padding-top: 5px; padding-bottom: 5px; background-color: #eee; text-align: center; }
 .radio, .tab_content { position: absolute; left: -999em; }
 .radio:checked ~ .tab_content {
-	margin-top: -1px;
-	padding: 1em 2em;
-	border: 1px solid #ccc;
-	left: 0;
-	right: 0;
+  margin-top: -1px;
+  padding: 1em 2em;
+  border: 1px solid #ccc;
+  left: 0;
+  right: 0;
 }
 .radio:checked ~ .label {
-	background-color: #fff;
-	border-bottom: 1px solid #fff;
-	position: relative;
-	z-index: 1;
+  background-color: #fff;
+  border-bottom: 1px solid #fff;
+  position: relative;
+  z-index: 1;
 }
 
 <div class="box">
-	<div class="tab">
-		<input type="radio" id="testTabRadio1" class="radio" name="tab" checked="checked" />
-		<label class="label" for="testTabRadio1">选项卡1</label>
-		<div class="tab_content">我是选项卡1对应的内容</div>
-	</div>
-	<div class="tab">
-		<input type="radio" id="testTabRadio2" class="radio" name="tab" />
-		<label class="label" for="testTabRadio2">选项卡2</label>
-		<div class="tab_content">我是选项卡2对应的内容</div>
-	</div>
-	<div class="tab">
-		<input type="radio" id="testTabRadio3" class="radio" name="tab" />
-		<label class="label" for="testTabRadio3">选项卡3</label>
-		<div class="tab_content">我是选项卡3对应的内容</div>
-	</div>
+  <div class="tab">
+    <input type="radio" id="testTabRadio1" class="radio" name="tab" checked="checked" />
+    <label class="label" for="testTabRadio1">选项卡1</label>
+    <div class="tab_content">我是选项卡1对应的内容</div>
+  </div>
+  <div class="tab">
+    <input type="radio" id="testTabRadio2" class="radio" name="tab" />
+    <label class="label" for="testTabRadio2">选项卡2</label>
+    <div class="tab_content">我是选项卡2对应的内容</div>
+  </div>
+  <div class="tab">
+    <input type="radio" id="testTabRadio3" class="radio" name="tab" />
+    <label class="label" for="testTabRadio3">选项卡3</label>
+    <div class="tab_content">我是选项卡3对应的内容</div>
+  </div>
 </div>
 
 </pre>利用锚点实现选项卡的切换,缺点：页面跳转,可使用js美化<pre class="css">
@@ -1189,14 +1274,14 @@ div:target{display:block;} 结合锚点实现模态框即弹出框
 .container>div:not(:target) > a {}
 
 <div class="container">
-	<div id="c1">
-		<a href="#c1">First</a>
-		<div>First</div>
-	</div>
-	<div id="c2">
-		<a href="#c2">Second</a>
-		<div>Second</div>
-	</div>
+  <div id="c1">
+    <a href="#c1">First</a>
+    <div>First</div>
+  </div>
+  <div id="c2">
+    <a href="#c2">Second</a>
+    <div>Second</div>
+  </div>
 </div>
 
 </pre>
@@ -1205,31 +1290,31 @@ div:target{display:block;} 结合锚点实现模态框即弹出框
 <div id="tags">
 <h2>元素css</h2><pre class="css">
 h3:before{
-	content:""; display:inline-block;
-	width:0px; height:0px;
-	border-top:8px solid transparent;
-	border-right:10px solid transparent;
-	border-bottom:8px solid transparent;
-	border-left:10px solid red;
+  content:""; display:inline-block;
+  width:0px; height:0px;
+  border-top:8px solid transparent;
+  border-right:10px solid transparent;
+  border-bottom:8px solid transparent;
+  border-left:10px solid red;
 }
 
 </pre>三角形列表项目符号<pre class="css">
 ul {
-	margin: 0.75em 0;
-	padding: 0 1em;
-	list-style: none;
+  margin: 0.75em 0;
+  padding: 0 1em;
+  list-style: none;
 }
 li:before {
-	content: "";
-	border-color: transparent #111;
-	border-style: solid;
-	border-width: 0.35em 0 0.35em 0.45em;
-	display: block;
-	height: 0;
-	width: 0;
-	left: -1em;
-	top: 0.9em;
-	position: relative;
+  content: "";
+  border-color: transparent #111;
+  border-style: solid;
+  border-width: 0.35em 0 0.35em 0.45em;
+  display: block;
+  height: 0;
+  width: 0;
+  left: -1em;
+  top: 0.9em;
+  position: relative;
 }
 
 </pre><pre class="css">
@@ -1280,20 +1365,20 @@ a,button,input,optgroup,select,textarea { -webkit-tap-highlight-color:rgba(0,0,0
 
 /* 输入边框渐变 */
 input[type=text], textarea {
-	-webkit-transition: all 0.30s ease-in-out;
-	-moz-transition: all 0.30s ease-in-out;
-	-ms-transition: all 0.30s ease-in-out;
-	-o-transition: all 0.30s ease-in-out;
-	outline: none;
-	padding: 3px 0px 3px 3px;
-	margin: 5px 1px 3px 0px;
-	border: 1px solid #ddd;
+  -webkit-transition: all 0.30s ease-in-out;
+  -moz-transition: all 0.30s ease-in-out;
+  -ms-transition: all 0.30s ease-in-out;
+  -o-transition: all 0.30s ease-in-out;
+  outline: none;
+  padding: 3px 0px 3px 3px;
+  margin: 5px 1px 3px 0px;
+  border: 1px solid #ddd;
 }
 input[type=text]:focus, textarea:focus {
-	box-shadow: 0 0 5px rgba(81, 203, 238, 1);
-	padding: 3px 0px 3px 3px;
-	margin: 5px 1px 3px 0px;
-	border: 1px solid rgba(81, 203, 238, 1);
+  box-shadow: 0 0 5px rgba(81, 203, 238, 1);
+  padding: 3px 0px 3px 3px;
+  margin: 5px 1px 3px 0px;
+  border: 1px solid rgba(81, 203, 238, 1);
 }
 
 </pre>
@@ -1424,9 +1509,9 @@ target.onanimationend = function() {
 
 </pre>在可打印的网页中显示URLs<pre class="css">
 @media print {
-	a:after {
-		content: " [" attr(href) "] ";
-	}
+  a:after {
+    content: " [" attr(href) "] ";
+  }
 }
 
 </pre>通用媒体查询<pre class="css">
@@ -1479,10 +1564,10 @@ filter:Alpha(opacity=50)  //兼容IE
 
 </pre>跨浏览器透明<pre class="css">
 .transparent {
-	filter: alpha(opacity=50); /* internet explorer */
-	-khtml-opacity: 0.5;       /* khtml, old safari */
-	-moz-opacity: 0.5;         /* mozilla, netscape */
-	opacity: 0.5;              /* fx, safari, opera */
+  filter: alpha(opacity=50); /* internet explorer */
+  -khtml-opacity: 0.5;       /* khtml, old safari */
+  -moz-opacity: 0.5;         /* mozilla, netscape */
+  opacity: 0.5;              /* fx, safari, opera */
 }
 
 </pre>
@@ -1502,11 +1587,11 @@ opacity(%)      设置对象的透明度。
 saturate(%)     设置对象的饱和度。300%
 sepia(%)        设置对象的褐色程度。
 drop-shadow(x y blur color)：设置对象的阴影。
-	-webkit-filter: drop-shadow(3px 3px 3px gray);
-	第一个是水平偏移距离,默认在元素的左边,
-	第二个是垂直偏移距离,默认在元素的下面,当它们为负值时,阴影向相反方向偏移。
-	第三个值设置阴影模糊效果,值越大,越模糊。
-	第四个是阴影颜色。
+  -webkit-filter: drop-shadow(3px 3px 3px gray);
+  第一个是水平偏移距离,默认在元素的左边,
+  第二个是垂直偏移距离,默认在元素的下面,当它们为负值时,阴影向相反方向偏移。
+  第三个值设置阴影模糊效果,值越大,越模糊。
+  第四个是阴影颜色。
 filter还可以取值为url,url函数接受一个XML文件,该文件设置了 一个SVG滤镜,且可以包含一个锚点来指定一个具体的滤镜元素
 
 网站想瞬间实现黑暗模式
@@ -1518,16 +1603,17 @@ body { background: #fff;  filter: invert(1) hue-rotate(270deg); }
 
 <div id="clip">
 <h3>clip:剪裁绝对定位元素外形,clip设置不得当会导致元素不可见</h3><pre>
-clip是一个css属性,用来定义元素的那一部分用来显示,必须应用在绝对定位的元素上,可以是position:absolute或fixed;
-clip: auto是不剪裁的意思
-clip: rect(top,right,bottom,left);  其中的top、right、bottom、left都是相对于元素的左上角开始计算数值的
-clip: rect(top right bottom left);
+已废弃,该特性已经从Web标准中删除，虽然一些浏览器目前仍然支持它,clip-path属性代替了现在已经弃用的剪切clip属性
+
+clip是一个css属性,用来定义元素的那一部分用来显示,定义了元素的哪一部分是可见的,只适用于position:absolute的元素
+clip裁剪可以用来隐藏web控件,通过label的for指向web控件实现自定义样式。
+clip裁剪可以用来裁剪图片、动画
+
+clip: auto 默认,不剪裁
+clip: rect(top,right,bottom,left);  标准语法,其中的top、right、bottom、left都是相对于元素的左上角开始计算数值的
+clip: rect(top right bottom left);  向后兼容语法
 clip: rect(1px, 10em, 3rem, 2ch);
 clip: rect(1px 10em 3rem 2ch);
-
-clip裁剪可以用来隐藏web控件,通过label的for指向web控件实现自定义样式。
-clip裁剪可以用来裁剪图片。
-clip裁剪可以用来一些动画
 
 当一幅图像的尺寸大于包含它的元素时
 ＜img src="image/l2.jpg" border="0" width="120" height="150" style="position:absolute;clip:rect(0px 80px 200px 0px)" >
@@ -1536,9 +1622,256 @@ clip裁剪可以用来一些动画
 图片裁剪成半圆
 ＜img src="image/l2.jpg" border="0" width="150" height="150" style="border-radius: 75px; position:absolute;clip:rect(0px 75px 200px 0px)" >
 
-</pre>隐藏控件<pre class="html">
-<input type="file" id="imgFile" name="files[]" multiple accept="image/gif,image/jpeg,image/png" style="position: absolute;clip: rect(0 0 0 0);" />
-<label for="imgFile" style="border:2px solid;padding: .5rem;"> + 选择图片文件</label>
+隐藏控件
+< input type="file" id="imgFile" name="files[]" multiple accept="image/gif,image/jpeg,image/png" style="position: absolute;clip: rect(0 0 0 0);" />
+< label for="imgFile" style="border:2px solid;padding: .5rem;"> + 选择图片文件< /label>
+
+</pre>
+
+<h3>clip-path</h3><pre>
+clip-path属性代替了现在已经弃用的剪切clip属性
+clip-path CSS 属性创建一个裁剪区域，该区域设置应显示元素的哪一部分。区域内的部分显示，区域外的隐藏
+剪切区域是被引用内嵌的URL定义的路径或外部svg的路径，或作为一个形状例如circle()
+此属性采用以下值之一:circle() | ellipse() | polygon() | path() | url()
+使用最多的是circle和polygon。circle(radius at pair)值有两个参数:圆的半径和圆心的点。polygon(pair, pair, pair ...)值取3个或更多的点，表示一个三角形、一个矩形等
+
+clip-path: circle(40%)
+clip-path: ellipse(130px 140px at 10% 20%);
+clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+
+clip-path属性指定为下面列出的值的一个或多个值的组合：
+/* Keyword values,none不创建的剪切路径 */
+clip-path: none;
+
+/* < clip-source> values,用url表示剪切元素的路径 */ 
+clip-path: url(resources.svg#c1);
+
+/* < geometry-box> values */
+clip-path: margin-box;
+clip-path: border-box;
+clip-path: padding-box;
+clip-path: content-box;
+clip-path: fill-box;
+clip-path: stroke-box;
+clip-path: view-box;
+
+/* < basic-shape> values,一种形状，其大小和位置由几何盒值定义。如果没有指定几何框，则边框将用作参考框 */
+clip-path: inset(100px 50px);
+clip-path: circle(50px at 0 100px);
+clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+clip-path: path('M0.5,1 C0.5,1,0,0.7,0,0.3 A0.25,0.25,1,1,1,0.5,0.3 A0.25,0.25,1,1,1,1,0.3 C1,0.7,0.5,1,0.5,1 Z');
+
+/* Box and shape values combined */
+clip-path: padding-box circle(50px at 0 100px);
+
+/* Global values */
+clip-path: inherit;
+clip-path: initial;
+clip-path: unset;
+
+< geometry-box>
+如果同basic-shape一起声明将为基本形状提供相应的参考框盒。通过自定义，它将利用确定的盒子边缘包括任何形状边角（比如被border-radius定义的剪切路径）。几何框盒可有以下的值中的一个：
+margin-box 使用margin box作为引用框。
+border-box 使用border box作为引用框。
+padding-box 使用padding box作为引用框。
+content-box 使用content box作为引用框。
+fill-box 利用对象边界框作为引用框。
+stroke-box 使用笔触边界框（stroke bounding box）作为引用框
+view-box 使用最近的SVG视口（viewport）作为引用框。如果viewBox属性被指定来为元素创建SVG视口，引用框将会被定位在坐标系的原点，引用框位于由viewBox属性建立的坐标系的原点，引用框的尺寸用来设置viewBox属性的宽高值。
+
+CSS clip-path 生成器: https://www.html.cn/tool/css-clip-path/
+
+.clip1{  // 三角形
+  -webkit-clip-path: polygon(50% 0, 0 100%, 100% 100%);
+  clip-path: polygon(50% 0, 0 100%, 100% 100%);
+}
+每个点用逗号分开，数值（50%，0）可以理解为坐标（x，y）,三个点形成一个闭合区域，这也是页面���显示出来的区域，形成遮罩的效果,三角形绘制的大概的坐标模型，起点为元素的左上角，所以形成的是一个向下发展的坐标系
+
+.clip2{  // 圆形
+  -webkit-clip-path: circle(50% at 50% 50%);
+ clip-path: circle(50% at 50% 50%); 
+}
+.clip3{  // 椭圆
+  -weblit-clip-path:ellipse(25% 40% at 50% 50%);
+  clip-path:ellipse(45% 40% at 50% 50%);
+}
+.clip4{  // 正方形
+  -webkit-clip-path:inset(10% 10% 10% 10%);
+  clip-path:inset(10% 10% 10% 10%);
+}
+.clip5{  // 左下右上圆
+  -webkit-clip-path: inset(25% 0 25% 0 round 0 25% 0 25%);
+  clip-path: inset(25% 0 25% 0 round 0 25% 0 25%);
+}
+.clip6{  // 五角星
+  -webkit-clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+}
+.clip7{  // 对话框
+  -webkit-clip-path: polygon(0% 0%, 100% 0%, 100% 75%, 75% 75%, 75% 100%, 50% 75%, 0% 75%);
+  clip-path: polygon(0% 0%, 100% 0%, 100% 75%, 75% 75%, 75% 100%, 50% 75%, 0% 75%);
+}
+.clip8{  // 回形
+  -webkit-clip-path: polygon(0% 0%, 0% 100%, 25% 100%, 25% 25%, 75% 25%, 75% 75%, 25% 75%, 25% 100%, 100% 100%, 100% 0%);
+  clip-path: polygon(0% 0%, 0% 100%, 25% 100%, 25% 25%, 75% 25%, 75% 75%, 25% 75%, 25% 100%, 100% 100%, 100% 0%);
+}
+
+</pre><pre class="css">
+<img style="margin-bottom: 20px;clip-path: url(#cross);" src="https://mdn.mozillademos.org/files/12668/MDN.svg" alt="MDN logo">
+<svg height="0" width="0">
+  <defs>
+    <clipPath id="cross">
+      <rect y="110" x="137" width="90" height="90"/>
+      <rect x="0" y="110" width="90" height="90"/>
+      <rect x="137" y="0" width="90" height="90"/>
+      <rect x="0" y="0" width="90" height="90"/>
+    </clipPath>
+  </defs>
+</svg>
+
+<select id="clipPath">
+  <option value="none">none</option>
+  <option value="circle(100px at 110px 100px)">circle</option>
+  <option value="url(#cross)" selected>cross</option>
+  <option value="inset(20px round 20px)">inset</option>
+  <option value="path('M 0 200 L 0,110 A 110,90 0,0,1 240,100 L 200 340 z')">path</option>
+</select>
+
+</pre><pre>
+clip-path过渡动画
+
+clip-path动画的局限
+clip-path动画虽然美好，但是存在一定的局限性，那就是进行过渡的两个状态，坐标顶点的数量必须一致。
+也就是如果希望从三角形过渡到矩形。假设三角形和矩形的 clip-path 分别为：
+三角形：clip-path: polygon(50% 0, 0 100%, 100% 0)
+矩形： clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%)
+进行过渡动画时候，直接从 polygon(50% 0, 0 100%, 100% 0) --> polygon(0 0, 100% 0, 100% 100%, 0 100%) 是不行的，因为是从 3 个坐标点变换到 4 个坐标点。
+因此这里需要这用一个讨巧的办法，在三角形的表示方法中，使用四个坐标点表示，其中两个坐标点进行重合即可。也就是：
+三角形：clip-path: polygon(50% 0, 0 100%, 100% 0) -> clip-path: polygon(50% 0, 50% 0, 0 100%, 100% 0)
+
+</pre>多边形图形过渡<pre class="css">
+.polygon-animate {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: crimson;
+  transition: .3s;
+  clip-path: polygon( 50% 0%, 0% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100% );
+  animation: polygon-ani 5s linear infinite;
+}
+@keyframes polygon-ani {
+  20% {
+    background-color: darkorange;
+    clip-path: polygon( 50% 0%, 100% 50%, 50% 100%, 0% 50%, 0% 50%, 0% 50%, 0% 50%, 0% 50%, 0% 50% );
+  }
+  40% {
+    clip-path: polygon( 50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%, 0% 38%, 0% 38%, 0% 38%, 0% 38% );
+  }
+  60% {
+    background-color: lemonchiffon;
+    clip-path: polygon( 50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%, 0% 25%, 0% 25%, 0% 25% );
+  }
+  80%,100% {
+    clip-path: polygon( 50% 0%, 90% 20%, 100% 60%, 75% 100%, 25% 100%, 0% 60%, 10% 20%, 10% 20%, 10% 20% );
+  }
+}
+</pre>图形变换动画 正方形分解成四个三角形<pre class="css">
+.triangle2rect {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: aniContainer 2s infinite alternate;
+}
+.triangle2rect div {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.a {
+  background: #99cccc;
+  clip-path: polygon(0% 0%, 0% 100%, 50% 50%);
+  animation: a 2s infinite alternate;
+}
+.b {
+  background: #99cccc;
+  clip-path: polygon(0% 0%, 100% 0%, 50% 50%);
+  animation: b 2s infinite alternate;
+}
+.c {
+  background: #99cccc;
+  clip-path: polygon(100% 0%, 100% 100%, 50% 50%);
+  animation: c 2s infinite alternate;
+}
+.d {
+  background: #99cccc;
+  clip-path: polygon(100% 100%, 0% 100%, 50% 50%);
+  animation: d 2s infinite alternate;
+}
+@keyframes a {
+  0%, 10% {
+    background: #99cccc;
+    clip-path: polygon(0% 0%, 0% 100%, 50% 50%);
+  }
+  90%, 100% {
+    background: #000;
+    clip-path: polygon(0% 100%, 25% 100%, 12.5% 0%);
+  }
+}
+@keyframes b {
+  0%, 10% {
+    background: #99cccc;
+    clip-path: polygon(0% 0%, 100% 0%, 50% 50%);
+  }
+  90%, 100% {
+    background: #000;
+    clip-path: polygon(25% 0%, 50% 0%, 37.5% 100%);
+  }
+}
+@keyframes c {
+  0%, 10% {
+    background: #99cccc;
+    clip-path: polygon(100% 0%, 100% 100%, 50% 50%);
+  }
+  90%, 100% {
+    background: #000;
+    clip-path: polygon(62.5% 0%, 75% 100%, 50% 100%);
+  }
+}
+@keyframes d {
+  0%, 10% {
+    background: #99cccc;
+    clip-path: polygon(100% 100%, 0% 100%, 50% 50%);
+  }
+  90%, 100% {
+    background: #000;
+    clip-path: polygon(100% 0%, 87.5% 100%, 75% 0%);
+  }
+}
+@keyframes aniContainer {
+  0%, 10% {
+    width: 100px;
+    height: 100px;
+  }
+  90%, 100% {
+    width: 250px;
+    height: 60px;
+  }
+}
+
+< hgroup class="triangle2rect">
+  < div class="a">< /div>
+  < div class="b">< /div>
+  < div class="c">< /div>
+  < div class="d">< /div>
+< /hgroup>
 
 </pre>
 
@@ -1552,10 +1885,10 @@ table、th、td设置不同的背景可以体现出边框来
 
 1、background-image属性,把图像放入背景需要使用,默认值是none,多重背景图时使用逗号分隔
 body {
-	background-image: url(./eg_bg_04.gif);
-	background-repeat: repeat-y;
-	background-position:center;
-	background-attachment:fixed;
+  background-image: url(./eg_bg_04.gif);
+  background-repeat: repeat-y;
+  background-position:center;
+  background-attachment:fixed;
 }
 background:url(bg_flower.gif);
 background-image:url(bg_flower.gif),url(bg_flower_2.gif);
@@ -1592,6 +1925,8 @@ background-attachment: fixed改成了position: fixed,因为前面前者滚动实
 background-size:63px 100px;     背景图片大小,可用百分比则是相对于父元素的宽度和高度
 
 6、background-clip:content-box  背景被裁剪到内容框,border-box背景被裁剪到边框,padding-box内边距框
+backgroundclip CSS属性设置元素的背景是否扩展到其border、padding或content框之下,text实现图片作为文字的背景效果
+此属性采用以下值之一：border-box (default) | padding-box | content-box | text
 
 7、background-origin规定背景图片的定位区域,背景图片可以放置于content-box、padding-box或border-box区域
 -webkit-background-origin:content-box;   /* Safari */
@@ -1613,11 +1948,11 @@ background简写的/它和font以及border-radius里简写方式使用的/用法
 
 </pre>全屏背景<pre class="css">
 html {
-	background: url('images/bg.jpg') no-repeat center center fixed;
-	-webkit-background-size: cover;
-	-moz-background-size: cover;
-	-o-background-size: cover;
-	background-size: cover;
+  background: url('images/bg.jpg') no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
 }
 
 </pre>
@@ -1631,21 +1966,30 @@ text-indent      缩进,可继承。 text-indent: 5em;
 color            文本颜色
 background-color 文本背景颜色
 text-align       对齐方式,left/right/center/justify	实现两端对齐文本效果,;min-width: 100px;text-align: justify;text-align-last: justify;
-vertical-align   垂直对齐,定义行内元素的基线相对于该元素所在行的基线的垂直对齐,允许指定负长度值和百分比值,这会使元素降低而不是升高。在表单元格中这个属性会设置单元格框中的单元格内容的对齐方式
- - baseline	   默认,元素放置在父元素的基线上。
- - sub         垂直对齐文本的下标。
- - super       垂直对齐文本的上标
+
+vertical-align   垂直对齐
+CSS的属性vertical-align用来指定行内元素（inline）或表格单元格（table-cell）元素的垂直对齐方式,不能用它垂直对齐块级元素
+定义行内元素的基线相对于该元素所在行的基线的垂直对齐,允许指定负长度值和百分比值,这会使元素降低而非升高,表单元格中这个属性会设置单元格框中的单元格内容的对齐方式
+对于顺序指示器(st, nd等)、需要的输入星号(*)或没有正确居中的图标特别有用
+ - baseline	   默认,使元素的基线与父元素的基线对齐。HTML规范没有详细说明部分可替换元素的基线，如textarea,这意味着这些元素使用此值的表现因浏览器而异
+ - sub         垂直对齐文本的下标,使元素的基线与父元素的下标基线对齐
+ - super       垂直对齐文本的上标,使元素的基线与父元素的上标基线对齐
  - top         把元素顶端与行中最高元素顶端对齐
  - text-top    把元素的顶端与父元素字体的顶端对齐
  - text-bottom 把元素的底端与父元素字体的底端对齐。
- - middle      把此元素放置在父元素的中部。
+ - middle      把此元素放置在父元素的中部,使元素的中部与父元素的基线加上父元素x-height的一半对齐
  - bottom      把元素的顶端与行中最低的元素的顶端对齐。
- - %	         使用 "line-height" 属性的百分比值来排列此元素,允许使用负值。
+ - %	         使用"line-height"属性的百分比值来排列此元素,允许使用负值
+ - 从基线开始的长度(px,%, em, rem等)
+
+vertical-align属性可被用于两种环境：
+1、使行内元素盒模型与其行内元素容器垂直对齐,例如用于垂直对齐一行文本的内的图片img
+2、垂直对齐表格单元内容
 
 </pre><img src="image/height.png"><pre>
 line-height      行高,行间距,百分比默认150%,1.5em;字号越大行高应设置越小,当文本区高度和行高相同时垂直居中
 body{line-height:normal; line-height:inherit; line-height:120%; line-height:25px; line-height: 1em; line-height:1.2}
-line-height的值紧跟着font-size值使用斜杠分开，如font-size / line-height 
+line-height的值紧跟着font-size值使用斜杠分开,如font-size / line-height 
 body{font:100%/normal  arial;} , body{font:100%/120%  arial;} ,body{font:100%/1.2  arial;}  ,body{font:100%/25px  arial;} 
 
 不需要分别添加line-height,只要添加到body即可
@@ -1675,6 +2019,10 @@ h1{font-size: 32px} 计算后的line-height 32px * 1.5 = 48px
 p{font-size: 16px}  计算后的line-height 16px * 1.5 = 24px
 #footer{font-size: 12px} 计算后的line-height 12px * 1.5 = 18px
 
+垂直居中
+font-size: 20px;
+line-height: 2;
+
 行高是指文本行基线间的垂直距离,基线（base line）并不是汉字文字的下端沿，而是英文字母“x”的下端沿
 上行的底线和下一行顶线之间的距离就是行距，而同一行顶线和底线之间的距离是font-size的大小，行距的一半是半行距
 font-size: 16px; line-height: 20px;则行间距为4px,半行间距为2px
@@ -1693,9 +2041,9 @@ line-height不需要考虑字体大小以及行高，然后计算padding了,只�
 外层设置宽度、display: table;
 内层设置 display: table-cell; vertical-align: middle;
 < div style="width: 300px; height:300px; text-align: center; display: table; background-color: #888; color: #FFF;">
-	< div style="display: table-cell; vertical-align: middle;">
-		< h4>这是一段很长很长的话！为了体现折行还要讲好多好多哦！< /h4>
-	< /div>
+  < div style="display: table-cell; vertical-align: middle;">
+    < h4>这是一段很长很长的话！为了体现折行还要讲好多好多哦！< /h4>
+  < /div>
 < /div>
 
 把box-sizing设置成"border-box"导致height并不总是等于content的高度,所以当lineHeight=height-borderWidth-padding的时line-height的高度才等于content的高度，文字才垂直居中
@@ -1722,26 +2070,26 @@ direction属性影响块级元素中文本的书写方向、表中列布局的�
 div.justify{border:1px solid red;min-width: 100px;text-align: justify;text-align-last: justify;}
 
 <div class="justify-text">
-	<div class="li">账号</div>
-	<div class="li">密码</div>
-	<div class="li">电子邮件</div>
+  <div class="li">账号</div>
+  <div class="li">密码</div>
+  <div class="li">电子邮件</div>
 </div>
 
 // scss样式
 .justify-text {
-	.li {
-		padding: 0 20px;
-		margin-top: 10px;
-		width: 100px;
-		background-color: #f13f84;
-		line-height: 40px;
-		text-align-last: justify;
-		color: #fff;
-		list-style: none;
-		&:first-child {
-			margin-top: 0;
-		}
-	}
+  .li {
+    padding: 0 20px;
+    margin-top: 10px;
+    width: 100px;
+    background-color: #f13f84;
+    line-height: 40px;
+    text-align-last: justify;
+    color: #fff;
+    list-style: none;
+    &:first-child {
+      margin-top: 0;
+    }
+  }
 }
 
 /* 用CSS动画实现省略号动画 */
@@ -1808,13 +2156,13 @@ pre-line     合并空白符序列,但是保留换行符。
 inherit      规定应该从父元素继承 white-space 属性的值。
 
 input{
-	cursor: auto;
-	display: block;
-	height: 1.4rem;
-	text-overflow: clip;
-	overflow: hidden;
-	white-space: nowrap; // 不换行
-	min-height: 1.4rem;
+  cursor: auto;
+  display: block;
+  height: 1.4rem;
+  text-overflow: clip;
+  overflow: hidden;
+  white-space: nowrap; // 不换行
+  min-height: 1.4rem;
 }
 
 word-break 属性规定自动换行的处理方法,强制换行
@@ -1849,8 +2197,8 @@ text-shadow:-1px 1px #1AC33E,-2px 2px #19B43A,-3px 3px #19A536,-4px 4px #189332,
 </pre><pre class="css">
 /* 制造模糊文本 */
 .blurry-text {
-	color: transparent;
-	text-shadow: 0 0 5px rgba(0,0,0,0.5);
+  color: transparent;
+  text-shadow: 0 0 5px rgba(0,0,0,0.5);
 }
 
 /* 模糊文字 */
@@ -2194,24 +2542,24 @@ p.sansserif{font-family:Arial,Verdana,Sans-serif}
 
 </pre><pre>
 2、font-style 属性最常用于规定斜体文本,三个值：
-	normal - 文本正常显示
-	italic - 文本斜体显示  取代 em标签
-	oblique - 文本倾斜显示
+  normal - 文本正常显示
+  italic - 文本斜体显示  取代 em标签
+  oblique - 文本倾斜显示
 
 3、font-variant 属性可以设定小型大写字母
-	p {font-variant:small-caps;}
+  p {font-variant:small-caps;}
 
 4、font-weight 属性设置文本的粗细,数值100-900,默认为400为normal,700为bold
-	p.normal {font-weight:normal;}
-	p.thick {font-weight:bold;}   取代 b 标签
-	p.thick {font-weight:bolder;} 取代 b 标签
-	p.thick {font-weight:lighter;}
-	p.thicker {font-weight:900;}
+  p.normal {font-weight:normal;}
+  p.thick {font-weight:bold;}   取代 b 标签
+  p.thick {font-weight:bolder;} 取代 b 标签
+  p.thick {font-weight:lighter;}
+  p.thicker {font-weight:900;}
 
 5、font-size 属性设置文本的大小,默认大小是 16 像素 (16px=16pixels=1em)
 实际上它设置的是字体中字符框的高度;实际的字符字形可能比这些框高或矮(通常会矮)。
 各关键字对应的字体必须比一个最小关键字相应字体要高,并且要小于下一个最大关键字对应的字体
-	font: arial,sans-serif italic bold 1em/2em ; font-size/line-height
+  font: arial,sans-serif italic bold 1em/2em ; font-size/line-height
 
 可能的值
 xx-small    把字体的尺寸设置为不同的尺寸,从 xx-small 到 xx-large。
@@ -2243,15 +2591,15 @@ inherit	规定应该从父元素继承 line-height 属性的值
 </pre><pre class="css">
 // @font-face模板
 @font-face {
-	font-family: 'MyWebFont';
-	src: url('webfont.eot');                                    /* IE9 Compat Modes */
-	src: url('webfont.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-	url('webfont.woff') format('woff'),                         /* Modern Browsers */
-	url('webfont.ttf') format('truetype'),                      /* Safari, Android, iOS */
-	url('webfont.svg#svgFontName') format('svg');               /* Legacy iOS */
+  font-family: 'MyWebFont';
+  src: url('webfont.eot');                                    /* IE9 Compat Modes */
+  src: url('webfont.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+  url('webfont.woff') format('woff'),                         /* Modern Browsers */
+  url('webfont.ttf') format('truetype'),                      /* Safari, Android, iOS */
+  url('webfont.svg#svgFontName') format('svg');               /* Legacy iOS */
 }
 body {
-	font-family: 'MyWebFont', Arial, sans-serif;
+  font-family: 'MyWebFont', Arial, sans-serif;
 }
 
 </pre>文字扫尾效果<pre class="css">
@@ -2620,76 +2968,76 @@ box-shadow: 0px 12px 12px rgba(245,245,245,1); // 面板阴影
 
 </pre>网页顶部盒阴影<pre class="css">
 body:before {
-	content: "";
-	position: fixed;
-	top: -10px;
-	left: 0;
-	width: 100%;
-	height: 10px;
-	-webkit-box-shadow: 0px 0px 10px rgba(0,0,0,.8);
-	-moz-box-shadow: 0px 0px 10px rgba(0,0,0,.8);
-	box-shadow: 0px 0px 10px rgba(0,0,0,.8);
-	z-index: 100;
+  content: "";
+  position: fixed;
+  top: -10px;
+  left: 0;
+  width: 100%;
+  height: 10px;
+  -webkit-box-shadow: 0px 0px 10px rgba(0,0,0,.8);
+  -moz-box-shadow: 0px 0px 10px rgba(0,0,0,.8);
+  box-shadow: 0px 0px 10px rgba(0,0,0,.8);
+  z-index: 100;
 }
 
 </pre>深灰色的点击渐变按钮<pre class="css">
 .graybtn {
-	-moz-box-shadow:inset 0px 1px 0px 0px #ffffff;
-	-webkit-box-shadow:inset 0px 1px 0px 0px #ffffff;
-	box-shadow:inset 0px 1px 0px 0px #ffffff;
-	background:-webkit-gradient( linear, left top, left bottombottom, color-stop(0.05, #ffffff), color-stop(1, #d1d1d1) );
-	background:-moz-linear-gradient( center top, #ffffff 5%, #d1d1d1 100% );
-	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#d1d1d1');
-	background-color:#ffffff;
-	-moz-border-radius:6px;
-	-webkit-border-radius:6px;
-	border-radius:6px;
-	border:1px solid #dcdcdc;
-	display:inline-block;
-	color:#777777;
-	font-family:arial;
-	font-size:15px;
-	font-weight:bold;
-	padding:6px 24px;
-	text-decoration:none;
-	text-shadow:1px 1px 0px #ffffff;
+  -moz-box-shadow:inset 0px 1px 0px 0px #ffffff;
+  -webkit-box-shadow:inset 0px 1px 0px 0px #ffffff;
+  box-shadow:inset 0px 1px 0px 0px #ffffff;
+  background:-webkit-gradient( linear, left top, left bottombottom, color-stop(0.05, #ffffff), color-stop(1, #d1d1d1) );
+  background:-moz-linear-gradient( center top, #ffffff 5%, #d1d1d1 100% );
+  filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#d1d1d1');
+  background-color:#ffffff;
+  -moz-border-radius:6px;
+  -webkit-border-radius:6px;
+  border-radius:6px;
+  border:1px solid #dcdcdc;
+  display:inline-block;
+  color:#777777;
+  font-family:arial;
+  font-size:15px;
+  font-weight:bold;
+  padding:6px 24px;
+  text-decoration:none;
+  text-shadow:1px 1px 0px #ffffff;
 }
 .graybtn:hover {
-	background:-webkit-gradient( linear, left top, left bottombottom, color-stop(0.05, #d1d1d1), color-stop(1, #ffffff) );
-	background:-moz-linear-gradient( center top, #d1d1d1 5%, #ffffff 100% );
-	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#d1d1d1', endColorstr='#ffffff');
-	background-color:#d1d1d1;
+  background:-webkit-gradient( linear, left top, left bottombottom, color-stop(0.05, #d1d1d1), color-stop(1, #ffffff) );
+  background:-moz-linear-gradient( center top, #d1d1d1 5%, #ffffff 100% );
+  filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#d1d1d1', endColorstr='#ffffff');
+  background-color:#d1d1d1;
 }
 .graybtn:active {
-	position:relative;
-	top:1px;
+  position:relative;
+  top:1px;
 }
 
 </pre>盒阴影<pre class="css">
 /* 内部CSS3盒阴影 */
 #mydiv {
-	-moz-box-shadow: inset 2px 0 4px #000;
-	-webkit-box-shadow: inset 2px 0 4px #000;
-	box-shadow: inset 2px 0 4px #000;
+  -moz-box-shadow: inset 2px 0 4px #000;
+  -webkit-box-shadow: inset 2px 0 4px #000;
+  box-shadow: inset 2px 0 4px #000;
 }
 
 /* 外部CSS3盒阴影 */
 #mydiv {
-	-webkit-box-shadow: 0 2px 2px -2px rgba(0, 0, 0, 0.52);
-	-moz-box-shadow: 0 2px 2px -2px rgba(0, 0, 0, 0.52);
-	box-shadow: 0 2px 2px -2px rgba(0, 0, 0, 0.52);
+  -webkit-box-shadow: 0 2px 2px -2px rgba(0, 0, 0, 0.52);
+  -moz-box-shadow: 0 2px 2px -2px rgba(0, 0, 0, 0.52);
+  box-shadow: 0 2px 2px -2px rgba(0, 0, 0, 0.52);
 }
 
 </pre>图片边框偏光<pre class="css">
 img.polaroid {
-	background:#000;                      /*Change this to a background image or remove*/
-	border:solid #fff;
-	border-width:6px 6px 20px 6px;
-	box-shadow:1px 1px 5px #333;          /* Standard blur at 5px. Increase for more depth */
-	-webkit-box-shadow:1px 1px 5px #333;
-	-moz-box-shadow:1px 1px 5px #333;
-	height:200px;                         /*Set to height of your image or desired div*/
-	width:200px;                          /*Set to width of your image or desired div*/
+  background:#000;                      /*Change this to a background image or remove*/
+  border:solid #fff;
+  border-width:6px 6px 20px 6px;
+  box-shadow:1px 1px 5px #333;          /* Standard blur at 5px. Increase for more depth */
+  -webkit-box-shadow:1px 1px 5px #333;
+  -moz-box-shadow:1px 1px 5px #333;
+  height:200px;                         /*Set to height of your image or desired div*/
+  width:200px;                          /*Set to width of your image or desired div*/
 }
 
 </pre><pre>
@@ -2804,18 +3152,18 @@ img{position:absolute;left:100px} 如果去掉position：absolute则left失效,�
 </pre><pre class="html">
 例：mm1覆盖mm2
 <div style="position:relative; z-index:auto;">
-	< img src="mm1.jpg" style="position:absolute; z-index:2;">
+  < img src="mm1.jpg" style="position:absolute; z-index:2;">
 </div>
 <div style="position:relative; z-index:auto;">
-	< img src="mm2.jpg" style="position:relative; z-index:1;">
+  < img src="mm2.jpg" style="position:relative; z-index:1;">
 </div>
 
 例：mm2覆盖mm1
 <div style="position:relative; z-index:0;">
-	< img src="mm1.jpg" style="position:absolute; z-index:2;">
+  < img src="mm1.jpg" style="position:absolute; z-index:2;">
 </div>
 <div style="position:relative; z-index:0;">
-	< img src="mm2.jpg" style="position:relative; z-index:1;">
+  < img src="mm2.jpg" style="position:relative; z-index:1;">
 </div>
 
 分析：差别就在于,z-index:0所在的div元素是层叠上下文元素,而z-index:auto所在的div元素是一个普通的元素于是两个img的层叠比较就不受父级的影响,两者直接套用层叠黄金准则,两者有着明显不一的z-index值,因此,遵循"谁大谁上"的准则,于是,z-index为2的img在z-index为1的img上。
@@ -2902,10 +3250,10 @@ Flex是Flexible Box的缩写,意为弹性布局,用来为盒状模型提供最�
   /*flex-grow, flex-shrink 和 flex-basis的简写,默认值为0 1 auto,*/
 
   align-self: auto | flex-start | flex-end | center | baseline | stretch;
-	/*单独对齐方式：自动(默认) | 顶部对齐 | 底部对齐 | 居中对齐 | 上下对齐并铺满 | 文本基线对齐*/
-	
-	margin-left: auto;
-	/* 让最后一项右边对齐 */
+  /*单独对齐方式：自动(默认) | 顶部对齐 | 底部对齐 | 居中对齐 | 上下对齐并铺满 | 文本基线对齐*/
+  
+  margin-left: auto;
+  /* 让最后一项右边对齐 */
 }
 
 </pre><pre>
@@ -2940,14 +3288,14 @@ li:nth-child(1) { margin-right: auto; }
 
 </pre>左重右轻导航栏布局,flexbox横向布局时,最后一个元素通过margin-left:auto实现向右对齐<pre class="css">
 <ul class="nav-list">
-	<li>HTML5</li>
-	<li>CSS3</li>
-	<li>JAVASCRIPT</li>
-	<li>TYPESCRIPT</li>
-	<li>THREE.JS</li>
-	<li>NODE</li>
+  <li>HTML5</li>
+  <li>CSS3</li>
+  <li>JAVASCRIPT</li>
+  <li>TYPESCRIPT</li>
+  <li>THREE.JS</li>
+  <li>NODE</li>
 </ul>
-	
+  
 .nav-list { display: flex; align-items: center; padding: 0 10px; width: 700px; height: 60px; background-color: #00b7a3;}
 .nav-list li { padding: 0 10px; height: 40px; line-height: 40px; font-size: 16px; color: #fff; list-style: none; }
 .nav-list li + li { margin-left: 10px; }
@@ -3775,24 +4123,24 @@ grid-template-columns,grid-template-rows 作为长度,百分比或calc的简单�
 <h3>鼠标样式</h3><pre class="css">
 // 在可点击的项目上强制手型
 a[href], input[type='submit'], input[type='image'], label[for], select, button, .pointer {
-	cursor: pointer;
+  cursor: pointer;
 }
 
 </pre>css禁用鼠标事件<pre class="css">
 .disabled {
-	pointer-events: none;
-	cursor: default;
-	opacity: 0.6;
+  pointer-events: none;
+  cursor: default;
+  opacity: 0.6;
 }
 
 </pre>css禁止用户选择<pre class="css">
 body{
-	-webkit-touch-callout: none;
-	-webkit-user-select: none;
-	-khtml-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 </pre>
@@ -3900,26 +4248,26 @@ display:table-cell 元素生成的匿名table默认table-layout:auto。宽度将
 .image p { color: #fff; padding-top: 8px; }
 
 <div class="grid">
-	<div class="row">
-		<div class="image">
-			< img src="../../image/l1.jpg" alt="A Lily" />
-			<p>A lily in the gardens of The Vyne Country House</p>
-		</div>
-		<div class="image">
-			< img src="../../image/l3.jpg" alt="A Fuchsia plant" />
-			<p>Fuchsia plant in my garden</p>
-		</div>
-	</div>
-	<div class="row">
-		<div class="image">
-			< img src="../../image/l2.jpg" alt="A crazy looking Allium flower" />
-			<p>A crazy looking flower</p>
-		</div>
-		<div class="image">
-			< img src="../../image/l4.jpg" alt="A Robin sitting on a fence" />
-			<p>This robin has been visiting our garden over the summer</p>
-		</div>
-	</div>
+  <div class="row">
+    <div class="image">
+      < img src="../../image/l1.jpg" alt="A Lily" />
+      <p>A lily in the gardens of The Vyne Country House</p>
+    </div>
+    <div class="image">
+      < img src="../../image/l3.jpg" alt="A Fuchsia plant" />
+      <p>Fuchsia plant in my garden</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="image">
+      < img src="../../image/l2.jpg" alt="A crazy looking Allium flower" />
+      <p>A crazy looking flower</p>
+    </div>
+    <div class="image">
+      < img src="../../image/l4.jpg" alt="A Robin sitting on a fence" />
+      <p>This robin has been visiting our garden over the summer</p>
+    </div>
+  </div>
 </div>
 
 </pre><pre class="html">
@@ -4137,21 +4485,21 @@ transform没有触发repaint是因为transform动画由GPU控制,支持硬件加
 </pre><pre class="css">
 .ball-running { animation: run-around 4s infinite; width: 100px; height: 100px; background-color: red; position: absolute; }
 @keyframes run-around {
-	0%: { top: 0; left: 0; }
-	25% { top: 0; left: 200px; }
-	50% { top: 200px; left: 200px; }
-	75% { top: 200px; left: 0; }
+  0%: { top: 0; left: 0; }
+  25% { top: 0; left: 200px; }
+  50% { top: 200px; left: 200px; }
+  75% { top: 200px; left: 0; }
 }
-	
+  
 <div class="ball-running"></div>
 
 // 用transform重写动画效果
 .ball-running { animation: run-around2 4s infinite; width: 100px; height: 100px; background-color: red; position: absolute; }
 @keyframes run-around2 {
-	0%: { transform: translate(0, 0); }
-	25% { transform: translate(200px, 0); }
-	50% { transform: translate(200px, 200px); }
-	75% { transform: translate(0, 200px); }
+  0%: { transform: translate(0, 0); }
+  25% { transform: translate(200px, 0); }
+  50% { transform: translate(200px, 200px); }
+  75% { transform: translate(0, 200px); }
 }
 
 <div class="ball-running"></div>
@@ -4174,7 +4522,7 @@ div:hover { transform: scale(1.0); }
 CSS transform
 CSS opacity
 CSS filter
-	
+  
 可以用他来优化平时的操作,例如拖拽,在mouseover阶段就用transform,在mousedown阶段在再用position绝对定位,这样就可以减少repaint和reflow的操作,还有就是动画等
 
 </pre>
@@ -4254,7 +4602,7 @@ perspective(length)	  透视函数,是transform变形函数的一个属性值,�
 由于透视原点perspective-origin只能设置在设置了perspective透视属性的元素。
 若为元素设置透视函数perspective(),则透视原点不起使用,观察者使用默认位置,即元素中心点对应的平面上
 透视函数perspective(length)的参数只能是长度值,长度值只能是正数
-由于transform属性是从前向后的顺序解析属性值的,所以一定要把perspective()函数写在其他变形函数前面,否则将没有透视效果
+由于transform属性是从前向后的顺序解析属性值的,所以一定要把perspective()函数写在其他变形函数前面,否���将没有透视效果
 
 matrix3d(n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n)	定义3D转换,使用16个值的4x4矩阵
 
@@ -4263,10 +4611,10 @@ transform:rotate3d(1, 1, 1, 360deg);
 
 </pre>开启硬件加速,像Chrome/Filefox/Safari/IE9+及最新版本Opera都支持硬件加速,当检测到某个DOM元素应用了某些CSS规则时就会自动开启,从而解决页面闪白,保证动画流畅<pre class="css">
 .css {
-	-webkit-transform: translate3d(0,0,0);
-	-moz-transform: translate3d(0,0,0);
-	-ms-transform: translate3d(0,0,0);
-	transform: translate3d(0,0,0);
+  -webkit-transform: translate3d(0,0,0);
+  -moz-transform: translate3d(0,0,0);
+  -ms-transform: translate3d(0,0,0);
+  transform: translate3d(0,0,0);
 }
 
 </pre><pre class="css">
@@ -4333,35 +4681,35 @@ firefox和IE浏览器支持隐式过渡,webkit内核浏览器不支持
 
 </pre>浏览器兼容<pre class="css">
 #div{
-	width:100px;
-	height:100px;
-	background:yellow;
-	transition:width 2s;
-	-moz-transition:width 2s;    /* Firefox 4 */
-	-webkit-transition:width 2s; /* Safari and Chrome */
-	-o-transition:width 2s;      /* Opera */
+  width:100px;
+  height:100px;
+  background:yellow;
+  transition:width 2s;
+  -moz-transition:width 2s;    /* Firefox 4 */
+  -webkit-transition:width 2s; /* Safari and Chrome */
+  -o-transition:width 2s;      /* Opera */
 }
 
 #div:hover{ width:300px; }
 
 </pre><pre class="css">
 #div{
-	width:100px;
-	height:100px;
-	background:yellow;
-	transition:width 2s, height 2s;
-	-moz-transition:width 2s, height 2s, -moz-transform 2s;       /* Firefox 4 */
-	-webkit-transition:width 2s, height 2s, -webkit-transform 2s; /* Safari and Chrome */
-	-o-transition:width 2s, height 2s, -o-transform 2s;           /* Opera */
+  width:100px;
+  height:100px;
+  background:yellow;
+  transition:width 2s, height 2s;
+  -moz-transition:width 2s, height 2s, -moz-transform 2s;       /* Firefox 4 */
+  -webkit-transition:width 2s, height 2s, -webkit-transform 2s; /* Safari and Chrome */
+  -o-transition:width 2s, height 2s, -o-transform 2s;           /* Opera */
 }
 
 #div:hover{
-	width:200px;
-	height:200px;
-	transform:rotate(180deg);
-	-moz-transform:rotate(180deg);    /* Firefox 4 */
-	-webkit-transform:rotate(180deg); /* Safari and Chrome */
-	-o-transform:rotate(180deg);      /* Opera */
+  width:200px;
+  height:200px;
+  transform:rotate(180deg);
+  -moz-transform:rotate(180deg);    /* Firefox 4 */
+  -webkit-transform:rotate(180deg); /* Safari and Chrome */
+  -o-transform:rotate(180deg);      /* Opera */
 }
 
 </pre><pre class="css">
@@ -4371,9 +4719,9 @@ firefox和IE浏览器支持隐式过渡,webkit内核浏览器不支持
 </pre><pre>
 消除transition闪屏
 .css {
-	-webkit-transform-style: preserve-3d;
-	-webkit-backface-visibility: hidden;
-	-webkit-perspective: 1000;
+  -webkit-transform-style: preserve-3d;
+  -webkit-backface-visibility: hidden;
+  -webkit-perspective: 1000;
 }
 
 【 transition-property属性值 】
@@ -4598,32 +4946,32 @@ li:hover .bd { max-height: 600px; transition-timing-function: ease-in; }
 
 </pre>点击按钮的水波纹, 插件ripple.js<pre class="css"></pre>
 .btn {
-	position: relative;
-	overflow: hidden;
-	padding: 1rem;
+  position: relative;
+  overflow: hidden;
+  padding: 1rem;
 }
 
 .btn:after {
-	content: "";
-	display: block;
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	top: 0;
-	left: 0;
-	pointer-events: none;
-	background-image: radial-gradient(circle, #666 10%, transparent 10.01%);
-	background-repeat: no-repeat;
-	background-position: 50%;
-	transform: scale(10, 10);
-	opacity: 0;
-	transition: transform .3s, opacity .5s;
+  content: "";
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, #666 10%, transparent 10.01%);
+  background-repeat: no-repeat;
+  background-position: 50%;
+  transform: scale(10, 10);
+  opacity: 0;
+  transition: transform .3s, opacity .5s;
 }
 
 .btn:active:after {
-	transform: scale(0, 0);
-	opacity: .3;
-	transition: 0s;
+  transform: scale(0, 0);
+  opacity: .3;
+  transition: 0s;
 }
 
 < button class="btn">Button< /button>
@@ -4716,18 +5064,18 @@ animate.css里面的类主要包括Attention(晃动效果)、bounce(弹性缓冲
 
 </pre><pre class="css">
 div{
-	width: 100px;
-	height: 100px;
-	background: red;
-	position: relative;
-	animation: myfirst 5s linear 2s infinite alternate;
+  width: 100px;
+  height: 100px;
+  background: red;
+  position: relative;
+  animation: myfirst 5s linear 2s infinite alternate;
 }
 @keyframes myfirst{
-	0%   {background:red; left:0px; top:0px;}
-	25%  {background:yellow; left:200px; top:0px;}
-	50%  {background:blue; left:200px; top:200px;}
-	75%  {background:green; left:0px; top:200px;}
-	100% {background:red; left:0px; top:0px;}
+  0%   {background:red; left:0px; top:0px;}
+  25%  {background:yellow; left:200px; top:0px;}
+  50%  {background:blue; left:200px; top:200px;}
+  75%  {background:green; left:0px; top:200px;}
+  100% {background:red; left:0px; top:0px;}
 }
 
 var o = document.getElementsByTagName("div")[0];
@@ -4775,9 +5123,9 @@ div{
 </pre>animation事件API<pre class="css">
 #test{height:100px; width:300px; background-color:lightblue; animation:anim 2s 3;}
 @keyframes anim{
-	0%{height: 100px;}
-	50%{height: 50px;}
-	100%{height: 0;}
+  0%{height: 100px;}
+  50%{height: 50px;}
+  100%{height: 0;}
 }
 
 <button id='reset'>还原</button>
@@ -4791,9 +5139,9 @@ function listener(e){
   e = e || event;
   var li = document.createElement("li");
   switch(e.type) {
-		case "animationstart": li.innerHTML = "Started: elapsed time is " + e.elapsedTime; break;
-		case "animationend": li.innerHTML = "Ended: elapsed time is " + e.elapsedTime; break;
-		case "animationiteration": li.innerHTML = "New loop started at time " + e.elapsedTime; break;
+    case "animationstart": li.innerHTML = "Started: elapsed time is " + e.elapsedTime; break;
+    case "animationend": li.innerHTML = "Ended: elapsed time is " + e.elapsedTime; break;
+    case "animationiteration": li.innerHTML = "New loop started at time " + e.elapsedTime; break;
   }
   test.appendChild(li);
 }
@@ -4828,11 +5176,11 @@ function listener(e){
 
 /*---每图片切换有两个阶段：位移切换和静置。中间的效果可以任意定制----*/
 @keyframes ma {
-	0%,20% {		margin-left: 0px;		}
-	25%,40% {		margin-left: -300px;	}
-	45%,60% {		margin-left: -600px;	}
-	65%,80% {		margin-left: -900px;	}
-	85%,100% {		margin-left: -1200px;	}
+  0%,20% {		margin-left: 0px;		}
+  25%,40% {		margin-left: -300px;	}
+  45%,60% {		margin-left: -600px;	}
+  65%,80% {		margin-left: -900px;	}
+  85%,100% {		margin-left: -1200px;	}
 }
 @keyframes ma1 {0%{margin-left:-1200px;}100%{margin-left:-0px;}	}
 @keyframes ma2 {0%{margin-left:-1200px;}100%{margin-left:-300px;}	}
@@ -4841,25 +5189,25 @@ function listener(e){
 @keyframes ma5 {100%{margin-left:-1200px;} }
 
 <div id="frame" >
-	<a id="a1" class="num">1</a>
-	<a id="a2" class="num">2</a>
-	<a id="a3" class="num">3</a>
-	<a id="a4" class="num">4</a>
-	<a id="a5" class="num">5</a>
-	<div id="photos">
-		<div style="background: rgb(74, 66, 173);">1</div>
-		<div style="background: rgb(34, 145, 169);">2</div>
-		<div style="background: rgb(128, 178, 60);">3</div>
-		<div style="background: rgb(225, 176, 0);">4</div>
-		<div style="background: rgb(231, 173, 14);">5</div>
-		<ul id="dis">
-			<li>中国标志性建筑：天安门</li>
-			<li>中国标志性建筑：东方明珠</li>
-			<li>中国标志性建筑：布达拉宫</li>
-			<li>中国标志性建筑：长城</li>
-			<li>中国标志性建筑：天坛</li>
-		</ul>
-	</div>
+  <a id="a1" class="num">1</a>
+  <a id="a2" class="num">2</a>
+  <a id="a3" class="num">3</a>
+  <a id="a4" class="num">4</a>
+  <a id="a5" class="num">5</a>
+  <div id="photos">
+    <div style="background: rgb(74, 66, 173);">1</div>
+    <div style="background: rgb(34, 145, 169);">2</div>
+    <div style="background: rgb(128, 178, 60);">3</div>
+    <div style="background: rgb(225, 176, 0);">4</div>
+    <div style="background: rgb(231, 173, 14);">5</div>
+    <ul id="dis">
+      <li>中国标志性建筑：天安门</li>
+      <li>中国标志性建筑：东方明珠</li>
+      <li>中国标志性建筑：布达拉宫</li>
+      <li>中国标志性建筑：长城</li>
+      <li>中国标志性建筑：天坛</li>
+    </ul>
+  </div>
 </div>
 
 </pre>圆形进度条动画<pre class="css">
@@ -5185,8 +5533,8 @@ linear-gradient(-135deg,transparent 8%, rgba(0,201,87,1) 0);
 【 渐变叠加 折角效果 】
 background:#0acf00;  /* Fallback */
 background:
-	linear-gradient(to left bottom,transparent 50%,rgba(0,0,0,.5) 0) no-repeat 100% 0 / 2em 2em,
-	linear-gradient(-135deg,transparent 1.42em, rgba(0,201,87,1) 0);
+  linear-gradient(to left bottom,transparent 50%,rgba(0,0,0,.5) 0) no-repeat 100% 0 / 2em 2em,
+  linear-gradient(-135deg,transparent 1.42em, rgba(0,201,87,1) 0);
 }
 
 线性渐变的核心是渐变轴、起点终点和颜色值分布
@@ -5236,11 +5584,11 @@ position 参数定义椭圆圆心坐标位置,x轴 y 轴,默认center center,当
 shape 参数定义椭圆形状,可以是值 circle(圆形) 或 ellipse(椭圆形),默认值是 ellipse
 
 size 参数定义椭圆半径大小,圆的半径,closest-side farthest-side closest-corner farthest-corner
-	 如果shape是circle,则size可以设置为length,表示直径,0%表示圆心,100%表示距离圆心为半径的点
-	closest-side:半径为从圆心到最近边
-	closest-corner:半径为从圆心到最近角
-	farthest-side:半径为从圆心到最远边
-	farthest-side:半径为从圆心到最远角
+   如果shape是circle,则size可以设置为length,表示直径,0%表示圆心,100%表示距离圆心为半径的点
+  closest-side:半径为从圆心到最近边
+  closest-corner:半径为从圆心到最近角
+  farthest-side:半径为从圆心到最远边
+  farthest-side:半径为从圆心到最远角
 
 色标 由于位置处于100%的色标有时并不会占满渐变区域,则浏览器会默认使用最后一个色标的颜色铺满渐变区域
 
@@ -5335,24 +5683,24 @@ body{background-image: linear-gradient(to right top, #8e44ad 0%, #3498db 100%)}
 
 // 背景渐变色(蓝色)
 button {
-	background-image: linear-gradient(#5187c4, #1c2f45);
-	background-size: auto 200%;
-	background-position: 0 100%;
-	transition: background-position 0.5s;
+  background-image: linear-gradient(#5187c4, #1c2f45);
+  background-size: auto 200%;
+  background-position: 0 100%;
+  transition: background-position 0.5s;
 }
 button:hover {
-	background-position: 0 0;
+  background-position: 0 0;
 }
 
 // 渐变模板(绿色)
 .colorbox {
-	background: #629721;
-	background-image: -webkit-gradient(linear, left top, left bottombottom, from(#83b842), to(#629721));
-	background-image: -webkit-linear-gradient(top, #83b842, #629721);
-	background-image: -moz-linear-gradient(top, #83b842, #629721);
-	background-image: -ms-linear-gradient(top, #83b842, #629721);
-	background-image: -o-linear-gradient(top, #83b842, #629721);
-	background-image: linear-gradient(top, #83b842, #629721);
+  background: #629721;
+  background-image: -webkit-gradient(linear, left top, left bottombottom, from(#83b842), to(#629721));
+  background-image: -webkit-linear-gradient(top, #83b842, #629721);
+  background-image: -moz-linear-gradient(top, #83b842, #629721);
+  background-image: -ms-linear-gradient(top, #83b842, #629721);
+  background-image: -o-linear-gradient(top, #83b842, #629721);
+  background-image: linear-gradient(top, #83b842, #629721);
 }
 
 </pre>colorwheel<pre class="css">
@@ -5399,156 +5747,156 @@ body { background: gainsboro; }
 <div id="menu">
 <h3>导航栏=链接列表</h3><pre>
 水平导航栏：
-	1.浮动 li{ float:left; } li a{ display:block; }
-	2.内联 li{ display:inline/inline-block;}
+  1.浮动 li{ float:left; } li a{ display:block; }
+  2.内联 li{ display:inline/inline-block;}
 
 </pre>下拉菜单<pre class="html">
 #ul1 li{positon:relative; display:inline-block;}
 #ul2{
-	position:absolute;
-	display:none;
-	width:100%;
-	min-width:80px;
-	z-index:1;
-	box-shadow:0px 8px 16px 0px red;
-	padding:12px 16px;
+  position:absolute;
+  display:none;
+  width:100%;
+  min-width:80px;
+  z-index:1;
+  box-shadow:0px 8px 16px 0px red;
+  padding:12px 16px;
 }
 #ul2 a{display:block; }
 #ul1 li:hover #ul2{display:block; }
 
 </pre>纯CSS折叠面板<pre class="html">
 <div class="accordion">
-	<input type="checkbox" id="collapse1">
-	<input type="checkbox" id="collapse2">
-	<input type="checkbox" id="collapse3">
-	<article>
-		<label for="collapse1">web秀</label>
-		<p>html<br>javascript<br>css<br>uni app</p>
-	</article>
-	<article>
-		<label for="collapse2">今日头条</label>
-		<p>新闻<br>图片<br>视频<br>养生</p>
-	</article>
-	<article>
-		<label for="collapse3">阿里巴巴</label>
-		<p>淘宝<br>阿里云<br>闲鱼<br>天猫</p>
-	</article>
+  <input type="checkbox" id="collapse1">
+  <input type="checkbox" id="collapse2">
+  <input type="checkbox" id="collapse3">
+  <article>
+    <label for="collapse1">web秀</label>
+    <p>html<br>javascript<br>css<br>uni app</p>
+  </article>
+  <article>
+    <label for="collapse2">今日头条</label>
+    <p>新闻<br>图片<br>视频<br>养生</p>
+  </article>
+  <article>
+    <label for="collapse3">阿里巴巴</label>
+    <p>淘宝<br>阿里云<br>闲鱼<br>天猫</p>
+  </article>
 </div>
 .accordion {
-	width: 300px;
-	article {
-		margin-top: 5px;
-		cursor: pointer;
-		&:first-child {
-			margin-top: 0;
-		}
-	}
-	input {
-		display: none;
-		padding: 0;
-		margin: 0;
-		&:nth-child(1):checked ~ article:nth-of-type(1) p,
-		&:nth-child(2):checked ~ article:nth-of-type(2) p,
-		&:nth-child(3):checked ~ article:nth-of-type(3) p {
-			border-bottom-width: 1px;
-			max-height: 600px;
-		}
-	}
-	label {
-		display: block;
-		padding: 0 20px;
-		height: 40px;
-		background-color: #00b7a3;
-		cursor: pointer;
-		line-height: 40px;
-		font-size: 16px;
-		color: #fff;
-	}
-	p {
-		overflow: hidden;
-		padding: 0 20px;
- 		margin: 0;
-		border: 1px solid #00b7a3;
-		border-top: none;
-		border-bottom-width: 0;
-		max-height: 0;
-		line-height: 30px;
-		transition: all 500ms;
-	}
+  width: 300px;
+  article {
+    margin-top: 5px;
+    cursor: pointer;
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+  input {
+    display: none;
+    padding: 0;
+    margin: 0;
+    &:nth-child(1):checked ~ article:nth-of-type(1) p,
+    &:nth-child(2):checked ~ article:nth-of-type(2) p,
+    &:nth-child(3):checked ~ article:nth-of-type(3) p {
+      border-bottom-width: 1px;
+      max-height: 600px;
+    }
+  }
+  label {
+    display: block;
+    padding: 0 20px;
+    height: 40px;
+    background-color: #00b7a3;
+    cursor: pointer;
+    line-height: 40px;
+    font-size: 16px;
+    color: #fff;
+  }
+  p {
+    overflow: hidden;
+    padding: 0 20px;
+     margin: 0;
+    border: 1px solid #00b7a3;
+    border-top: none;
+    border-bottom-width: 0;
+    max-height: 0;
+    line-height: 30px;
+    transition: all 500ms;
+  }
 }
 
 </pre>纯CSS Tabbar切换效果<pre class="html">
 <div class="tab-navbar">
-	<input type="radio" name="tab" id="tab1" checked>
-	<input type="radio" name="tab" id="tab2">
-	<input type="radio" name="tab" id="tab3">
-	<input type="radio" name="tab" id="tab4">
-	<nav>
-		<label for="tab1">首页</label>
-		<label for="tab2">列表</label>
-		<label for="tab3">其他</label>
-		<label for="tab4">我的</label>
-	</nav>
-	<main>
-		<ul>
-			<li>首页</li>
-			<li>列表</li>
-			<li>其他</li>
-			<li>我的</li>
-		</ul>
-	</main>
+  <input type="radio" name="tab" id="tab1" checked>
+  <input type="radio" name="tab" id="tab2">
+  <input type="radio" name="tab" id="tab3">
+  <input type="radio" name="tab" id="tab4">
+  <nav>
+    <label for="tab1">首页</label>
+    <label for="tab2">列表</label>
+    <label for="tab3">其他</label>
+    <label for="tab4">我的</label>
+  </nav>
+  <main>
+    <ul>
+      <li>首页</li>
+      <li>列表</li>
+      <li>其他</li>
+      <li>我的</li>
+    </ul>
+  </main>
 </div>
-	 
+   
 *{ padding: 0; margin: 0; }
 .active { background-color: #00b7a3; color: #fff; }
 .tab-navbar {
-	display: flex;
-	overflow: hidden;
-	flex-direction: column-reverse;
-	border-radius: 10px;
-	width: 300px;
-	height: 400px;
-	margin: 100px auto;
-	input {
-		display: none;
-		&:nth-child(1):checked {
-			& ~ nav label:nth-child(1) {
-				@extend .active;
-			}
-			& ~ main ul { background-color: #f13f84; transform: translate3d(0, 0, 0); }
-		}
-		&:nth-child(2):checked {
-			& ~ nav label:nth-child(2) {
-				@extend .active;
-			}
-			& ~ main ul { background-color: #44bb44; transform: translate3d(-25%, 0, 0); }
-		}
-		&:nth-child(3):checked {
-			& ~ nav label:nth-child(3) {
-				@extend .active;
-			}
-			& ~ main ul { background-color: #ff7632; transform: translate3d(-50%, 0, 0); }
-		}
-		&:nth-child(4):checked {
-			& ~ nav label:nth-child(4) {
-				@extend .active;
-			}
-			& ~ main ul { background-color: #00bbdd; transform: translate3d(-75%, 0, 0); }
-		}
-	}
-	nav {
-		display: flex;
-		height: 40px;
-		background-color: #f0f0f0;
-		line-height: 40px;
-		text-align: center;
-		label { flex: 1; cursor: pointer; transition: all 300ms; }
-	}
-	main {
-		flex: 1;
-		ul { display: flex; flex-wrap: nowrap; width: 400%; height: 100%; transition: all 300ms; }
-		li { display: flex; justify-content: center; align-items: center; flex: 1; font-weight: bold; font-size: 20px; color: #fff; }
-	}
+  display: flex;
+  overflow: hidden;
+  flex-direction: column-reverse;
+  border-radius: 10px;
+  width: 300px;
+  height: 400px;
+  margin: 100px auto;
+  input {
+    display: none;
+    &:nth-child(1):checked {
+      & ~ nav label:nth-child(1) {
+        @extend .active;
+      }
+      & ~ main ul { background-color: #f13f84; transform: translate3d(0, 0, 0); }
+    }
+    &:nth-child(2):checked {
+      & ~ nav label:nth-child(2) {
+        @extend .active;
+      }
+      & ~ main ul { background-color: #44bb44; transform: translate3d(-25%, 0, 0); }
+    }
+    &:nth-child(3):checked {
+      & ~ nav label:nth-child(3) {
+        @extend .active;
+      }
+      & ~ main ul { background-color: #ff7632; transform: translate3d(-50%, 0, 0); }
+    }
+    &:nth-child(4):checked {
+      & ~ nav label:nth-child(4) {
+        @extend .active;
+      }
+      & ~ main ul { background-color: #00bbdd; transform: translate3d(-75%, 0, 0); }
+    }
+  }
+  nav {
+    display: flex;
+    height: 40px;
+    background-color: #f0f0f0;
+    line-height: 40px;
+    text-align: center;
+    label { flex: 1; cursor: pointer; transition: all 300ms; }
+  }
+  main {
+    flex: 1;
+    ul { display: flex; flex-wrap: nowrap; width: 400%; height: 100%; transition: all 300ms; }
+    li { display: flex; justify-content: center; align-items: center; flex: 1; font-weight: bold; font-size: 20px; color: #fff; }
+  }
 }
 
 </pre>
@@ -5589,7 +5937,7 @@ div span{display:inline-block; font-size:0.1em; vertical-align:middle;}
 
 【大小不固定,图片的水平垂直居中】
 1、透明gif图片+背景定位的方法,利用了background-position:center实现图片居中显示
-	img src="../image/pixel.gif" style="background-image:url(http://image.zhu.com/image/128/mm1.jpg);"
+  img src="../image/pixel.gif" style="background-image:url(http://image.zhu.com/image/128/mm1.jpg);"
 
 2、display:table-cell和文字大小控制居中
 div {display:table-cell; width:144px; height:144px; font-size:118px; border:1px solid #beceeb; text-align:center; vertical-align:middle;}
@@ -5663,30 +6011,30 @@ device-aspect-ratio比例值,屏幕的纵横比
 
 /* for 240 px width screen */
 @media only screen and (max-device-width:240px){
-	selector{ ... }
+  selector{ ... }
 }
 /* for 320px width screen */
 @media only screen and (min-device-width:241px) and (max-device-width:320px){
-	selector{ ... }
+  selector{ ... }
 }
 /* for 480 px width screen */
 @media only screen (min-device-width:321px)and (max-device-width:480px){
-	selector{ ... }
+  selector{ ... }
 }
 
 3、表格(table)的响应式处理
 （1）、隐藏不重要数据列
 @media only screen and (max-width: 800px) {
-	table td:nth-child(2),
-	table th:nth-child(2) {display: none;}
+  table td:nth-child(2),
+  table th:nth-child(2) {display: none;}
 }
 @media only screen and (max-width: 640px) {
-	table td:nth-child(4),
-	table th:nth-child(4),
-	table td:nth-child(7),
-	table th:nth-child(7),
-	table td:nth-child(8),
-	th:nth-child(8){display: none;}
+  table td:nth-child(4),
+  table th:nth-child(4),
+  table td:nth-child(7),
+  table th:nth-child(7),
+  table td:nth-child(8),
+  th:nth-child(8){display: none;}
 }
 
 （2）、多列横向变2列纵向
@@ -5710,11 +6058,11 @@ JS检测：var retina = window.devicePixelRatio > 1;
 
 @media only screen and (-webkit-min-device-pixel-ratio:1.5),
 only screen and (min-device-pixel-ratio:1.5) {
-	button {
-		border:none;
-		padding:0 16px;
-		box-shadow: inset 0 0 1px #000, inset 0 1px 0 #75c2f8, 0 1px 1px -1px rgba(0, 0, 0, .5);
-	}
+  button {
+    border:none;
+    padding:0 16px;
+    box-shadow: inset 0 0 1px #000, inset 0 1px 0 #75c2f8, 0 1px 1px -1px rgba(0, 0, 0, .5);
+  }
 }
 
 【 tips 】
@@ -5749,8 +6097,8 @@ img{ max-width:300px; height:auto; }
 
 </pre><pre class="html">
 <video width="100%" controls>
-	＜source src="情人 KATE.mp4" type="video/mp4"＞
-	Your browser does not support HTML5 video.
+  ＜source src="情人 KATE.mp4" type="video/mp4"＞
+  Your browser does not support HTML5 video.
 </video>
 
 </pre><pre>
@@ -5763,7 +6111,7 @@ img{ max-width:300px; height:auto; }
 <h2>scss sass less</h2><pre>
 sass和less都属于CSS预处理器。
 
-css预处理定义了一种新的语言,其基本思想是用一种专门的编程语言为css增加了一些编程的特性,将CSS作为目标生成文件,然后开发者就只要使用这种语言进行CSS的编码工作。通俗地说就是“用一种专门的编程语言,进行Web页面样式设计,再通过编译器转化为正常的CSS文件,以供项目使用”。
+css预处理定义了一种新的语言,其基本思想是用一种专门的编程��言为css增加了一些编程的特性,将CSS作为目标生成文件,然后开发者就只要使用这种语言进行CSS的编码工作。通俗地说就是“用一种专门的编程语言,进行Web页面样式设计,再通过编译器转化为正常的CSS文件,以供项目使用”。
 
 为什么使用CSS预处理器？　　
 CSS只是一个标记语言,不是编程语言,因此不可以自定义变量,不可以引用等等。
@@ -6471,37 +6819,37 @@ module.exports = {
 
 </main>
 <ol>
-	<li><a href="#top">顶部</a></li>
-	<li><a href="#load">css加载</a></li>
-	<li><a href="#syntax">css syntax</a></li>
-	<li><a href="#var">css变量</a></li>
-	<li><a href="#counter">counter</a></li>
-	<li><a href="#selector">selector</a></li>
-	<li>
-		<a href="#tags">css元素 ▼</a>
-		<ul>
-			<li><a href="#media">media column</a></li>
-			<li><a href="#opcity">opcity filter</a></li>
-			<li><a href="#clip">clip bg</a></li>
-			<li><a href="#text">text font</a></li>
-			<li><a href="#a">a ul ol</a></li>
-			<li><a href="#table">table outline</a></li>
-			<li><a href="#border">border box</a></li>
-		</ul>
-	</li>
-	<li><a href="#position">position float</a></li>
+  <li><a href="#top">顶部</a></li>
+  <li><a href="#load">css加载</a></li>
+  <li><a href="#syntax">css syntax</a></li>
+  <li><a href="#var">css变量</a></li>
+  <li><a href="#counter">counter</a></li>
+  <li><a href="#selector">selector</a></li>
+  <li>
+    <a href="#tags">css元素 ▼</a>
+    <ul>
+      <li><a href="#media">media column</a></li>
+      <li><a href="#opcity">opcity filter</a></li>
+      <li><a href="#clip">clip bg</a></li>
+      <li><a href="#text">text font</a></li>
+      <li><a href="#a">a ul ol</a></li>
+      <li><a href="#table">table outline</a></li>
+      <li><a href="#border">border box</a></li>
+    </ul>
+  </li>
+  <li><a href="#position">position float</a></li>
   <li><a href="#flex">flex</a></li>
   <li><a href="#grid">grid</a></li>
-	<li><a href="#cursor">cursor</a></li>
-	<li><a href="#display">display</a></li>
-	<li><a href="#hack">css精灵和hack</a></li>
-	<li><a href="#transform">transform</a></li>
-	<li><a href="#transition">transition</a></li>
-	<li><a href="#animate">animation</a></li>
-	<li><a href="#gradient">gradient</a></li>
-	<li><a href="#menu">nav menu</a></li>
-	<li><a href="#center">center</a></li>
-	<li><a href="#response">response design</a></li>
+  <li><a href="#cursor">cursor</a></li>
+  <li><a href="#display">display</a></li>
+  <li><a href="#hack">css精灵和hack</a></li>
+  <li><a href="#transform">transform</a></li>
+  <li><a href="#transition">transition</a></li>
+  <li><a href="#animate">animation</a></li>
+  <li><a href="#gradient">gradient</a></li>
+  <li><a href="#menu">nav menu</a></li>
+  <li><a href="#center">center</a></li>
+  <li><a href="#response">response design</a></li>
   <li><a href="#scss">scss</a></li>
   <li><a href="#CSS_Modules">CSS_Modules</a></li>
 </ol>
@@ -6511,11 +6859,11 @@ module.exports = {
 <script src="vendors/SyntaxHighlighter/shCore.js"></script>
 <script>
   // 代码高亮
-	document.querySelectorAll('pre[class=html]').forEach(node => node.classList.add('brush:html;toolbar:false'))
-	document.querySelectorAll('pre[class=js]').forEach(node => node.classList.add('brush:js;toolbar:false'))
-	document.querySelectorAll('pre[class=php]').forEach(node => node.classList.add('brush:php;toolbar:false'))
-	document.querySelectorAll('pre[class=css]').forEach(node => node.classList.add('brush:css;toolbar:false'))
-	SyntaxHighlighter.all();
+  document.querySelectorAll('pre[class=html]').forEach(node => node.classList.add('brush:html;toolbar:false'))
+  document.querySelectorAll('pre[class=js]').forEach(node => node.classList.add('brush:js;toolbar:false'))
+  document.querySelectorAll('pre[class=php]').forEach(node => node.classList.add('brush:php;toolbar:false'))
+  document.querySelectorAll('pre[class=css]').forEach(node => node.classList.add('brush:css;toolbar:false'))
+  SyntaxHighlighter.all();
 </script>
 </body>
 </html>

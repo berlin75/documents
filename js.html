@@ -710,7 +710,7 @@ element选项中选择元素右键,选择菜单中break on -> node removal
 Performance面板的call tree可以查看每个函数的执行时间,非常方便的找到性能瓶颈,先来编写一段有性能问题的代码测试一下。
 setInterval(function slowFunc(){
   var arr=[];
-  for(var i=0;i<1000;i++){
+  for(var i=0; i < 1000; i++){
     arr.push(i);
     arr.sort();
   }
@@ -1089,6 +1089,60 @@ let str3 = deepClone(str1);
 console.log(str3 === str1); // false
 console.log(str3.obj === str1.obj); // false
 console.log(str3.fn === str1.fn); // true
+
+</textarea>对象深度克隆; 1.JSON.stringify深度克隆对象; 2.无法对函数、RegExp等特殊对象的克隆; 3.会抛弃对象的constructor,所有的构造函数会指向Object; 4.对象有循环引用,会报错<textarea>
+export const objDeepClone = obj => clone(obj)
+
+const isType = (obj, type) => {
+  if (typeof obj !== 'object') return false;
+  const typeString = Object.prototype.toString.call(obj);
+  let flag;
+  switch (type) {
+    case 'Array': flag = typeString === '[object Array]'; break;
+    case 'Date': flag = typeString === '[object Date]'; break;
+    case 'RegExp': flag = typeString === '[object RegExp]'; break;
+    default: flag = false;
+  }
+  return flag;
+};
+
+const clone = parent => {
+  const parents = []
+  const children = []
+
+  const _clone = parent => {
+    if (parent === null) return null
+    if (typeof parent !== 'object') return parent
+
+    let child, proto
+
+    if (isType(parent, 'Array')) {          // 对数组做特殊处理
+      child = []
+    } else if (isType(parent, 'RegExp')) {  // 对正则对象做特殊处理
+      child = new RegExp(parent.source, getRegExp(parent))
+      if (parent.lastIndex) child.lastIndex = parent.lastIndex
+    } else if (isType(parent, 'Date')) {   // 对Date对象做特殊处理
+      child = new Date(parent.getTime())
+    } else {                               // 处理对象原型
+      proto = Object.getPrototypeOf(parent)
+      child = Object.create(proto)         // 利用Object.create切断原型链
+    }
+
+    const index = parents.indexOf(parent)  // 处理循环引用
+
+    if (index !== -1) return children[index]  // 如果父数组存在本对象,说明之前已经被引用过,直接返回此对象
+  
+    parents.push(parent)
+    children.push(child)
+
+    for (const i in parent) {             // 递归
+      child[i] = _clone(parent[i])
+    }
+
+    return child
+  }
+  return _clone(parent)
+}
 
 </textarea><pre>
 【 数字类型 】
@@ -1852,10 +1906,59 @@ for(var i = 0, len = arrayNumbers.length; i < len; i++) {
   sum += arrayNumbers[i];
 }
 
-// i和len是在for循环的第一个声明中,二者只会初始化一次,这要比下面这种写法快：
-// for(var i = 0; i < arrayNumbers.length; i++)
-// 为什么呢？因为数组arrayNumbers的长度在每次遍历的时候都会计算一次,这就造成了不必要的消耗。
-// 这个问题其实在最新的Javascript引擎中已经被修复了。
+// i和len是在for循环的第一个声明中,二者只会初始化一次,这要比下面这种写法快：for(var i = 0; i < arrayNumbers.length; i++)
+// 因为数组arrayNumbers的长度在每次遍历的时候都会计算一次,这就造成了不必要的消耗,这个问题其实在最新的Javascript引擎中已经被修复了。
+
+</textarea><textarea>
+// 格式化文件单位,文件大小(kb)
+export const fileFormatSize = size => {
+  var i
+  var unit = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+  for (i = 0; i < unit.length && size >= 1024; i++) {
+    size /= 1024
+  }
+  return (Math.round(size * 100) / 100 || 0) + unit[i]
+}
+
+</textarea><textarea>
+var array = [];
+for(var i = 0; i < 3; i++) {
+  array.push(() => i);
+}
+var newArray = array.map(el => el());
+console.log(newArray); // [3, 3, 3]
+
+1、在for循环的头部声明带有var关键字的变量会为该变量创建单个绑定（存储空间）
+
+// 误解作用域:认为存在块级作用域
+var array = [];
+for (var i = 0; i < 3; i++) {  // 三个箭头函数体中的每个`'i'`都指向相同的绑定,这就是为什么它们在循环结束时返回相同的值'3'。
+ array.push(() => i);
+}
+var newArray = array.map(el => el());
+console.log(newArray); // [3, 3, 3]
+
+如果2、用 let 声明一个具有块级作用域的变量，则为每个循环迭代创建一个新的绑定。
+
+// 使用ES6块级作用域
+var array = [];
+for (let i = 0; i < 3; i++) {  // 这一次，每个'i'指的是一个新的的绑定，并保留当前的值。因此，每个箭头函数返回一个不同的值。
+ array.push(() => i);
+}
+var newArray = array.map(el => el());
+console.log(newArray); // [0, 1, 2]
+
+3、解决这个问题的另一种方法是使用闭包。
+let array = [];
+for (var i = 0; i < 3; i++) {
+ array[i] = (function(x) {
+  return function() {
+    return x;
+  };
+ })(i);
+}
+const newArray = array.map(el => el());
+console.log(newArray); // [0, 1, 2] 
 
 </textarea>
 
@@ -2693,6 +2796,31 @@ console.log(a);
   console.log(a);
 }())
 
+// 使用var关键字声明的变量在JS中会被提升，并在内存中分配值undefined,但初始化恰发生在给变量赋值的地方
+// var声明的变量是函数作用域的，而let和const是块作用域的
+var a = 10;
+function foo() {
+ console.log(a);
+ var a = 20;
+}
+foo();  // undefined
+
+var a = 10;
+function foo() {
+ console.log(a);
+ let a = 20;
+}
+foo();  // ReferenceError：a undefined
+
+// let和const声明可以让变量在其作用域上受限于它所使用的块、语句或表达式。与var不同的是，这些变量没有被提升，并且有一个所谓的暂时死区(TDZ)。试图访问TDZ中的这些变量将引发ReferenceError，因为只有在执行到达声明时才能访问它们
+var a = 10; // 全局使用域 
+function foo() { // TDZ 开始 
+ // 创建了未初始化的'a' 
+ console.log(a); // ReferenceError 
+ // TDZ结束，'a'仅在此处初始化，值为20 
+ let a = 20; 
+}
+
 </textarea><textarea>
 function test() {
   var a = 1;
@@ -2866,7 +2994,7 @@ oa = null;     // a属性的那个对象现在也是零引用了,它可以被垃
 2、标记-清除算法:把"对象是否不再需要"简化定义为"对象是否可以获得"
 这个算法假定设置一个叫做根(root)的对象(在Javascript里,根是全局对象).定期的,垃圾回收器将从根开始,找所有从根开始引用的对象,然后找这些对象引用的对象……从根开始,垃圾回收器将找到所有可以获得的对象和所有不能获得的对象
 
-【 内存泄漏（Memory Leak）】
+【 内存泄漏(Memory Leak)】
 不再用到的内存没有及时释放就叫做内存泄漏
 程序中己动态分配的堆内存由于某种原因程序未释放或无法释放,造成系统内存的浪费,导致程序运行速度减慢甚至系统崩溃等严重后果。
 计算机正常运转会用到内存,内存像是一个中转站,他把你暂存的数据,马上就会用到的数据存储在这,以让你更快捷方便的使用, 那你肯定会想到一个问题,暂存的数据到底哪些该存储在这里,存储的东西不会一直在这,又是怎么消失的呢？
@@ -3198,7 +3326,10 @@ str.split(regexp / "分隔符",3)  字符串分割成字符串数组,数组最�
 例:str.split("")                将字符串分割成单个字符的数组
 例:str.split(" ")               将字符串按照空格分割成字符串数组  [[多关键词搜索]]
 
-【 trim方法:去除字符串两边空白 】
+【 trim() 】
+String.prototype.trim()
+从一个字符串的两端删除空白字符。在这个上下文中的空白字符是所有的空白字符 (space, tab, no-break space等) 以及所有行终止符字符(如 LF,CR等)
+
 </pre><textarea>
 var str = "     \nsdsd  s    sdsd\n      ";
 str.trim();    //"sdsd  s    sdsd"
@@ -3345,6 +3476,8 @@ includes():  返回布尔值,表示是否找到了参数字符串。
 startsWith():返回布尔值,表示参数字符串是否在原字符串的头部。
 endsWith():  返回布尔值,表示参数字符串是否在原字符串的尾部。
 这三个方法都支持第二个参数n,表示开始搜索的位置,endsWith的行为与其他两个方法有所不同。它针对前n个字符,而其他两个方法针对从第n个位置直到字符串结束
+
+export const startsWith = (str, value) => str.indexOf(value) === 0
 
 </pre><textarea>
 let s = 'Hello world!';
@@ -3992,7 +4125,17 @@ var res = arr.splice(2,1,'x','y');
 console.log(res, arr);                 // ["c"], ["a","b","x","y","d","e"]
 
 </textarea><pre>
-arr.reverse()    颠倒数组,返回变化之后的数组
+arr.reverse()
+颠倒数组中元素的位置，改变了数组，并返回该数组的引用
+arr = [{a:1},{a:2},{a:3}]
+console.log(arr.reverse())  // [{a:3},{a:2},{a:1}]
+console.log(arr)  // [{a:3},{a:2},{a:1}]
+
+颠倒类数组中的元素
+const a = {0: 1, 1: 2, 2: 3, length: 3};
+Array.prototype.reverse.call(a);
+console.log(a); // {0: 3, 1: 2, 2: 1, length: 3}
+
 arr.sort(func)   数组比较排序,参数必须是回调函数,参数可选,默认字母排序.不生成副本
 
 </pre>排序比较函数<textarea>
@@ -4744,6 +4887,33 @@ function unique(array) {
 }
 console.log(unique(array)); // [{value: 1}, {value: 2}]
 
+</textarea><textarea>
+// 一维数组并集
+export const arrAndSet = (arrOne, arrTwo) => arrOne.concat(arrTwo.filter(v => !arrOne.includes(v)))
+// 一维数组交集
+export const arrIntersection = (arrOne, arrTwo) => arrOne.filter(v => arrTwo.includes(v))
+// 一维数组差集
+export const arrDifference = (arrOne, arrTwo) => arrOne.concat(arrTwo).filter(v => !arrOne.includes(v) || !arrTwo.includes(v))
+// 一维数组合并
+export const arrConcat = (arrOne, arrTwo) => [...arrOne, ...arrTwo]
+
+// 两个一维数组合并成一个对象数组
+export const arrTwoToArrObj = (arrOne, arrTwo, oneKey, twoKey) => {
+  if(!oneKey && !twoKey){
+    return arrOne.map((oneKey, i) => ({ [oneKey]:arrTwo[i] }))
+    // 或者,此方法针对将arrTwo的索引作为key的情况,arrTwo值会覆盖arrOne
+    // return Object.assign({}, arrOne, arrTwo)
+  }else{
+    return arrOne.map((oneKey, i) => ({ oneKey, twoKey: arrTwo[i] }))
+  }
+}
+
+// 数组对象求和
+export const arrObjSum = (obj, key) => {
+  return obj.reduce((prev, cur) => prev + cur.key, 0)
+}
+
+
 </textarea>
 </div>
 
@@ -5231,6 +5401,21 @@ function f2(){
   return this;
 }
 f2() === undefined;  // true
+
+</textarea><textarea>
+var x = 10; // global scope
+var foo = {
+  x: 90,
+  getX: function() {
+    return this.x;
+  }
+};
+foo.getX(); // 90, this指向foo对象
+let xGetter = foo.getX;
+xGetter();  // 10, 非严格的模式下this指向window对象
+
+let getFooX = foo.getX.bind(foo);  // 通过使用Function.prototype.bind将this的值绑定到foo对象来创建新函数,获取foo.x的值
+getFooX();  // 90
 
 </textarea>3、用在对象的方法中关键字this总是指向调用该方法的对象<textarea>
 var o = {
@@ -9596,7 +9781,7 @@ function debounce(fn, delay) {
   let timer = null        // 定时器
 
   return function () {    // 将debounce处理结果当作函数返回
-    let context = this,   // 保留调用时的this上下文
+    let context = this   // 保留调用时的this上下文
     let args = arguments  // 保留调用时传入的参数
 
     if (timer) clearTimeout(timer)  // 每次事件触发时都去清除之前的旧定时器
@@ -9765,9 +9950,9 @@ function debounce(fn, delay) {
 
   // 让throttle处理结果当作函数返回
   return function () {    // 将debounce处理结果当作函数返回
-    let context = this,   // 保留调用时的this上下文
+    let context = this   // 保留调用时的this上下文
     let args = arguments  // 保留调用时传入的参数
-    let now = +new Data()
+    let now = +new Date()
 
     if (now -last < delay) {  // 如果上次触发时间和本次楚触发的时间间隔小于设定的阈值则为本次触发操作设立一个新的定时器
       clearTimeout(timer)
@@ -11320,9 +11505,49 @@ var isKHTML = sUserAgent.indexOf("KHTML") > -1 || sUserAgent.indexOf("Konqueror"
 var isIE = sUserAgent.indexOf("compatible") > -1 && sUserAgent.indexOf("MSIE") > -1 && !isOpera;
 var isMoz = sUserAgent.indexOf("Gecko") > -1 && !isKHTML;
 //检测操作系统
-var isWin =(navigator.platform == "Win32") ||(navigator.platform == "Windows");
-var isMac =(navigator.platform == "Mac68K") ||(navigator.platform == "MacPPC") ||(navigator.platform == "Macintosh");
-var isUnix =(navigator.platform == "X11") && !isWin && !isMac;
+var isWin = (navigator.platform == "Win32") || (navigator.platform == "Windows");
+var isMac = (navigator.platform == "Mac68K") || (navigator.platform == "MacPPC") || (navigator.platform == "Macintosh");
+var isUnix = (navigator.platform == "X11") && !isWin && !isMac;
+
+/* 判断是浏览器内核 */
+export const checkBrowser = () => {
+  const u = navigator.userAgent;
+  const obj = {
+    trident: u.indexOf("Trident") > -1,                         //IE内核
+    presto: u.indexOf("Presto") > -1,                           //opera内核
+    webKit: u.indexOf("AppleWebKit") > -1,                      //苹果、谷歌内核
+    gecko: u.indexOf("Gecko") > -1 && u.indexOf("KHTML") == -1, //火狐内核
+  }
+  return Object.keys(obj)[Object.values(obj).indexOf(true)]
+};
+
+/* 判断是终端类型,值有ios,android,iPad */
+export const checkIosAndroidIpad = () => {
+  const u = navigator.userAgent;
+  const obj = {
+    ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/),               //ios终端
+    android: u.indexOf("Android") > -1 || u.indexOf("Linux") > -1, //android终端或者uc浏览器
+    iPad: u.indexOf("iPad") > -1,                                  //是否iPad
+  }
+  return Object.keys(obj)[Object.values(obj).indexOf(true)]
+};
+
+/* 判断是否是微信,qq 或 uc */
+export const checkWeixinQqUc = () => {
+  const u = navigator.userAgent;
+  const obj = {
+    weixin: u.indexOf("MicroMessenger") > -1, //是否微信
+    qq: u.match(/QQ/i) == "qq"&&!u.indexOf('MQQBrowser') > -1, //是否QQ
+    uc: u.indexOf('UCBrowser') > -1
+  }
+  return Object.keys(obj)[Object.values(obj).indexOf(true)]
+};
+
+/* 检查是否是 IphoneX */
+export const checkIsIphoneX = () => {
+  const isIOS = !!navigator.userAgent.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/);
+  return isIOS && screen.height >= 812
+};
 
 --------------------------------------------------------------------------
 var browserName=navigator.userAgent.toLowerCase();
@@ -13616,8 +13841,9 @@ JSON.stringify(value[, replacer[, space]])
 参数replacer
 用于转换结果的函数或数组或null
 用于控制如何筛选对象的键值,如果只想输出指定的属性可以传入Array
-如果replacer为函数则JSON.stringify将调用该函数,并传入每个成员的键和值,使用返回值而不是原始值;如果此函数返回undefined则排除成员,根对象的键是一个空字符串:""
 如果replacer是一个数组,则仅转换该数组中具有键值的成员。成员的转换顺序与键在数组中的顺序一样。当value参数也为数组时将忽略replacer数组
+如果replacer为函数则JSON.stringify将调用该函数,并传入每个成员的键和值,使用返回值而不是原始值;如果此函数返回undefined则排除成员,根对象的键是一个空字符串:""
+JSON.stringify不能处理某些值，如Set类型的值就不能正常序列化,但可以通过传入函数的方式将Set类型的值转换为数组类型，从而使得数据能够被正常序列化
 
 参数space
 文本添加缩进、空格和换行符
@@ -13627,7 +13853,7 @@ space也可以使用非数字,如:'\t'或空格" "
 </pre><textarea>
 var obj = {"name":"百度", "site":"https://www.baidu.com"}
 str_pretty2 = JSON.stringify(obj, null, 4)                //使用四个空格缩进
-document.write("<pre>" + str_pretty2 + "</textarea>" );        //pre用于格式化输出
+document.write("< pre>" + str_pretty2 + "< /textarea>" );        //pre用于格式化输出
 {
     "name": "百度",
     "site": "https://www.baidu.com"
@@ -13655,8 +13881,17 @@ function convert(key,value) {                       // 将每个字符串值转�
   if(typeof value === 'string')  return value.toUpperCase();
   return value;
 }
-
 JSON.stringify(xiaoming, convert, '  ');
+
+</textarea><textarea>
+const obj = { name: 'foo', level: 'low', age: '100', money: 'empty' }
+JSON.stringify(obj)   // "{"name":"foo","level":"low","age":"100","money":"empty"}"
+JSON.stringify(obj, ['name', 'age'])  // "{"name":"foo","age":"100"}"
+
+const obj1 = { name: new Set([1]) }
+JSON.stringify(obj1, (key, value) => value instanceof Set ? [...value] : value)
+// 正常序列化是 "{"name":{}}"
+// 例子中的输出为 "{"name":[1]}"
 
 </textarea>如果还想要精确控制如何序列化json数据,可以给json数据定义一个toJSON()的方法,直接返回JSON应该序列化的数据<textarea>
 var xiaoming = {
@@ -14821,27 +15056,8 @@ Ajax解决浏览器缓存问题
 5、jQuery直接$.ajaxSetup({cache:false}),这样页面的所有ajax都会执行这条语句就是不需要保存缓存记录。
 
 W3C标准文档中这个请求头不是什么都可以设置的,标准里面明确规定了以下请求头信息是浏览器控制,开发者不允许设置这些请求头
-Accept-Charset
-Accept-Encoding
-Access-Control-Request-Headers
-Access-Control-Request-Method
-Connection
-Content-Length
-Cookie
-Cookie2
-Date
-DNT
-Expect
-Host
-Keep-Alive
-Origin
-Referer
-TE
-Trailer
-Transfer-Encoding
-Upgrade
-User-Agent
-Via
+Accept-Charset、Accept-Encoding、Access-Control-Request-Headers、Access-Control-Request-Method、Connection、Content-Length、
+Cookie、Cookie2、Date、DNT、Expect、Host、Keep-Alive、Origin、Referer、TE、Trailer、Transfer-Encoding、Upgrade、User-Agent、Via
 
 </pre>对应的jQuery可以在beforeSend回调里面设置请求头<textarea>
 $.ajax({
@@ -14870,9 +15086,7 @@ interface XMLHttpRequestEventTarget : EventTarget {
   attribute EventHandler onloadend;
 };
 
-interface XMLHttpRequestUpload : XMLHttpRequestEventTarget {
-
-};
+interface XMLHttpRequestUpload : XMLHttpRequestEventTarget { };
 
 interface XMLHttpRequest : XMLHttpRequestEventTarget {
   // event handler
@@ -14882,13 +15096,7 @@ interface XMLHttpRequest : XMLHttpRequestEventTarget {
 
 </textarea><pre>
 XMLHttpRequestEventTarget接口定义了7个事件：
-onloadstart
-onprogress
-onabort
-ontimeout
-onerror
-onload
-onloadend
+onloadstart、onprogress、onabort、ontimeout、onerror、onload、onloadend
 
 XMLHttpRequest有一个upload属性,而upload是一个XMLHttpRequestUpload对象,XMLHttpRequest和XMLHttpRequestUpload都继承了同一个XMLHttpRequestEventTarget接口,所以xhr和xhr.upload都有7个事件,onreadystatechange是XMLHttpRequest独有的事件
 
@@ -15357,7 +15565,70 @@ function create(){
   echo '{"success":true,"msg":"目标：'.$_POST["name"].'信息已保存成功！"}';
 }
 
-</textarea>
+</textarea><pre>
+【 在页面关闭或跳转时优雅的发送Ajax请求 】
+有时需要在用户离开页面时做一些上报来记录用户行为或埋点,又或者是发送到服务器的ajax请求。那如何保证请求能够正确的送达就是一个很关键的点
+最高策略是下个页面落地发送
+
+1、首先要做事件监听
+浏览器有两个事件可以用来监听页面关闭,beforeunload和unload。
+beforeunload在文档和资源将要关闭的时候调用的,这时文档还可见,并且在这个关闭的事件还是可以取消的。比如下面这种写法就会让用户导致在刷新或者关闭页面时候,有个弹窗提醒用户是否关闭。
+
+window.addEventListener("beforeunload", function (event) {
+ event.preventDefault();  // Cancel the event as stated by the standard
+ event.returnValue = '';  // Chrome requires returnValue to be set
+});
+
+unload则是在页面已经正在被卸载时发生,此时文档所处的状态是：
+1.所有资源仍存在(图片,iframe等)；
+2.对于用户所有资源不可见；
+3.界面交互无效(window.open, alert, confirm等)；
+4.错误不会停止卸载文档的过程。
+
+基于以上两个方法就可以实现对页面关闭的事件监听了,为了稳妥,可以两个事件都监听。然后对监听函数做处理,让关闭事件只调用一次,比如用变量控制请求发送的次数。
+
+2、其次发送请求
+有了上面的监听,事情只完成了一半,如果在监听中直接发送ajax请求就会发现请求被浏览器abort了,无法发送出去。在页面卸载的时候浏览器并不能保证异步的请求能够成功发出去
+
+方案1: 发送同步的ajax请求,但用户需要等待请求结束才可以关闭页面。对用户的体验不好
+var oAjax = new XMLHttpRequest();
+oAjax.open('POST', url + '/user/register', false); // false表示同步请求
+oAjax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+oAjax.onreadystatechange = function() {
+ if (oAjax.readyState == 4 && oAjax.status == 200) {
+  var data = JSON.parse(oAjax.responseText);
+ } else {
+  console.log(oAjax);
+ }
+};
+oAjax.send('a=1&b=2');
+
+方案2：发送异步请求,并且在服务端忽略ajax的abort
+虽然异步请求会被浏览器abort,但如果服务端可以忽略abort仍然正常执行,也是可以的,比如PHP有ignore_user_abort函数可以忽略abort,这样需要改造后台,一般不太可行。
+
+方案3：使用navigator.sendBeacon发送异步请求
+这个方法主要用于满足统计和诊断代码的需要,这些代码通常尝试在卸载unload文档之前向web服务器发送数据。过早的发送数据可能导致错过收集数据的机会,然而对于开发者来说保证在文档卸载期间发送数据一直是一个困难。因为用户代理通常会忽略在卸载事件处理器中产生的异步XMLHttpRequest,所以这个方法就是用来在用户离开时发请求的,非常适合这种场景
+navigator.sendBeacon(url [, data]);
+sendBeacon支持发送的data可以是ArrayBufferView, Blob, DOMString或FormData类型的数据。
+
+下面是几种使用sendBeacon发送请求的方式,可以修改header和内容的格式,因为一般和服务器的通信方式都是固定的,如果修改了header或内容,服务器就无法正常识别出来了。
+
+(1)使用Blob来发送,可以自己定义内容的格式和header
+blob = new Blob([`room_id=123`], {type : 'application/x-www-form-urlencoded'});  // 设置content-type
+navigator.sendBeacon("/cgi-bin/leave_room", blob);
+
+(2)使用FormData对象,但这时content-type会被设置成"multipart/form-data"
+var fd = new FormData();
+fd.append('room_id', 123);
+navigator.sendBeacon("/cgi-bin/leave_room", fd);
+
+(3)数据也可以使用URLSearchParams对象,content-type会被设置成"text/plain;charset=UTF-8"
+var params = new URLSearchParams({ room_id: 123 })
+navigator.sendBeacon("/cgi-bin/leave_room", params);
+
+通过尝试,可以发现使用blob发送比较方便,内容的设置也比较灵活,如果发送的消息抓包后发现后台没有识别出来,可以尝试修改内容的string或header来找到合适的方式发送请求。
+
+</pre>
 </div>
 
 <div id="formData">
@@ -25184,7 +25455,7 @@ player.unsubscribe()  // 退订所有订阅事件
 
 player._publish('loaded', true)  // 可以在外部手动发出事件(真实生产场景中,发布特性一般为类内部私有方法)
 
-</textarea>观察者模式: 钩子模块（动作是对方法的逻辑进行补充,过滤器是对方法的返回值进行处理）<textarea>
+</textarea>观察者模式: 钩子模块(动作是对方法的逻辑进行补充,过滤器是对方法的返回值进行处理)<textarea>
 var Hook = (function(){
   var _initHook = method => !method['__hooks__'] && (method['__hooks__'] = { actions : [], filters : [] })
 
@@ -27073,7 +27344,7 @@ console.log(a.foo3); // 3
 var param = 'size';
 var config = {
   [param]: 12,
-  ["mobile" + param.charAt(0).toUpperCase() + param.slice(1)]: 4
+  ["mobile" + param.charAt(0).toUpperCase() + param.slice(1)]: 4  // 将字母全部转化成以大写开头
 };
 
 console.log(config); // { size: 12, mobileSize: 4 }
@@ -28057,10 +28328,44 @@ s === Number.prototype.toString     // true
 let {toString: s} = true;
 s === Boolean.prototype.toString    // true
 
-</pre><pre>
-【 变量的解构赋值用途 】
+</pre>
 
-</pre>1、交换变量的值<textarea>
+<h4>以数组解构的方式解构对象</h4><textarea>
+var obj = { x: 1, y: 2, z: 3 };
+[...obj]; // TypeError
+
+展开语法和for-of语句遍历iterable对象定义要遍历的数据。Array或Map是具有默认迭代行为的内置迭代器。对象不是可迭代的，但可以通过使用iterable和iterator协议使它们可迭代。
+在Mozilla文档中，如果一个对象实现了@@iterator方法，那么它就是可迭代的，这意味着这个对象或它原型链上的一个对象必须有一个带有@@iterator键的属性，这个键可以通过常量Symbol.iterator获得。
+
+var obj = { x: 1, y: 2, z: 3 };
+obj[Symbol.iterator] = function() {   // iterator 是一个具有 next 方法的对象，它的返回至少有一个对象，两个属性：value＆done。返回一个 iterator 对象
+  return {
+    next: function() {
+      if (this._countDown === 3) {
+        const lastValue = this._countDown;
+        return { value: this._countDown, done: true };
+      }
+      this._countDown = this._countDown + 1;
+      return { value: this._countDown, done: false };
+    },
+    _countDown: 0
+  };
+};
+[...obj]; // 打印 [1, 2, 3]
+
+还可以使用generator函数来定制对象的迭代行为：
+var obj = {x:1, y:2, z: 3}
+obj[Symbol.iterator] = function*() {
+  yield 1;
+  yield 2;
+  yield 3;
+}
+[...obj]; // 打印 [1, 2, 3]
+
+</textarea>
+
+<h4>变量的解构赋值用途</h4>
+1、交换变量的值<textarea>
 let x = 1;
 let y = 2;
 [x,y] = [y,x];
@@ -31872,11 +32177,11 @@ async function func() {
 }
 
 当匹配到.vue结尾的文件名时会将文件作为source参数传给vue-loader,use属性后面可以是一个字符串也可以是一个路径,当是字符串时默认会视为nodejs模块去node_modules中找
-而这些文件本质上其实就是字符串（图片视频就是Buffer对象）,以vue-loader为例,当loader接受到文件时通过字符串匹配将其分为3份,模版字符串会vue-loader编译为render函数,script部分会交给babel-loader,style部分会交给css-loader,同时loader遵守单一原则,即一个loader只做一件事,这样可以灵活组合多个loader,互不干扰
+而这些文件本质上其实就是字符串(图片视频就是Buffer对象),以vue-loader为例,当loader接受到文件时通过字符串匹配将其分为3份,模版字符串会vue-loader编译为render函数,script部分会交给babel-loader,style部分会交给css-loader,同时loader遵守单一原则,即一个loader只做一件事,这样可以灵活组合多个loader,互不干扰
 
 实现思路
 因为loader可以读取匹配到的文件,经过处理变成期望的输出结果,所以可以自己实现一个loader,接受js文件,当遇到await关键字时,给代码包裹一层try/catch
-如何能够准确给await及后面的表达式包裹try/catch需要用到抽象语法树（AST）相关的知识
+如何能够准确给await及后面的表达式包裹try/catch需要用到抽象语法树(AST)相关的知识
 抽象语法树是源代码语法结构的一种抽象表示,它以树状的形式表现编程语言的语法结构,树上的每个节点都表示源代码中的一种结构
 通过AST可以实现很多非常有用的功能,例如将ES6以后的代码转为ES5,eslint的检查,代码美化,甚至js引擎都是依赖AST实现的,同时因为代码本质只是单纯的字符串,所以并不仅限于js之间的转换,scss,less等css预处理器也是通过AST转为浏览器认识的css代码,举个例子
 let a = 1
@@ -31884,9 +32189,9 @@ let b = a + 5
 
 将字符串转为AST树需要经过词法分析和语法分析两步
 
-词法分析将一个个代码片段转为token（词法单元）,去除空格注释,例如第一行会将let,a,=,1 这4个转为token,token是一个对象,描述了代码片段在整个代码中的位置和记录当前值的一些信息
+词法分析将一个个代码片段转为token(词法单元),去除空格注释,例如第一行会将let,a,=,1 这4个转为token,token是一个对象,描述了代码片段在整个代码中的位置和记录当前值的一些信息
 
-语法分析会将token结合当前语言（JS）的语法转换成Node（节点）,同时Node包含一个type属性记录当前的类型,例如let在JS中代表着一个变量声明的关键字,所以它的type为VariableDeclaration,而a = 1会作为let的声明描述,它的type为VariableDeclarator,而声明描述是依赖于变量声明的,所以是一种上下的层级关系
+语法分析会将token结合当前语言(JS)的语法转换成Node(节点),同时Node包含一个type属性记录当前的类型,例如let在JS中代表着一个变量声明的关键字,所以它的type为VariableDeclaration,而a = 1会作为let的声明描述,它的type为VariableDeclarator,而声明描述是依赖于变量声明的,所以是一种上下的层级关系
 另外可以发现并不是一个token对应一个Node,等号左右必须都有值才能组成一个声明语句,否则会作出警告,这就是eslint的基本原理。最后所有的Node组合在一起就形成了AST语法树
 
 推荐一个很实用的AST查看工具AST explorer,更直观的查看代码是如何转为抽象语法树
@@ -31959,7 +32264,7 @@ module.exports = function (source) {
 	traverse(ast, {
 		AwaitExpression(path) {
 			let tryCatchAst = t.tryStatement(
-				// try 子句（必需项）
+				// try 子句(必需项)
 				t.blockStatement([
 					t.expressionStatement(path.node)
 				]),
@@ -42597,7 +42902,7 @@ SVG
 
 </pre>
 
-<h3 id="svg">可缩放矢量图形（Scalable Vector Graphics,SVG）</h3><pre>
+<h3 id="svg">可缩放矢量图形(Scalable Vector Graphics,SVG)</h3><pre>
 SVG是一种用于描述基于二维的矢量图形的,基于XML的标记语言。本质上SVG相对于图像,就好比HTML相对于文本
 SVG是一个基于文本的开放Web标准,它的设计明确地保证它与CSS、DOM及SMIL等其他Web标准一同运作。
 SVG图像及其相关行为被定义于XML文本文件中,这意味着可以对它们进行搜索、索引、编写脚本及压缩,此外也意味着可以使用任何文本编辑器和绘图软件来创建和编辑,更适合seo优化
@@ -42610,19 +42915,19 @@ Svg文件比jpg格式要小很多
 canvas与svg两者区别:
 canvas:
 1)依赖分辨率
-2）不支持事件处理器
-3）弱的文本渲染能力
-4）能够以.png或.jpg格式保存结果图像
-5）最适合图像密集型的游戏,其中的许多对象会被频繁重绘
+2)不支持事件处理器
+3)弱的文本渲染能力
+4)能够以.png或.jpg格式保存结果图像
+5)最适合图像密集型的游戏,其中的许多对象会被频繁重绘
 应用场景：提供的功能更原始,适合像素处理,动态渲染和大数据量绘制
 Canvas可以针对比较复杂动画制作
 
 svg：
-1）不依赖分辨率
-2）支持事件处理器
-3）最适合带有大型渲染区域的应用程序（比如谷歌地图）
-4）复杂度高会减慢渲染速度（任何过度使用DOMD的应用都不快）
-5）不适合游戏应用
+1)不依赖分辨率
+2)支持事件处理器
+3)最适合带有大型渲染区域的应用程序(比如谷歌地图)
+4)复杂度高会减慢渲染速度(任何过度使用DOMD的应用都不快)
+5)不适合游戏应用
 应用场景：功能更完善,适合静态图片展示,高保真文档查看和打印的应用场景
 Svg可以用来制作logo等
 
@@ -42651,7 +42956,7 @@ codebase属性指向下载插件的URL
 < a href="circle1.svg">View SVG file< /a>
 
 svg元素
-如果svg不是根元素,svg元素可以用于在当前文档（比如一个HTML文档）内嵌套一个独立的svg片段,这个独立片段拥有独立的视口和坐标系统
+如果svg不是根元素,svg元素可以用于在当前文档(比如一个HTML文档)内嵌套一个独立的svg片段,这个独立片段拥有独立的视口和坐标系统
 类别:容器元素,结构元素
 允许的内容物可以是任意数量、任意排序的下列元素：
 动画元素、描述性元素、形状元素、结构化元素、渐变元素、
@@ -45916,6 +46221,35 @@ var init={'questions':[{'question':'jQuery是什么？','answers':['JavaScript�
 $(function(){
   $('#quiz-container').jquizzy({ questions: init.questions });
 });
+
+</textarea>
+
+<h4>examples</h4><textarea>
+function foo() {
+  setTimeout(foo, 0); // 是否存在堆栈溢出错误?
+}; 
+不会溢出,Js并发模型基于“事件循环”,浏览器提供运行时环境来执行JS代码。
+浏览器的主要组件包括调用堆栈，事件循环**，任务队列和Web API**。 像setTimeout，setInterval和Promise这样的全局函数不是Js的一部分，而是Web API的一部分
+JS调用栈是后进先出(LIFO),引擎每次从堆栈中取出一个函数，然后从上到下依次运行代码。每当它遇到一些异步代码如setTimeout，它就把它交给Web API。因此每当事件被触发时callback都会被发送到任务队列
+事件循环(Event loop)不断地监视任务队列(Task Queue)，并按它们排队的顺序一次处理一个回调。每当调用堆栈(call stack)为空时，Event loop获取回调并将其放入堆栈(stack )中进行处理。如果调用堆栈不是空的，则事件循环不会将任何回调推入堆栈
+
+步骤：
+1、调用 foo()会将foo函数放入调用堆栈(call stack)。
+2、在处理内部代码时，JS引擎遇到setTimeout。
+3、然后将foo回调函数传递给WebAPIs并从函数返回，调用堆栈再次为空
+4、计时器被设置为0，因此foo将被发送到任务队列
+5、由于调用堆栈是空的，事件循环将选择foo回调并将其推入调用堆栈进行处理。
+6、进程再次重复，堆栈不会溢出
+
+如果在控制台中运行以下函数，页面(选项卡)的UI是否仍然响应
+function foo() {
+ return Promise.resolve().then(foo);
+}; 
+答案 : 不会响应
+大多数时候，开发人员假设在事件循环图中只有一个任务队列。但事实并非如此，可以有多个任务队列。由浏览器选择其中的一个队列并在该队列中处理回调。
+在底层来看，JavaScript中有宏任务和微任务。setTimeout回调是宏任务，而Promise回调是微任务。
+主要的区别在于他们的执行方式。宏任务在单个循环周期中一次一个地推入堆栈，但是微任务队列总是在执行后返回到事件循环之前清空。因此如果以处理条目的速度向这个队列添加条目，那么就永远在处理微任务。只有当微任务队列为空时，事件循环才会重新渲染页面
+每次调用foo()都会继续在微任务队列上添加另一个'foo'回调，因此事件循环无法继续处理其他事件（滚动，单击等），直到该队列完全清空为止。 因此，它会阻止渲染。
 
 </textarea>
 </div>
