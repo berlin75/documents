@@ -84,9 +84,9 @@ src用于替换当前内容;
 <h2>标签集</h2><pre>
 【 lang属性 css国际化 】
 ＜html lang="zh | zh-CN | EN">＜/html> 
-lang属性被使用的场景：Chrome的内置翻译，针对特定语言的内容的搜索引擎及屏幕阅读器,可以以适当的口音和正确的发音读出内容
-一般指导原则是html元素必须始终具有lang属性集，然后该属性将被所有其他元素继承
-在同一页面上看到不同语言的内容并不罕见,这种情况下可以使用span>或div包装该内容，并将正确的lang属性应用于该包装元素。
+lang属性被使用的场景：Chrome的内置翻译,针对特定语言的内容的搜索引擎及屏幕阅读器,可以以适当的口音和正确的发音读出内容
+一般指导原则是html元素必须始终具有lang属性集,然后该属性将被所有其他元素继承
+在同一页面上看到不同语言的内容并不罕见,这种情况下可以使用span>或div包装该内容,并将正确的lang属性应用于该包装元素。
 < p>The fourth animal in the Chinese Zodiac is Rabbit (< span lang="zh">兔子< /span>).< /p>
 
 [lang="zh] 属性选择器只匹配zh
@@ -169,8 +169,8 @@ lang属性被使用的场景：Chrome的内置翻译，针对特定语言的内�
 展开收起组件,效果和jQuery手风琴插件差不多,设置open属性让它默认为展开状态
 <details>
   <summary>头条号《做工程师不做码农》</summary>
-  欢迎大家关注我的头条号，专注大前端、全栈、程序员成长的公众号！如果对你有所启发和帮助，可以点个关注、收藏，也可以留言讨论，这是对作者的最大鼓励。
-  作者简介：Web前端工程师，全栈开发工程师、持续学习者。
+  欢迎大家关注我的头条号,专注大前端、全栈、程序员成长的公众号！如果对你有所启发和帮助,可以点个关注、收藏,也可以留言讨论,这是对作者的最大鼓励。
+  作者简介：Web前端工程师,全栈开发工程师、持续学习者。
 </details>
 <details>
   <summary>Google Nexus 6</summary>
@@ -2990,7 +2990,7 @@ function gotoend(pro,value){
 }
 
 </pre><pre>
-原生进度条和度量,progress不适合用来表示度量衡，如果想表示度量衡应该使用meter标签代替,meter用来度量给定范围（gauge）内的数据
+原生进度条和度量,progress不适合用来表示度量衡,如果想表示度量衡应该使用meter标签代替,meter用来度量给定范围(gauge)内的数据
 < meter value="3" min="0" max="10">< /meter> 十分之三 < br>
 < meter value="0.6">< /meter> 60%
 
@@ -4055,14 +4055,14 @@ File(9139) {
 
 <div id="ObjectURl">
 <h3>对象URL,也称blob URL</h3><pre>
-Blob URL： Blob URLs是W3C的官方名称,在实际使用时常称为Object-URLs。Blob URLs只能通过URL.createObjectURL方法暂时生成在浏览器中,此方法将生成一个指向于Blob和File的对象的URL,并能通过URL.revokeObjectURL方法释放,在页面关闭时被销毁掉并只存在于当前session中。
+Blob URLs是W3C的官方名称,在实际使用时常称为Object-URLs。Blob URLs只能通过URL.createObjectURL方法暂时生成在浏览器中,此方法将生成一个指向于Blob和File的对象的URL,并能通过URL.revokeObjectURL方法释放,在页面关闭时被销毁掉并只存在于当前session中。
 
 对比Data URLs： Blob URLs只是暂时的协议允许Blob和File对象能够利用URL以资源的形式被使用在图片(img标签)、二进制数据下载链接等,而不需通过上传文件到server端后返回URL资源。而Data URLs定义为data:[< mediatype >][;base64],< data >,在JS中为二进制数据需要编码为Base64字符串,而一个字符需要占用两字节,使得原始纯二进制数据的Blob URLs相比于Data URLs更小更快。
 
 解决的问题： 在面对需要保存canvas为图片的需求中,可以通过canvas.toDataURL方法转数据为base64编码并用以下载和展示。但在面对长图时,过长的base64编码将消耗过多的内存,并且由于客户端能力不尽相同使得在客户端有内存溢出风险甚至引起浏览器崩溃。但canvas同时可以使用canvas.toBlob方法获得原始二进制数据的Blob对象,并通过URL.createObjectURL方法获取暂时的URL资源,相比于base64消耗更低的内存风险也更小
 
 </pre>生成Blob URLs并下载<pre class="js">
-canvas.toBlob((blob)=>{
+canvas.toBlob(blob=>{
   let url = URL.createObjectURL(blob);
   let a = documen.createElement('a');
   a.href = url;
@@ -4072,18 +4072,18 @@ canvas.toBlob((blob)=>{
 },'image/png',1);
 
 </pre>通过FileReader读取Blob<pre class="js">
-canvas.toBlob((blob)=>{
+canvas.toBlob(blob=>{
   let fr = new FileReader();
-  fr.addEventListener('load' , (event) => {
+  fr.addEventListener('load' , event => {
     //dosomething to event.target.result
   })
-  // readAsArrayBuffer、readAsBinaryString、readAsText
-  fr.readAsDataURL(blob);
+  fr.readAsDataURL(blob);  // readAsArrayBuffer、readAsBinaryString、readAsText
 },'image/png',1);
 
 </pre><pre>
 【 window.URL.createObjectURL() 】
 创建简单的URL字符串对象,用于指向任何DOM File对象数据,包括用户电脑中的本地文件img/pdf/video,URL对象是File对象的一个字符串标识。
+使用object URL来引用可以使用DOM文件对象引用的数据
 
 URL.createObjectURL()静态方法会创建一个DOMString,其中包含一个表示参数中给出的对象的URL,这个URL的生命周期和创建它的窗口中的document绑定,这个新的URL对象表示指定的File对象或Blob对象
 
@@ -4096,6 +4096,11 @@ URL.createObjectURL(object)会对二进制数据生成一个URL,这个URL可以�
 
 URL.revokeObjectURL(objectURL);
 释放由createObjectURL方法创建的URL对象,以便释放浏览器内存
+
+调用URL.createObjectURL来从文件对象中创建一个URL字符串对象
+const objectURL = window.URL.createObjectURL(fileObj);
+然后可以在URL字符串对象上调用revokeURL以从内存中释放URL资源
+URL.revokeObjectURL(objectURL);
 
 使用对象URL的好处是可以不必把文件内容读取到JS中而直接使用文件内容,只要在需要文件内容的地方提供对象URL即可。
 
@@ -4118,8 +4123,8 @@ a.textContent = "Download";
 document.body.appendChild(a);
 
 </pre>URL.createObjectURL(FileObject)<pre class="js">
-<input type="file">
-<img src="">
+< input type="file">
+< img src="">
 
 document.querySelector('input[type=file]').onchange = function(){
   var objectURL = URL.createObjectURL(this.files[0]);
@@ -4171,6 +4176,33 @@ function handleFiles(files) {
   }
 }
 
+</pre><pre class="js">
+< input type="file"  accept="image/*">
+< img />
+
+const fileInput = document.querySelector('input');
+const img = document.querySelector('img');
+fileInput.onchange = () => {
+  const file = fileInput.files[0];
+  img.src = URL.createObjectURL(file);
+  img.onload = () => {
+    URL.revokeObjectURL(img.src);
+  }
+}
+
+</pre>还可以使用object URL来显示PDF,使用相同的crateObjectURL方法，但将其设置为iframe的URL而不是img元素<pre class="js">
+< input type="file" >
+< iframe>
+
+const fileInput = document.querySelector('input');
+const iframe = document.querySelector('iframe');
+fileInput.onchange = () => {
+  const file = fileInput.files[0];
+  const objUrl = URL.createObjectURL(file);
+  iframe.setAttribute('src', objUrl);
+  URL.revokeObjectURL(objUrl);
+}
+
 </pre>Using object URLs to display embedded PDF files or any other resources that can be displayed by the browser rather than proposed as a downloaded file - 把pdf文件变成图片(Mozilla的pdf.js库)<pre class="js">
 document.querySelector('input[type=file]').onchange = function(){
   var fileList = this.files;
@@ -4193,15 +4225,26 @@ document.querySelector('input[type=file]').onchange = function(){
   reader.readAsArrayBuffer(file);
 }
 
-</pre><pre>
-【 Using object URLs with other file types - preview uploaded video 】
-
-</pre><pre class="js">
+</pre>【 Using object URLs with other file types - preview uploaded video 】<pre class="js">
 const video = document.getElementById('video');
 const obj_url = window.URL.createObjectURL(blob);
 video.src = obj_url;
 video.play()
 window.URL.revokeObjectURL(obj_url);
+
+</pre>选择一个视频文件并播放<pre class="js">
+< input type='file' />
+< video controls />
+
+const fileInput = document.querySelector('input');
+const video = document.querySelector('video');
+fileInput.onchange = async () => {
+  const file = fileInput.files[0];
+  const objUrl = URL.createObjectURL(file);
+  video.src = objUrl;
+  await video.play();  // play方法返回一个Promise，因此必须添加一个await等待该Promise的解决
+  URL.revokeObjectURL(objUrl);
+}
 
 </pre>上传预览图片的2种方法<pre class="js">
 objURL方式：<input type="file" id="imgFile" name="files[]" multiple accept="image/gif,image/jpeg,image/png" style="position: absolute;clip: rect(0 0 0 0);" />
@@ -4273,29 +4316,18 @@ document.getElementById('imgFile1').onchange = function(e){
 var canvas = document.getElementsByClassName("canvas")[0];
 var ctx = canvas.getContext("2d");
 
-var border = {
-  width: 40, //头像边框厚度
-  color: "rgba(247, 248, 250, .9)" //头像边框颜色
-}
-//图像的最小高度与宽度
-var minImgRect = { width: null, height: null };
-//保存当前图像的宽度与高度(缩放后)
-var imgRect = { width: null, height: null };
-//保存当前图片在canvas里的位置
-var currLoc = { x: null, y: null };
-// 保存当前图片的居中比例,拖动时清空,缩放时重新计算;居中比例：以canvas中轴线为基准将图片切成两部分,左侧部分占总宽度的比例,y方向同理。
-var midpoint = null;
-
+var border = { width: 40, color: "rgba(247, 248, 250, .9)" }   //头像边框厚度和颜色
+var minImgRect = { width: null, height: null };  //图像的最小高度与宽度
+var imgRect = { width: null, height: null };  //保存当前图像的宽度与高度(缩放后)
+var currLoc = { x: null, y: null };  //保存当前图片在canvas里的位置
+var midpoint = null;  // 保存当前图片的居中比例,拖动时清空,缩放时重新计算;居中比例：以canvas中轴线为基准将图片切成两部分,左侧部分占总宽度的比例,y方向同理
 
 var uploadButton = document.getElementsByClassName("uploadButton")[0]; //图像上传按钮对象
 var fileInput = uploadButton.getElementsByClassName("fileInput")[0]; //图像上传控件
 var rangeInput = document.getElementsByClassName("rangeInput")[0]; //滑块对象
 var image = new Image(); //图像文件
 
-//模拟图片上传按钮
-uploadButton.onclick = function(e) {
-  return fileInput.click();
-}
+uploadButton.onclick = e => fileInput.click()  //模拟图片上传按钮
 
 //图片上传处理代码
 fileInput.addEventListener('change', function(e) {
@@ -6718,17 +6750,17 @@ el.style.left = left;
 // better operation
 el.style.cssText += "; left: " + left + "px; top: " + top + "px;";
 
-// better operation（将样式内容设置于某一类名，再进行元素类名绑定）
+// better operation(将样式内容设置于某一类名,再进行元素类名绑定)
 el.className += " theclassName";
 
 【 css动画造成页面不流畅问题分析优化 】
-使用css3动画造成页面的不流畅和卡顿问题，其潜在原因往往还是页面的回流和重绘，减少页面动画元素对其他元素的影响是提高性能的根本方向，而实现可如下：
-1）设置动画元素position样式为absolute或fixed，可避免动画的进行对页面其它元素造成影响，导致其重排和重绘的发生；
-2）避免使用使用fixed或absoulte的position、margin，top，left，width，height等属性执行动画，用transform进行替代；尽量用transform和opacity完成动画的展示，因为这两个属性可以避免重排和重绘的发生
+使用css3动画造成页面的不流畅和卡顿问题,其潜在原因往往还是页面的回流和重绘,减少页面动画元素对其他元素的影响是提高性能的根本方向,而实现可如下：
+1)设置动画元素position样式为absolute或fixed,可避免动画的进行对页面其它元素造成影响,导致其重排和重绘的发生；
+2)避免使用使用fixed或absoulte的position、margin,top,left,width,height等属性执行动画,用transform进行替代；尽量用transform和opacity完成动画的展示,因为这两个属性可以避免重排和重绘的发生
 
-合理的提升合成层，以减少页面不必要的绘制和重排
+合理的提升合成层,以减少页面不必要的绘制和重排
 有一些特别的属性可以在不同的层中单独绘制,然后再合并图层。对这种属性的访问,如果正确使用了CSS不会触发Layout - Paint,而是直接进行Compsite Layers: transform、opacity
-合成层的好处是不会影响到其他元素的绘制和不被其他层所影响，因此为了彼此之前的影响造成的性能损失，需合理的将动画效果中的元素或固定元素提升为合成层。
+合成层的好处是不会影响到其他元素的绘制和不被其他层所影响,因此为了彼此之前的影响造成的性能损失,需合理的将动画效果中的元素或固定元素提升为合成层。
 提升合成层的最好方式是使用CSS的will-change属性,将will-change设置为opacity、transform、top、left、bottom、right可以将元素提升为合成层。
 CSS3属性will-change为web开发者提供了一种告知浏览器该元素会有哪些变化的方法,这样浏览器可在元素属性真正发生变化前做好对应的优化准备工作
 transform又分为:translate, scale, rotate等,这些层应该放入单独的渲染层中,为了对这个元素创建一个独立的渲染层必须提升该元素。
@@ -6736,7 +6768,7 @@ transform又分为:translate, scale, rotate等,这些层应该放入单独的渲
 对于还不兼容该属性的浏览器使用3D transform予以代替
 #target { transform: translateZ(0); }
 
-对于像页面顶部栏、侧栏等固定不变的位置元素也可将其提升为合成层以避免其被其他元素影响而发生重绘，但合成层的提升也意味着性能的消耗增加，必须通过调试以测出合理的临界值，不能盲目提升合成层，此外盲目提升合成层也可能造成重叠产生的额外合成层，容易导致层爆炸的出现，即页面连锁出现大量合成层默认提升，,太多的独立渲染层,虽然缩减了Paint的时间,但增加了Composite Layers的时间,因此需要仔细权衡,在作调整之前需要查看浏览器控制台的Timeline的运行结果来做支持。
+对于像页面顶部栏、侧栏等固定不变的位置元素也可将其提升为合成层以避免其被其他元素影响而发生重绘,但合成层的提升也意味着性能的消耗增加,必须通过调试以测出合理的临界值,不能盲目提升合成层,此外盲目提升合成层也可能造成重叠产生的额外合成层,容易导致层爆炸的出现,即页面连锁出现大量合成层默认提升,,太多的独立渲染层,虽然缩减了Paint的时间,但增加了Composite Layers的时间,因此需要仔细权衡,在作调整之前需要查看浏览器控制台的Timeline的运行结果来做支持。
 
 </pre>
 
@@ -6921,13 +6953,245 @@ link href = "landscape.css" rel = "stylesheet" media = "orientation:landscape"
 【 使用GPU加速 】
 很多动画都会定时执行,每次执行都可能会导致浏览器的重新布局,比如：
 @ keyframes my {
-  20 % {top : 10px ;}
-  50 % {top : 120px ;}
+  20% {top: 10px;}
+  50% {top: 120px;}
 }
 这些内容可以放到GPU加速执行,GPU是专门设计来进行图形处理的,在图形处理上比CPU要高效很多
 可以通过使用transform来启动这一特性：
 transform : translateY ( 10px );
 transform : translateY ( 120px );
+
+</pre>
+
+<h3>构建骨架屏(Skeleton Screen)加快首屏加载、服务端渲染(ssr)和预渲染(prerender)</h3><pre>
+在页面加载时间为1~2秒时的转化率是最高的,而当加载时间继续增长,转化率开始呈现一个下降的趋势,大约页面加载时间每增加1s转化率下降6.7个百分点
+在200ms到1s之间,用户似乎还感知不到自己处在交互等待状态,当一秒钟后依然得不到任何反馈,用户将会把其关注的焦点移到其他地方,如果等待超过10s,用户将对网站失去兴趣,并浏览其他网站。
+
+那么需要做些什么来留住用户呢？
+通常方案会在首屏或获取数据时,在页面中展现一个进度条或转动的Spinner
+进度条：明确知道交互所需时间,或知道一个大概值的时候我们选择使用进度条
+Spinner：无法预测获取数据、或者打开页面的时长。
+有了进度条或Spinner,至少告诉了用户两点内容：
+进行的操作需要等待一段时间。
+其次,安抚用户,让其耐心等待。
+除此之外,进度条和Spinner并不能带来其他任何作用,既无法让用户感知到页面加载得更快,也无法给用户一个焦点,让用户将关注集中到这个焦点上,并且知道这个焦点即将呈现用户感兴趣的内容。
+骨架屏就是比进度条和Spinner更好的方案
+
+骨架屏是一个页面的空白版本,通过这个空白版本传递信息,页面正在渐进式的加载过程中
+用户大概会在200ms内获取到界面的具体关注点,在数据获取或页面加载完成之前,给用户首先展现骨架屏,骨架屏的样式、布局和真实数据渲染的页面保持一致,这样用户在骨架屏中获取到关注点,并能够预知页面什么地方将要展示文字什么地方展示图片,这样也就能够将关注焦点移到感兴趣的位置。当真实数据获取后,用真实数据渲染的页面替换骨架屏,如果整个过程在1s以内,用户几乎感知不到数据的加载过程和最终渲染的页面替换骨架屏,而在用户的感知上,出现骨架屏那一刻数据已经获取到了,而后只是数据渐进式的渲染出来,这样用户感知页面加载更快了。
+
+现在的前端框架React、Vue、Angular已经占据了主导地位,市面上大多数前端应用也都是基于这三个框架或库完成,这三个框架有一个共同的特点都是JS驱动,在JS代码解析完成之前,页面不会展示任何内容,也就是所谓的白屏。用户是极其不喜欢看到白屏的,什么都没有展示,用户很有可能怀疑网络或应用出了什么问题。拿Vue来说,在应用启动时Vue会对组件中的data和computed中状态值通过Object.defineProperty方法转化成set、get访问属性,以便对数据变化进行监听。而这一过程都是在启动应用时完成的,这也势必导致页面启动阶段比非JS驱动(比如jQuery应用)的页面要慢一些
+
+如何构建骨架屏
+饿了么移动web页面在2016年开始引入骨架屏,是完全通过HTML和CSS手写的,手写骨架屏当然可以完全复刻页面的真实样式,但也有弊端：
+手写骨架屏带来的问题就是,每次需求的变更不仅需要修改业务代码, 同时也要去修改骨架屏的样式和布局,这往往是比较机械重复的工作,手写骨架屏增加了维护成本
+
+服务端渲染(ssr)和预渲染(prerender)
+现在前端领域,不同框架下服务端渲染的技术已经相当成熟,开箱即用的方案也有,比如Vue的Nuxt.js,为什么不直接使用服务端渲染来加快内容展现？
+服务端渲染主要有两个目的,一是SEO,二是加快内容展现。在带来这两个好处的同时,也需要评估服务端渲染的成本,首先需要服务端的支持,因此涉及到了到了服务构建、部署等,同时web项目是一个流量较大的网站,也需要考虑服务器的负载及相应的缓存策略,特别是一些外卖行业,由于地理位置的不同,不同用户看到的页面也是不一样的,也就是所谓的千人千面,这也为缓存造成了一定困难。
+预渲染(prerender)就是在项目的构建过程中通过一些渲染机制,比如puppeteer或则jsdom将页面在构建的过程中就渲染好,然后插入到html中,这样在页面启动之前首先看到的就是预渲染的页面了。但是该方案最终也抛弃了,预渲染渲染的页面数据是在构建过程中就已经打包到了html中, 当真实访问页面的时候,真实数据可能已经和预渲染的数据有了很大的出入,而且预渲染的页面也是一个不可交互的页面,在页面没有启动之前,用户无法和预渲染的页面进行任何交互,预渲染页面中的数据反而会影响到用户获取真实的信息,当涉及到一些价格、金额、地理位置的地方甚至会导致用户做出一些错误的决定
+
+生成骨架屏基本方案
+通过puppeteer在服务端操控headless Chrome打开开发中的需要生成骨架屏的页面,在等待页面加载渲染完成之后,在保留页面布局样式的前提下,通过对页面中元素进行删减或增添,对已有元素通过层叠样式进行覆盖,这样达到在不改变页面布局下,隐藏图片和文字,通过样式覆盖,使得其展示为灰色块。然后将修改后的HTML和CSS样式提取出来,这样就是骨架屏了。
+
+通过page-skeleton-webpack-plugin (npm page-skeleton-webpack-plugin)工具中的代码展示骨架屏的具体生成过程。
+将页面分成了不同的块：
+文本块：仅包含文本节点(NodeType为Node.TEXT_NODE)的元素(NodeType为Node.ELEMENT_NODE),一个文本块可能是一个p元素也可能是div等,文本块将会被转化为灰色条纹。
+图片块：图片块是很好区分的,任何img元素都将被视为图片块,图片块的颜色将被处理成配置的颜色,形状也被修改为配置的矩形或圆型。
+按钮块：任何button元素、type为button的input元素,role为button的a元素都将被视为按钮块,按钮块中的文本块不在处理。
+svg 块：任何最外层是svg的元素都被视为svg块。
+伪类元素块：任何伪类元素都将视为伪类元素块,如::before或::after。
+...
+
+为什么要把页面划分为不同的块呢？
+将页面划分为不同的块,然后分别对每个块进行处理,这样不会破坏页面整体的样式和布局,当最终生成骨架屏后,骨架屏的布局样式将和真实页面的布局样式完全一致,这样就达到了复用样式及页面布局的目的。
+
+在所有分开处理之前需要完成一项工作,将生成骨架屏的脚本插入到puppeteer打开的页面中,这样才能够执行脚本,并最终生成骨架屏。
+值得庆幸的是,puppeteer在其生成的page实例中提供了一个原生的方法。
+page.addScriptTag(options)
+options< Object>
+url
+path
+content
+type(Use 'module' in order to load a Javascript ES6 module.)
+
+有了这种方法可以插入一段js脚本的url或是相对/绝对路径,也可以直接是js脚本的内容,在实践过程中直接插入的脚本内容。
+async makeSkeleton(page) {
+  const { defer } = this.options
+  await page.addScriptTag({ content: this.scriptContent })
+  await sleep(defer)
+  await page.evaluate((options) => {
+    Skeleton.genSkeleton(options)
+  }, this.options)
+}
+
+有了上面插入的脚本,并且在脚本中提供了一个全局对象Skeleton,这样就可以直接通过page.evaluate方法来执行脚本内容并最终生成骨架页面了。
+
+文本块的骨架结构生成
+文本块可以算是骨架屏生成中最复杂的一个区块了,任何只包含文本节点的元素都将视为文本块,在确定某个元素是文本块后,下一步就是通过一些CSS样式及元素的增减将其修改为骨架样式
+在生成文本块骨架屏之前首先需要了解一些基本的参数。
+单行文本内容的高度可以通过fontSize获取到。
+单行文本内容加空白间隙的高度可以通过lineHeight获取到。
+p元素总共有多少行文本,也就是所谓行数,这个可以通过p元素的(height - paddingTop - paddingBottom)/ lineHeight 大概算出。
+文本的textAlign属性。
+fontSize、lineHeight、paddingTop、paddingBottom都可以通过getComputedStyle获取到,而元素的高度height可以通过getBoundingClientRect获取到,有了这些参数后就能够绘制文本块的骨架屏了。
+
+文本块的骨架屏也是通过线性渐变来绘制的,核心简化代码：
+const textHeightRatio = parseFloat(fontSize, 10) / parseFloat(lineHeight, 10)
+const firstColorPoint = ((1 - textHeightRatio) / 2 * 100).toFixed(decimal)
+const secondColorPoint = (((1 - textHeightRatio) / 2 + textHeightRatio) * 100).toFixed(decimal)
+
+const rule = `{
+  background-image: linear-gradient(
+    transparent ${firstColorPoint}%, ${color} 0%,
+    ${color} ${secondColorPoint}%, transparent 0%);
+  background-size: 100% ${lineHeight};
+  position: ${position};
+  background-origin: content-box;
+  background-clip: content-box;
+  background-color: transparent;
+  color: transparent;
+  background-repeat: repeat-y;
+}`
+
+首先计算了lineHeight和fontSize等一些样式参数,通过这些参数计算出了文本占整个行高的比值也就是textHeightRadio,有了这一比值就可以知道灰色条纹的分界点
+也就是说,在线性渐变中,如果将线性渐变的起始点设置小于前一个颜色点的起始值或设置为0%,那么线性渐变将会消失,取而代之的将是两条颜色分明的条纹,也就是说不再有线性渐变。
+
+在绘制文本块的时候,backgroundSize宽度为100%,高度为lineHeight,也就是灰色条纹加透明条纹的高度是lineHeight。虽然把灰色条纹绘制出来了,但文字依然显示,在最终骨架样式效果出现之前还需要隐藏文字,设置color：‘transparent’这样文字就和背景色一致,最终显示得也就是灰色条纹了。
+
+根据lineCount可以判断文本块是单行文本还是多行,在处理单行文本的时候,由于文本的宽度并没有整行宽度,因此针对单行文本,还需要计算出文本的宽度,然后设置灰色条纹的宽度为文本宽度,这样骨架样式的效果才能够更加接近文本样式
+
+图片块的骨架生成
+图片块的绘制比文本块要相对简单很多
+最初订的方案是通过一个DIV元素来替换IMG元素,然后设置DIV元素背景为灰色,DIV的宽高等同于原来IMG元素的宽高,这种方案有一个严重的弊端就是,原来通过元素选择器设置到IMG元素上的样式无法运用到DIV元素上面,导致最终图片块的骨架效果和真实的图片在页面样式上有出入,特别是没法适配不同的移动端设备,因为DIV的宽高被硬编码。
+接下来又尝试了一种看似高级的方法,通过Canvas来绘制和原来图片大小相同的灰色块,然后将Canvas转化为dataUrl赋予给IMG元素的src特性上,这样IMG元素就显示成了一个灰色块了,看似完美,当将生成的骨架页面生成HTML文件时文件大小尽然有200多kb,做骨架页面渲染的一个重要原因就是希望用户在感知上感觉页面加载快了,如果骨架页面都有200多kb,必将导致页面加载比之前要慢一些,违背了初衷,因此该方案也只能够放弃。
+
+最终方案选择一张1*1像素的gif透明gif图片转化成dataUrl,将其赋予给IMG元素的src特性上,同时设置图片的width和height特性为之前图片的宽高,将背景色调至为骨架样式所配置的颜色值,完美解决了所有问题。
+'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+这是1*1像素的base64格式的图片,总共只有几十个字节,明显比之前通过Canvas绘制的图片小很多。
+
+function imgHandler(ele, { color, shape, shapeOpposite }) {
+  const { width, height } = ele.getBoundingClientRect()
+  const attrs = { width, height, src }
+  const finalShape = shapeOpposite.indexOf(ele) > -1 ? getOppositeShape(shape) : shape
+  setAttributes(ele, attrs)
+  const className = CLASS_NAME_PREFEX + 'image'
+  const shapeName = CLASS_NAME_PREFEX + finalShape
+  const rule = `{ background: ${color} !important; }`
+  addStyle(`.${className}`, rule)
+  shapeStyle(finalShape)
+  addClassName(ele, [className, shapeName])
+  if (ele.hasAttribute('alt')) ele.removeAttribute('alt')
+}
+
+svg块骨架结构
+svg块处理起来也比较简单,首先需要判断svg元素hidden属性是否为true,如果为true说明该元素不展示的,所以可以直接删除该元素。
+if (width === 0 || height === 0 || ele.getAttribute('hidden') === 'true') {
+  return removeElement(ele)
+}
+
+如果不是隐藏的元素,那么将会把svg元素内部所有元素删除,减少最终生成的骨架页面体积,其次设置svg元素的宽、高和形状等。
+const shapeClassName = CLASS_NAME_PREFEX + shape
+shapeStyle(shape)
+
+Object.assign(ele.style, {
+  width: px2relativeUtil(width, cssUnit, decimal),
+  height: px2relativeUtil(height, cssUnit, decimal),
+})
+
+addClassName(ele, [shapeClassName])
+
+if (color === TRANSPARENT) {
+  setOpacity(ele)
+} else {
+  const className = CLASS_NAME_PREFEX + 'svg'
+  const rule = `{ background: ${color} !important; }`
+  addStyle(`.${className}`, rule)
+  ele.classList.add(className)
+}
+
+一些优化的细节
+首先,由上面一些代码可以看出,在生成骨架页面的过程中,将所有的共用样式通过addStyle方法缓存起来,最后在生成骨架屏的时候,统一通过style标签插入到骨架屏中。这样保证了样式尽可能多的复用。
+其次,在处理列表的时候,为了生成骨架屏尽可能美观,对列表进行了同化处理,也就是说将list中所有的listItem都是同一个listItem的克隆。这样生成的list的骨架屏样式就更加统一了。
+骨架屏仅是一种加载状态,并非真实页面,因此其并不需要完整的页面,其实只需要首屏就好了,对非首屏的元素进行了删除,只保留了首屏内部元素,这样也大大缩减了生成骨架屏的体积。
+删除无用的CSS样式,只提取了对骨架屏有用的CSS,然后通过style标签引入
+
+const checker = (selector) => {
+  if (DEAD_OBVIOUS.has(selector)) {
+    return true
+  }
+  if (/:-(ms|moz)-/.test(selector)) {
+     return true
+  }
+  if (/:{1,2}(before|after)/.test(selector)) {
+    return true
+  }
+  try {
+    const keep = !!document.querySelector(selector)
+    return keep
+  } catch (err) {
+    const exception = err.toString()
+    console.log(`Unable to querySelector('${selector}') [${exception}]`, 'error')
+    return false
+  }
+}
+
+主要通过document.querySelector方法来判断该CSS是否被使用到,如果该CSS选择器能够选择上元素,说明该CSS样式是有用的,保留。如果没有选择上元素,说明该CSS样式没有用到,所以移除
+
+通过webpack将骨架屏打包到项目中
+
+为什么在开发过程中生成骨架屏？
+其主要原因还是为了骨架屏的可编辑。
+上一个部分通过一些样式和元素的修改生成了骨架屏页面,但并没有马上将其写入到配置的输出文件夹中,在写入骨架页面到项目之前。通过memory-fs将骨架屏写入到内存中,以便能够通过预览页面进行访问。同时也将骨架屏源码发送到了预览页面,这样就可以通过修改源码,对骨架屏进行二次编辑。
+这样就可以在开发过程中对骨架屏进行编辑,修改部分样式,中部骨架屏可以进行实时预览,这之间的通信都是通过websocket来完成的。当对生成的骨架屏满意后,并点击右上角写入骨架屏按钮,将骨架屏写入到项目中,在最后项目构建时,将骨架屏打包到项目中。
+如果同时在构建的过程中生成骨架屏,并打包到项目中,这时的骨架屏是无法预览的,因此对此时的骨架屏一无所知,也不能够做任何修改,这就是在开发中生成骨架屏的原因所在。
+
+目前流行的前端框架基本都是JS驱动,也就是说,在最初的index.html不用写太多的html内容,而是等框架启动完成后,通过运行时将内容填充到html中,通常会在html模板中添加一个根元素
+< div id="app">< /div>
+当应用启动后会将真实的内容填充到上面的元素中。这也就给了一个展示骨架屏的机会,将骨架屏在页面启动之前添加到上面元素内
+< div id="app">< !-- shell.html -->< /div>
+在项目构建的过程中,将骨架屏插入到上面代码注释的位置,这样在应用启动前,就是展示的骨架屏,当应用启动后通过真实数据渲染的页面替换骨架屏页面。
+
+怎样将骨架屏打包到项目中
+Webpack是一款优秀的前端打包工具,其也提供了一些丰富的API可以自己编写一些插件来让webpack完成更多的工作,比如在构建过程中,将骨架屏打包到项目中。
+Webpack在整个打包的过程中提供了众多生命周期事件,比如compilation、after-emit等,比如最终将骨架屏插入到html中就是在after-emit钩子函数中进行的,简单的代码：
+
+SkeletonPlugin.prototype.apply = function (compiler) {
+  // 其他代码
+  compiler.plugin('after-emit', async (compilation, done) => {
+    try {
+      await outputSkeletonScreen(this.originalHtml, this.options, this.server.log.info)
+    } catch (err) {
+      this.server.log.warn(err.toString())
+    }
+    done()
+  })
+  // 其他代码
+}
+
+再来看看outputSkeletonScreen是如何将骨架屏插入到原始的HTML中,并且写入到配置的输入文件夹的。
+const outputSkeletonScreen = async (originHtml, options, log) => {
+  const { pathname, staticDir, routes } = options
+  return Promise.all(routes.map(async (route) => {
+    const trimedRoute = route.replace(/\//g, '')
+    const filePath = path.join(pathname, trimedRoute ? `${trimedRoute}.html` : 'index.html')
+    const html = await promisify(fs.readFile)(filePath, 'utf-8')
+    const finalHtml = originHtml.replace('< !-- shell -->', html)
+    const outputDir = path.join(staticDir, route)
+    const outputFile = path.join(outputDir, 'index.html')
+    await fse.ensureDir(outputDir)
+    await promisify(fs.writeFile)(outputFile, finalHtml, 'utf-8')
+    log(`write ${outputFile} successfully in ${route}`)
+    return Promise.resolve()
+  }))
+}
+
+Page Skeleton webpack 插件在我们内部团队已经开始使用,在使用的过程中我们也得到了一些反馈信息。
+首先是对SPA多路由的支持,现在插件已经支持多路由了,只是还没有用到真实项目中,针对每一个路由页面生成一个单独的index.html即静态路由。然后将每个路由生成的骨架屏插入到不同的静态路由的html中。
+其次在React和Vue服务端渲染中有一种称为Client-side Hydration的技术,指的是在Vue在浏览器接管由服务端发送来的静态HTML,使其变为由Vue管理的动态DOM的过程。
+在构建骨架屏的过程中,其DOM结构和真实页面的DOM结构基本相同,只是添加了一些行内样式和classname,也在思考这些DOM能够被复用,也就是在应用启动时重新创建所有DOM。只用激活这些骨架屏DOM,让其能够相应数据的变化,这似乎就可以使骨架屏和真实页面更好的融合。
+在页面启动后,可能还是会通过AJAX获取后端数据,这时候也可以通过骨架屏来作为一种加载状态,也就是说其实可以在「非首屏骨架屏」上做一些工作。
+在项目中可能会有一些性能监控的需求,比如骨架屏什么时候创建,什么时候被销毁,这些可能都希望通过一些性能监控的工具记录下来,以便将来做一些性能上面的分析。因此将来也会提供一些骨架屏的生命周期函数,或者提供相应的自定义事件,在生命周期不同阶段调用相应的生命周期钩子函数或监听相应事件,这样就可以将骨架屏的一些数据记录到性能监控软件中。
 
 </pre>
 </div>

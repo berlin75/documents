@@ -24612,6 +24612,9 @@ cmd> mysqldump -u 用户名 -p 数据库名 > 导出的文件名       // 导出
 cmd> mysqldump -u 用户名 -p 数据库名 表名> 导出的文件名   // 导出数据表
 cmd> mysqldump -P 3306 -h 192.168.1.25 -uroot -p -q -e base_push > C:\Users\think\Desktop\base_push20170921.sql
 
+mysql8.0需要添加新参数--column-statistics=0
+cmd> mysqldump --column-statistics=0 --host=< server > --port=< port > --user < user > --password > dump_file_path
+
 cmd> mysqldump -uroot -p blog>e:blog.sql               // 导出数据库blog到d盘blog.sql;左括号是导入外部SQL文件
 cmd> mysql -uroot -p < e:\\blog.sql
 

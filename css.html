@@ -1996,6 +1996,12 @@ body{font:100%/normal  arial;} , body{font:100%/120%  arial;} ,body{font:100%/1.
 body {line-height: 1;}
 这样文本元素就可以很容易地从body继承
 
+￥195字体大小不同的两个行内元素底部对齐
+&__price { flex-direction: row; align-items: flex-end; line-height: 1;
+  &__unit { color: #DE211B; font-size: 26px; }
+  &__num { color: #DE211B; font-size: 36px; }
+}
+
 计算后的line-height: 16px*120%=19.2px,计算出来的值会被层叠下去的元素所继承,line-height不随相关font-size相应的比例缩放
 body{font-size: 16px;line-height: 120%} 
 h1{font-size: 32px} 继承的计算后的值19.2px

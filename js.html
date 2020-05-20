@@ -20,8 +20,8 @@
       <li><a href="#yunsuanfu">运算符</a></li>
       <li><a href="#liucheng">流程控制</a></li>
       <li><a href="#hook">hook</a></li>
-			<li><a href="#var">变量</a></li>
-			<li><a href="#cycle">垃圾回收</a></li>
+      <li><a href="#var">变量</a></li>
+      <li><a href="#cycle">垃圾回收</a></li>
     </ul>
   </li>
   <li><a href="#str">String</a></li>
@@ -111,9 +111,9 @@
       <li><a href="#xiangyun">享元模式</a></li>
       <li><a href="#facade">外观模式</a></li>
       <li><a href="#builder">建造者模式</a></li>
-			<li><a href="#iter">迭代器模式</a></li>
-			<li><a href="#zhize">职责链模式</a></li>
-			<li><a href="#shipei">适配器模式</a></li>
+      <li><a href="#iter">迭代器模式</a></li>
+      <li><a href="#zhize">职责链模式</a></li>
+      <li><a href="#shipei">适配器模式</a></li>
     </ul>
   </li>
   <li>
@@ -1365,6 +1365,25 @@ const num = RoundNum(1.69, 1);   // 1.7
 5=="5"是true,先转换为同类型再比较,5==="5"是false
 加号字符串连接和元算符
 
+【 按强类型风格写代码 】
+JS是弱类型的,但写代码的时候不能太随意,写得太随意也体现了编码风格不好
+定义变量的时候要指明类型,告诉 JS 解释器这个变量是什么数据类型的,而不要让解释器去猜,例如不好的写法：
+var num,
+    str,
+    obj;
+声明了三个变量,但其实没什么用,因为解释器不知道它们是什么类型的,好的写法应该是这样的：
+var num = 0,
+    str = '',
+    obj = null;
+定义变量的时候就给他一个默认值,这样不仅方便了解释器,也方便了阅读代码的人,他会在心里有数——知道这些变量可能会当作什么用。
+
+【 不要随意地改变变量的类型 】
+var num = 5;      // 整型
+num = "-" + num;  // 字符串
+因为JS最终都会被解释成汇编的语言,汇编语言变量的类型肯定是要确定的,把一个整型的改成了字符串,那解释器就得做一些额外的处理。并且这种编码风格是不提倡的,有一个变量第1行是一个整型,第10行变成了一个字符串,第20行又变成了一个object,这样就让阅读代码的人比较困惑,上面明明是一个整数,怎么突然又变成一个字符串了。好的写法应该是再定义一个字符串的变量：
+var num = 5;
+var sign = "-" + num;
+
 【 去掉小数部分 】
 parseInt(num)
 ~~num
@@ -1512,6 +1531,14 @@ var canvas = document.querySelector('canvas');
 var ctx = canvas.getContext('2d');
 var width = canvas.width = window.innerWidth;
 var height = canvas.height = window.innerHeight;
+
+// 利用赋值表达式会返回一个值,在if里面赋值的同时用它的返回值做判断,然后else里面就已经有值了,+号把字符串转成了整数
+var age = 0;
+if((age = +form.age.value) >= 18){
+  console.log("你是成年人");
+} else {
+  consoe.log("小朋友,你还有" + (18 - age) + "就成年了");
+}
 
 </textarea><pre>
 比较运算符:<   >   <=   >=    ==   ===  !=    例:1==="1"返回false
@@ -1717,7 +1744,7 @@ function sleep(milliSeconds){
 }
 
 </textarea><pre>
-异常捕获机制
+【 异常捕获机制 】
 try语句如果throw抛出异常,则由catch语句捕获,否则catch语句被忽略;不管有无异常都会执行finally语句
 try后面必须跟catch或finally语句
 
@@ -1813,6 +1840,7 @@ window.onerror = function(m, f, l){ return true }
 </textarea><pre>
 【 三元表达式 】
 三元运算符:条件?真代码:假代码;
+如果写了if-else,压缩工具也会把它改三目运算符的形式
 
 </pre><textarea>
 if(){}
@@ -1822,9 +1850,19 @@ if(){}eles if(){}else{}
 </textarea><textarea>
 var scope=(speed>0 && speed<=50)
   ?0:(speed>50 && speed<=100)
-  ?1:(speed>=100 && speed<200)
-  ?2:(speed>=200 && speed<300)
+  ?1:(speed >= 100 && speed < 200)
+  ?2:(speed >= 200 && speed < 300)
   ?3:4;
+
+</textarea><textarea>
+function getPrice(count){
+  if(count < 0) return -1;
+  else return count * 100;
+}
+可以改成：
+function getPrice(count){
+  return count < 0 ? return -1 : count * 100;
+}
 
 </textarea><pre>
 跳出循环break;整个循环
@@ -1928,7 +1966,7 @@ for(var i = 0; i < 3; i++) {
 var newArray = array.map(el => el());
 console.log(newArray); // [3, 3, 3]
 
-1、在for循环的头部声明带有var关键字的变量会为该变量创建单个绑定（存储空间）
+1、在for循环的头部声明带有var关键字的变量会为该变量创建单个绑定(存储空间)
 
 // 误解作用域:认为存在块级作用域
 var array = [];
@@ -1938,11 +1976,11 @@ for (var i = 0; i < 3; i++) {  // 三个箭头函数体中的每个`'i'`都指�
 var newArray = array.map(el => el());
 console.log(newArray); // [3, 3, 3]
 
-如果2、用 let 声明一个具有块级作用域的变量，则为每个循环迭代创建一个新的绑定。
+如果2、用 let 声明一个具有块级作用域的变量,则为每个循环迭代创建一个新的绑定。
 
 // 使用ES6块级作用域
 var array = [];
-for (let i = 0; i < 3; i++) {  // 这一次，每个'i'指的是一个新的的绑定，并保留当前的值。因此，每个箭头函数返回一个不同的值。
+for (let i = 0; i < 3; i++) {  // 这一次,每个'i'指的是一个新的的绑定,并保留当前的值。因此,每个箭头函数返回一个不同的值。
  array.push(() => i);
 }
 var newArray = array.map(el => el());
@@ -2741,6 +2779,50 @@ var b=100;
 var a=10,b=100;
 
 </textarea><pre>
+【 减少作用域查找 】
+不要让代码暴露在全局作用域下
+var map = document.querySelector("#my-map");
+map.style.height = "600px";
+有时候需要在页面直接写一个script,要注意在一个script标签里面,代码的上下文都是全局作用域的,由于全局作用域比较复杂,查找比较慢。例如上面的map变量,第二行在使用的时候,需要在全局作用域查找一下这个变量,假设map是在一个循环里面使用,那可能就会有效率问题了。所以应该要把它搞成一个局部的作用域：
+!function(){
+  var map = document.querySelector("#my-map");
+  map.style.height = "600px";
+}()
+上面用了一个function制造一个局部作用域,也可以用ES6的块级作用域。由于map这个变量直接在当前的局部作用域命中了,所以就不用再往上一级的作用域(这里是全局作用域)查找了,而局部作用域的查找是很快的。同时直接在全局作用域定义变量会污染window对象
+
+不要滥用闭包
+闭包的作用在于可以让子级作用域使用它父级作用域的变量,同时这些变量在不同的闭包是不可见的。这样就导致了在查找某个变量的时候,如果当前作用域找不到就得往它的父级作用域查找,一级一级地往上直到找到了,或者到了全局作用域还没找到。因此如果闭包嵌套得越深,那么变量查找的时间就越长。如下：
+function getResult(count){
+  count++;
+  function process(){
+    var factor = 2;
+    return count * factor - 5;
+  }
+  return process();
+}
+
+上面的代码定义了一个process函数,在这个函数里面count变量的查找时间要高于局部的factor变量。其实这里不太适合用闭包,可以直接把count传给process：
+function getResult(count){
+  count++;
+  function process(count){
+    var factor = 2;
+    return count * factor - 5;
+  }
+  return process(count);
+}
+这样count的查找时间就和factor一样,都是在当前作用域直接命中。这个就启示如果某个全局变量需要频繁地被使用的时候,可以用一个局部变量缓存一下,如下：
+var url = "";
+if(window.location.protocal === "https:"){
+  url = "wss://xxx.com" + window.location.pathname + window.location.search;
+}
+频繁地使用了window.location对象,所以可以先把它缓存一下：
+var url = "";
+var location = window.location;
+if(location.protocal === "https:"){
+  url = "wss://xxx.com" + location.pathname + location.search;
+}
+搞成了一个局变变量,这样查找就会明显快于全局的查找,代码也可以写少一点
+
 【 变量提升hoisting 】
 变量有4种基本方式进入作用域：
 语言内置： 所有的作用域里都有this和arguments,arguments在全局作用域是不可见的
@@ -2796,8 +2878,8 @@ console.log(a);
   console.log(a);
 }())
 
-// 使用var关键字声明的变量在JS中会被提升，并在内存中分配值undefined,但初始化恰发生在给变量赋值的地方
-// var声明的变量是函数作用域的，而let和const是块作用域的
+// 使用var关键字声明的变量在JS中会被提升,并在内存中分配值undefined,但初始化恰发生在给变量赋值的地方
+// var声明的变量是函数作用域的,而let和const是块作用域的
 var a = 10;
 function foo() {
  console.log(a);
@@ -2812,12 +2894,12 @@ function foo() {
 }
 foo();  // ReferenceError：a undefined
 
-// let和const声明可以让变量在其作用域上受限于它所使用的块、语句或表达式。与var不同的是，这些变量没有被提升，并且有一个所谓的暂时死区(TDZ)。试图访问TDZ中的这些变量将引发ReferenceError，因为只有在执行到达声明时才能访问它们
+// let和const声明可以让变量在其作用域上受限于它所使用的块、语句或表达式。与var不同的是,这些变量没有被提升,并且有一个所谓的暂时死区(TDZ)。试图访问TDZ中的这些变量将引发ReferenceError,因为只有在执行到达声明时才能访问它们
 var a = 10; // 全局使用域 
 function foo() { // TDZ 开始 
  // 创建了未初始化的'a' 
  console.log(a); // ReferenceError 
- // TDZ结束，'a'仅在此处初始化，值为20 
+ // TDZ结束,'a'仅在此处初始化,值为20 
  let a = 20; 
 }
 
@@ -3002,13 +3084,13 @@ oa = null;     // a属性的那个对象现在也是零引用了,它可以被垃
 全局的、被引用的对象就会被保存在内存中,比如常见的闭包：l1被闭包环境引用,无法被回收
 
 function leak(arg) {
-	this.arg = arg;
+  this.arg = arg;
 }
 function test() {
-	var l1= new leak('It is a leak');
-	document.body.addEventListener('click', function() {
-		l1.arg = 'Here you are!'
-	})
+  var l1= new leak('It is a leak');
+  document.body.addEventListener('click', function() {
+    l1.arg = 'Here you are!'
+  })
 }
 test()
 
@@ -3220,7 +3302,7 @@ tag函数所有参数的实际值如下
 第三个参数:50
 
 </textarea>"标签模板"的一个重要应用就是过滤HTML字符串,防止用户输入恶意内容<textarea>
-let message = SaferHTML`<p>${sender} has sent you a message.</p>`;
+let message = SaferHTML`< p>${sender} has sent you a message.< /p>`;
 
 function SaferHTML(templateData) {
   let s = templateData[0];
@@ -3229,7 +3311,7 @@ function SaferHTML(templateData) {
 
     // Escape special characters in the substitution.
     s += arg.replace(/&/g,"&amp;")
-            .replace(/</g,"&lt;")
+            .replace(/< /g,"&lt;")
             .replace(/>/g,"&gt;");
 
     // Don't escape special characters in the template.
@@ -3241,9 +3323,9 @@ function SaferHTML(templateData) {
 // sender变量往往是用户提供的,经过SaferHTML函数处理,里面的特殊字符都会被转义。
 
 let sender = '< script >console.log("abc")< / script> '; // 恶意代码
-let message = SaferHTML`<p>${sender} has sent you a message.</p>`;
+let message = SaferHTML`< p>${sender} has sent you a message.< /p>`;
 
-message    // <p>& lt ;script& gt ;console.log("abc")& lt ;/script& gt ; has sent you a message.</p>
+message    // < p>& lt ;script& gt ;console.log("abc")& lt ;/script& gt ; has sent you a message.< /p>
 
 </textarea>标签模板的另一个应用就是多语言转换(国际化处理)<textarea>
 i18n`Welcome to ${siteName},you are visitor number ${visitorNumber}!`
@@ -4126,7 +4208,7 @@ console.log(res, arr);                 // ["c"], ["a","b","x","y","d","e"]
 
 </textarea><pre>
 arr.reverse()
-颠倒数组中元素的位置，改变了数组，并返回该数组的引用
+颠倒数组中元素的位置,改变了数组,并返回该数组的引用
 arr = [{a:1},{a:2},{a:3}]
 console.log(arr.reverse())  // [{a:3},{a:2},{a:1}]
 console.log(arr)  // [{a:3},{a:2},{a:1}]
@@ -4889,22 +4971,23 @@ console.log(unique(array)); // [{value: 1}, {value: 2}]
 
 </textarea><textarea>
 // 一维数组并集
-export const arrAndSet = (arrOne, arrTwo) => arrOne.concat(arrTwo.filter(v => !arrOne.includes(v)))
+export const arrAndSet = (arr1, arr2) => arr1.concat(arr2.filter(v => !arr1.includes(v)))
 // 一维数组交集
-export const arrIntersection = (arrOne, arrTwo) => arrOne.filter(v => arrTwo.includes(v))
+export const arrIntersection = (arr1, arr2) => arr1.filter(v => arr2.includes(v))
 // 一维数组差集
-export const arrDifference = (arrOne, arrTwo) => arrOne.concat(arrTwo).filter(v => !arrOne.includes(v) || !arrTwo.includes(v))
+export const diffrence = (arr1, arr2) => arr1.filter(v => !arr2.includes(v))  // 要求arr2是arr1的子集
+export const arrDifference = (arr1, arr2) => arr1.concat(arr2).filter(v => !arr1.includes(v) || !arr2.includes(v))
 // 一维数组合并
-export const arrConcat = (arrOne, arrTwo) => [...arrOne, ...arrTwo]
+export const arrConcat = (arr1, arr2) => [...arr1, ...arr2]
 
 // 两个一维数组合并成一个对象数组
-export const arrTwoToArrObj = (arrOne, arrTwo, oneKey, twoKey) => {
+export const arr2ToArrObj = (arr1, arr2, oneKey, twoKey) => {
   if(!oneKey && !twoKey){
-    return arrOne.map((oneKey, i) => ({ [oneKey]:arrTwo[i] }))
-    // 或者,此方法针对将arrTwo的索引作为key的情况,arrTwo值会覆盖arrOne
-    // return Object.assign({}, arrOne, arrTwo)
+    return arr1.map((oneKey, i) => ({ [oneKey]:arr2[i] }))
+    // 或者,此方法针对将arr2的索引作为key的情况,arr2值会覆盖arr1
+    // return Object.assign({}, arr1, arr2)
   }else{
-    return arrOne.map((oneKey, i) => ({ oneKey, twoKey: arrTwo[i] }))
+    return arr1.map((oneKey, i) => ({ oneKey, twoKey: arr2[i] }))
   }
 }
 
@@ -5006,6 +5089,14 @@ function isNumber(n){
 
 // 获取指定范围内的随机数
 var x = Math.floor(Math.random() *(max - min + 1)) + min;
+
+function randomNum(min, max) {
+  switch (arguments.length) {
+    case 1: return parseInt(Math.random() * min + 1, 10); break;
+    case 2: return parseInt(Math.random() * (max - min + 1) + min, 10); break;
+    default: return 0;
+  }
+}
 
 // 生成从0到指定值的数字数组
 var numbersArray = [] ,max = 100;
@@ -5163,6 +5254,12 @@ myDate.setDate(myDate.getDate() + 5);    // 操作日期:设置5天后的日期,
 myDate.setFullYear(2008,7,9)             // 操作日期:设置了一个特定的日期(2008年8月9日),返回1218247299401
 
 </pre><textarea>
+// 时间戳转换为时间
+function timestampToTime(timestamp = Date.parse(new Date()), isMs = true) {  // isMs为时间戳是否为毫秒
+  const date = new Date(timestamp * (isMs ? 1 : 1000));
+  return `${date.getFullYear()}-${date.getMonth()+1 < 10 ? "0"+(date.getMonth()+1) : date.getMonth()+1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+}
+
 /**
  * 日期对象转换为指定格式的字符串
  * @param {string} formatStr 日期格式,格式定义如下 yyyy-MM-dd HH:mm:ss
@@ -5594,7 +5691,19 @@ var fn = function(){
   console.log('fn-test');
 }
 
-</textarea>
+</textarea><pre>
+减少魔数
+例如,在某个文件的第 800 行,冒出来了一句：
+dialogHandler.showQuestionNaire("seller", "sell", 5, true);
+就会让人很困惑了,上面的四个常量分别代表什么呢,如果不去查一个那个函数的变量说明就不能够很快地意会到这些常量分别有什么用。这些意义不明的常量就叫“魔数”。所以最好还是给这些常量取一个名字,特别是在一些比较关键的地方。例如上面的代码可改成：
+var naireType = "seller",
+    dialogType = "sell",
+    questionsCount = 5,
+    reloadWindow = true;
+naireHandler.showNaire(naireType, dialogType, questionsCount, reloadWindow);
+这样意义就很明显了
+
+</pre>
 </div>
 
 <div id="fdingyi">
@@ -5735,7 +5844,22 @@ var test = new fn();
 console.log(test);              //{a:1}
 console.log(test.constructor);  //Object() { [native code] }
 
-</textarea>
+</textarea><pre>
+函数的返回类型应该是要确定的,例如下面不确定的写法：
+function getPrice(count){
+  if(count < 0) return "";
+  else return count * 100;
+}
+
+getPrice函数有可能返回一个整数,也有可能返回一个空的字符串。这样写也不太好,虽然它是符合JS语法的,但这种编码风格是不好的。使用这个函数的人会有点无所适从,不敢直接进行加减乘除,因为如果返回字符串进行运算的话值就是NaN 了。函数的返回类型应该是要确定的,如下面是返回整型：
+function getPrice(count){
+  if(count < 0) return -1;
+  else return count * 100;
+}
+
+然后告诉使用者,如果返回-1就表示不合法。如果类型确定,解释器也不用去做一些额外的工作,可以加快运行速度。
+
+</pre>
 </div>
 
 <div id="fuse">
@@ -7124,7 +7248,6 @@ VO按照如下顺序填充:
 3.变量声明(初始化变量值为undefined,若发生命名冲突会忽略)
 
 2、代码执行阶
-
 变量的作用域有两种:全局变量和局部变量
 Js函数内部可以直接读取全局变量,在函数外部自然无法读取函数内的局部变量
 函数内部声明变量的时候一定要使用var命令,如果不用的话实际上声明了一个全局变量
@@ -7155,7 +7278,7 @@ console.log(a);     // 0
 
 </textarea><pre>
 如何从外部读取局部变量？
-正常情况下函数内部的子函数才能读取局部变量,在函数外部自然无法读取函数内的局部变量,只有通过变通方法才能实现,那就是在函数的内部,再定义一个函数,形成闭包,在本质上闭包就是将函数内部和函数外部连接起来的一座桥梁
+正常情况下函数内部的子函数才能读取局部变量,在函数外部自然无法读取函数内的局部变量,只有通过变通方法才能实现,那就是在函数的内部再定义一个函数,形成闭包,在本质上闭包就是将函数内部和函数外部连接起来的一座桥梁
 
 函数f2嵌套在函数f1内部;函数f1返回函数f2
 这样在执行完var result = f1();后,变量result实际上是指向了函数f2,再执行result()后就会显示i的值,这段代码其实就创建了一个闭包,因为函数f1外的变量result引用了函数f1内的函数f2,就是说当函数f1的内部函数f2被函数f1外的一个变量引用的时候就创建了一个闭包
@@ -7286,7 +7409,7 @@ func();    // 33
 当前作用域总能够访问外部作用域中的变量,函数是Js中唯一拥有自身作用域的结构,因此闭包的创建依赖于函数
 函数内部的函数访问其所在函数的变量(局部变量、形参),这些变量会受到内部函数的影响,内部函数在外部函数外被调用时就会形成闭包
 
-【 必报访问私有变量 】
+【 闭包访问私有变量 】
 闭包是一个重要的JS模式,可以私有访问变量
 
 </pre><textarea>
@@ -7299,7 +7422,7 @@ function createGreater(greeting){
 const sayHello = createGreater('Hello')
 sayHello('joe')  // Hello,Joe
 
-// 在更真实的场景中可以设想一个初始函数apiConnect(apiKey),它返回一些使用API key的方法。在这种情况下,apiKey 只需要提供一次即可
+// 在更真实的场景中可以设想一个初始函数apiConnect(apiKey),它返回一些使用API key的方法。在这种情况下apiKey只需要提供一次即可
 function apiConnect(apiKey) {
   function get(route) {
     return fetch(`${route}?key=${apiKey}`)
@@ -8136,7 +8259,26 @@ Undo 目前尚未支持。
 Unlink 从当前选中区中删除全部超级链接。
 Unselect 清除当前选中区的选中状态。
 
-</pre>
+</pre>复制文本<textarea>
+function copy(str) {
+  const el = document.createElement("textarea");
+  el.value = str;
+  el.setAttribute("readonly", "");
+  el.style.position = "absolute";
+  el.style.left = "-9999px";
+  el.style.top = "-9999px";
+  document.body.appendChild(el);
+  const selected = document.getSelection().rangeCount > 0 ? document.getSelection().getRangeAt(0) : false;
+  el.select();
+  document.execCommand("copy");
+  document.body.removeChild(el);
+  if (selected) {
+    document.getSelection().removeAllRanges();
+    document.getSelection().addRange(selected);
+  }
+}
+
+</textarea>
 </div>
 
 <!--------------------element对象-------------------------------------------------------------->
@@ -8206,7 +8348,7 @@ length属性返回类列表中类的数量,该属性是只读的
 add(class1, class2, ...)方法在元素中添加一个或多个类名,如果指定的类名已存在则不会添加
 contains(class)方法返回布尔值,判断指定的类名是否存在。
 item(index)方法返回元素中索引值对应的类名,索引值从0开始,如果索引值在区间范围外则返回null
-remove(class1, class2, ...)方法移除元素中一个或多个类名,移除不存在的类名不会报错。
+remove(class1, class2, ...)方法移除元素中一个或多个类名,移除不存在的类名不会报错。cardImage.classList.remove('skeletons')
 toggle(class, true|false)	在元素中切换类名。
 第一个参数为要在元素中移除的类名并返回false,如果该类名不存在则会在元素中添加类名并返回true。
 第二个是可选参数,是个布尔值用于设置元素是否强制添加或移除类,不管该类名是否存在,IE或Opera12及其更早版本不支持第二个参数
@@ -8421,6 +8563,11 @@ win.getComputedStyle(el, null).color;      // null的意思是不返回伪类元
 使用该方法可能需要用到计算当前样式值的方法,这里也具有兼容性问题,currentStyle只有IE支持,取得当前应用的样getComputedStyle支持FF、Opera、Safari、Chrome等浏览器,取得最终应用的样式。
 
 </pre><textarea>
+// 获取元素css样式
+function getStyle(el, ruleName) {
+  return getComputedStyle(el, null).getPropertyValue(ruleName);
+}
+
 var obj = document.getElementById("div");
 objh=document.defaultView.getComputedStyle(obj,null).height;
 // 或者
@@ -8430,7 +8577,7 @@ objh=window.getComputedStyle(obj,null)[height];
 objh=obj.currentStyle[height];
 
 // 解决兼容性的方法
-function getStyle(element,property) {
+function getStyle(element, property) {
   var value = element.style[camelize(property)];
   if(!value) {
     if(document.defaultView && document.defaultView.getComputedStyle) {
@@ -8979,7 +9126,7 @@ this和event.target都是dom对象
 如果要使用jquey中的方法可以将他们转换为jquery对象,比如this和(this)的使用、event.target和(event.target)的使用
 
 </pre><textarea>
-<!-- JS 控制文本框只能输入中文、英文、数字、空格 -->
+< !-- JS 控制文本框只能输入中文、英文、数字、空格 -->
 <input onkeyup="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5\ ]/g,'')" onpaste="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5\ ]/g,'')" oncontextmenu="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5\ ]/g,'')">
 
 <form action="/deleteblog" method="post" onsubmit="return confirm('确定要删除吗？')" > </form>
@@ -9731,7 +9878,7 @@ bind(parent,"click",handleClick);
 函数防抖和函数节流是都优化高频率执行js代码的一种手段
 有些浏览器事件可以在短时间内快速触发多次,比如调整窗口大小或向下滚动页面,例如监听页面窗口滚动事件,并且用户持续快速地向下滚动页面,那么滚动事件可能在1秒内触发数千次,这可能会导致一些严重的性能问题。
 
-构建应用程序时出现滚动、窗口大小调整或按下键等事件务必考虑使用防抖(Debouncing) 和 函数节流(Throttling)来提升页面速度和性能或降低网络开销,本质都是以闭包的形式存在,通过对事件对应的回调函数进行包裹、以自由变量的形式缓存时间信息,最后用setTimeout来控制事件的触发频率。
+构建应用程序时出现滚动、窗口大小调整或按下键等事件务必考虑使用防抖(Debouncing)和函数节流(Throttling)来提升页面速度和性能或降低网络开销,本质都是以闭包的形式存在,通过对事件对应的回调函数进行包裹、以自由变量的形式缓存时间信息,最后用setTimeout来控制事件的触发频率。
 
 在throttle的逻辑里第一个人说了算,它只为第一个乘客计时,时间到了就执行回调。而debounce认为最后一个人说了算,debounce会为每一个新乘客设定新的定时器
 
@@ -9857,7 +10004,32 @@ throttle的主要思想在于：在某段时间内,不管触发了多少次回�
 
 对应到实际的交互上：每当用户触发了一次scroll事件就为这个触发操作开启计时器,一段时间内后续所有的scroll事件都无法触发新的scroll回调。直到时间到了,第一次触发的scroll事件对应的回调才会执行,而一段时间内触发的后续的scroll回调都会被节流阀无视掉。
 
+函数节流是让一个函数不要执行的太频繁,减少一些过快的调用来节流。
+基本步骤：
+获取第一次触发事件的时间戳
+获取第二次触发事件的时间戳
+时间差如果大于某个阈值就执行事件,然后重置第一个时间
+
 </pre><textarea>
+function throttle(fn, mustRun = 500) {
+  const timer = null;
+  let previous = null;
+  return function() {
+    const now = new Date();
+    const context = this;
+    const args = arguments;
+    if (!previous){
+      previous = now;
+    }
+    const remaining = now - previous;
+    if (mustRun && remaining >= mustRun) {
+      fn.apply(context, args);
+      previous = now;
+    }
+  }
+ }
+
+</textarea><textarea>
 // fn时需要包装的事件回调,clearInterval是时间间隔的阈值
 function throttle(fn, interval){
   let last = 0  // last为上一次触发回调的时间
@@ -10929,6 +11101,39 @@ document.querySelector('button').onclick = function(){
   }
 }
 
+// 进入全屏
+function launchFullscreen(element = document.documentElement) {
+  if (element.requestFullscreen) {
+    element.requestFullscreen();
+  } else if (element.mozRequestFullScreen) {
+    element.mozRequestFullScreen();
+  } else if (element.msRequestFullscreen) {
+    element.msRequestFullscreen();
+  } else if (element.webkitRequestFullscreen) {
+    element.webkitRequestFullScreen();
+  }
+}
+launchFullscreen();
+launchFullscreen(document.getElementById("id")); //某个元素进入全屏
+
+// 退出全屏
+function exitFullscreen() {
+  if (document.exitFullscreen) {
+    document.exitFullscreen();
+  } else if (document.msExitFullscreen) {
+    document.msExitFullscreen();
+  } else if (document.mozCancelFullScreen) {
+    document.mozCancelFullScreen();
+  } else if (document.webkitExitFullscreen) {
+    document.webkitExitFullscreen();
+  }
+}
+
+exitFullscreen();
+
+// 全屏事件
+document.addEventListener("fullscreenchange", e => console.log(document.fullscreenElement ? "进入全屏" : "退出全屏"));
+
 </textarea>onorientationchange屏幕旋转事件<textarea>
 function screenOrientation(){
   let orientation = screen.orientation || screen.mozOrientation || screen.msOrientation;
@@ -11858,6 +12063,16 @@ y       设置或获取鼠标指针位置相对于父文档的y像素坐标(亦�
 
 定位鼠标相对于页面的绝对位置使用event.clientX+document.body.scrollLeft,event.clientY+document.body.scrollTop,
 
+【 object.getClientRects() 】
+获取元素占据页面的所有矩形区域
+返回一个TextRectangle集合即TextRectangleList对象,包含top/left/bottom/right/width/height六个属性
+常用于获取鼠标的位置,如放大镜效果、微博的用户信息卡
+
+对于文本对象,W3C提供了一个TextRectangle对象,这个对象是对文本区域的一个解释
+这里的文本区域只针对inline 元素,比如：a,span,em这类标签元素。
+目前主流浏览器都支持该标准,而IE只支持TextRectangle的top left bottom right四个属性。IE下可以通过right-left来计算width、bottom-top来计算height。
+ie 和非ie浏览器在使用getClientRects还是有些差别的,ie获取TextRectangleList的范围很大。而非ie获取的范围比较小,只有display:inline的对象才能获取到TextRectangleList,例如em i span 等标签
+
 【 obj.getBoundingClientRect() 】
 用于获取某个元素相对于视窗的位置集合,集合中有top、left、bottom、right、width、height六个属性
 返回值类型:TextRectangle对象,每个矩形具有四个整数性质( 上,右 ,下,左 )表示的坐标的矩形,以像素为单位,现在已经是一个W3C标准
@@ -11874,24 +12089,21 @@ var ro = obj.getBoundingClientRect();
 var objwidth = ro.width || ro.right-rol.left;
 var objheight = ro.height || ro.bottom-ro.top;
 
-【 object.getClientRects() 】
-获取元素占据页面的所有矩形区域
-返回一个TextRectangle集合即TextRectangleList对象,包含top/left/bottom/right/width/height六个属性
-常用于获取鼠标的位置,如放大镜效果、微博的用户信息卡
-
-对于文本对象,W3C提供了一个TextRectangle对象,这个对象是对文本区域的一个解释
-这里的文本区域只针对inline 元素,比如：a,span,em这类标签元素。
-目前主流浏览器都支持该标准,而IE只支持TextRectangle的top left bottom right四个属性。IE下可以通过right-left来计算width、bottom-top来计算height。
-ie 和非ie浏览器在使用getClientRects还是有些差别的,ie获取TextRectangleList的范围很大。而非ie获取的范围比较小,只有display:inline的对象才能获取到TextRectangleList,例如em i span 等标签
-
 【 判断元素是否在可视区域内 】
+网页开发时常需要了解某个元素是否进入了"视口"(viewport),即用户能不能看到它
+
 方法1:
 1.向上滚动超出可视区域:整个文档滚动距离大于元素距离文档顶部加与元素高度,window.scrollTop>obj.offsetTop+obj.height
 2.在可视区域内部
-3.向下滚动超出可视区域:整个文档滚动距离小于元素和文档顶部的距离减浏览器可见区域的高度,
-  window.scrollTop < obj.offsetTop-window.height
+3.向下滚动超出可视区域:整个文档滚动距离小于元素和文档顶部的距离减浏览器可见区域的高度,window.scrollTop < obj.offsetTop-window.height
 
-方法2:应该再加上元素本身的高度,尤其是元素高度大于浏览器视口高度时,当元素顶部在视口上方时t为负值
+1、通过document.documentElement.clientHeight获取屏幕可视窗口高度
+2、通过document.documentElement.scrollTop获取浏览器窗口顶部与文档顶部之间的距离,也就是滚动条滚动的距离
+3、通过element.offsetTop获取元素相对于文档顶部的距离
+然后判断 2 - 3 < 1 成立元素就在可视区域内
+
+方法2: 监听到scroll事件后调用目标元素的getBoundingClientRect()方法得到它对应于视口左上角的坐标,再判断是否在视口之内。缺点是由于scroll事件密集发生计算量大容易造成性能问题,应加防抖函数
+应该再加上元素本身的高度,尤其是元素高度大于浏览器视口高度时,当元素顶部在视口上方时t为负值
 getBoundingClientRect用于获取某个元素相对于视窗的位置集合
 t=obj.getBoundingClientRect().top;
 h=window.innerHeight||document.documentElement.clientHeight||document.body.clientHeight; //浏览器可视区域高度
@@ -11906,6 +12118,15 @@ for(let ele of mainEle.querySelectorAll('div[id]')){
 }
 let currentId = ids[0]   // 当前显示在可视区的元素是最后加入数组的元素
 
+</textarea>判断元素是否在可视范围内<textarea>
+function elementIsVisibleInViewport(el, partiallyVisible = false) {  // // partiallyVisible为是否为完全可见
+  const { top, left, bottom, right } = el.getBoundingClientRect();
+
+  return partiallyVisible
+    ? ((top > 0 && top < innerHeight) || (bottom > 0 && bottom < innerHeight)) && ((left > 0 && left < innerWidth) || (right > 0 && right < innerWidth))
+    : top >= 0 && left >= 0 && bottom <= innerHeight && right <= innerWidth;
+}
+
 </textarea>jquery方式 - 以视口顶部为准<textarea>
 function checkShow($img) {
   var scrollTop = $(window).scrollTop();  //即页面向上滚动的距离
@@ -11916,6 +12137,144 @@ function checkShow($img) {
   //在2个临界状态之间的就为出现在视野中的
   return imgOffsetTop <(scrollTop + windowHeight) && imgOffsetTop + imgHeight > scrollTop
 }
+
+</textarea>判断当前位置是否为页面底部<textarea>
+function bottomVisible() {
+  return  document.documentElement.clientHeight + window.scrollY >= (document.documentElement.scrollHeight || document.documentElement.clientHeight)
+}
+
+</textarea>遮罩层固定滚动条,兼容安卓和iOS禁止页面滚动的解决方案<textarea>
+let scrollTop = 0;
+
+function preventScroll() {
+  scrollTop = window.scrollY;  // 存储当前滚动位置
+
+  // 将可滚动区域固定定位,可滚动区域高度为0后就不能滚动了
+  document.body.style["overflow-y"] = "hidden";
+  document.body.style.position = "fixed";
+  document.body.style.width = "100%";
+  document.body.style.top = -scrollTop + "px";
+  // document.body.style['overscroll-behavior'] = 'none'
+}
+
+function recoverScroll() {
+  document.body.style["overflow-y"] = "auto";
+  document.body.style.position = "static";
+  // document.querySelector('body').style['overscroll-behavior'] = 'none'
+  window.scrollTo(0, scrollTop);
+}
+
+</textarea><pre>
+【 IntersectionObserver API 】
+目前有一个新的IntersectionObserver API,可以自动观察元素是否可见,Chrome51+已经支持。由于可见(visible)的本质是,目标元素与视口产生一个交叉区,所以这个API叫做"交叉观察器"
+IntersectionObserver API是异步的,不随着目标元素的滚动同步触发。
+规格写明IntersectionObserver的实现应该采用requestIdleCallback(),即只有线程空闲下来才会执行观察器。这意味着这个观察器的优先级非常低,只在其他任务执行完,浏览器有了空闲才会执行
+
+var io = new IntersectionObserver(callback, option);
+IntersectionObserver是浏览器原生提供的构造函数,接受两个参数：callback是可见性变化时的回调函数,即目标元素的可见性变化时就会调用观察器的回调函数callback,option是可选配置对象
+构造函数的返回值是一个观察器实例。实例的observe方法可以指定观察哪个DOM节点。
+
+io.observe(document.getElementById('example'));  // 开始观察
+io.unobserve(element);  // 停止观察
+io.disconnect();  // 关闭观察器
+
+观察多个节点就要多次调用这个方法。
+io.observe(elementA);
+io.observe(elementB);
+
+callback一般会触发两次,一次是目标元素刚刚进入视口(开始可见),另一次是完全离开视口(开始不可见)。
+var io = new IntersectionObserver(entries => console.log(entries))
+callback函数的参数(entries)是一个数组,每个成员都是一个IntersectionObserverEntry对象。举例来说,如果同时有两个被观察的对象的可见性发生变化,entries数组就会有两个成员
+
+IntersectionObserverEntry对象提供目标元素的信息,一共有六个属性。
+{
+  time: 3893.92,
+  rootBounds: ClientRect { bottom: 920, height: 1024, left: 0, right: 1024, top: 0, width: 920 },
+  boundingClientRect: ClientRect { // ... },
+  intersectionRect: ClientRect { // ... },
+  intersectionRatio: 0.54,
+  target: element
+}
+
+每个属性的含义如下。
+time：可见性发生变化的时间,是一个高精度时间戳,单位为毫秒
+target：被观察的目标元素,是一个DOM节点对象
+rootBounds：根元素的矩形区域的信息,getBoundingClientRect()方法的返回值,如果没有根元素(即直接相对于视口滚动)则返回null
+boundingClientRect：目标元素的矩形区域的信息
+intersectionRect：目标元素与视口(或根元素)的交叉区域的信息
+intersectionRatio：目标元素的可见比例,即intersectionRect占boundingClientRect的比例,完全可见时为1,完全不可见时小于等于0
+
+Option对象的threshold属性决定了什么时候触发回调函数。它是一个数组,每个成员都是一个门槛值,默认为[0],即交叉比例(intersectionRatio)达到0时触发回调函数。
+new IntersectionObserver( entries => {},  {threshold: [0, 0.25, 0.5, 0.75, 1]} );
+用户可以自定义这个数组。比如,[0, 0.25, 0.5, 0.75, 1]就表示当目标元素 0%、25%、50%、75%、100% 可见时会触发回调函数。
+
+Option对象的root属性,rootMargin属性
+很多时候,目标元素不仅会随着窗口滚动,还会在容器里面滚动(比如在iframe窗口里滚动)。容器内滚动也会影响目标元素的可见性
+IntersectionObserver API支持容器内滚动。root属性指定目标元素所在的容器节点(即根元素),容器元素必须是目标元素的祖先节点。
+var opts = { root: document.querySelector('.container'), rootMargin: "500px 0px" };
+var observer = new IntersectionObserver( callback, opts );
+定义根元素的margin,用来扩展或缩小rootBounds这个矩形的大小,从而影响intersectionRect交叉区域的大小,这样设置以后,不管是窗口滚动或容器内滚动,只要目标元素可见性变化都会触发观察器
+
+const options = { root: document.querySelector('.box'), rootMargin: '30px 100px 20px' threshold: [0, 0.5, 1], }
+添加了rootMargin属性,将视窗的增大了,虚线就是现在的视窗,所以虽然元素不在root元素内,但元素现在也就在视窗里面了
+root元素只有在rootMargin为空的时候才是绝对的视窗
+
+某些静态资源(比如图片),只有用户向下滚动,它们进入视口时才加载,这样可以节省带宽,提高网页性能,这就叫做"惰性加载",有了IntersectionObserverAPI实现起来就很容易了
+
+</pre>只有目标区域可见时才会将模板内容插入真实DOM,从而引发静态资源的加载<textarea>
+function query(selector) {
+  return Array.from(document.querySelectorAll(selector));
+}
+
+var observer = new IntersectionObserver(
+  function(changes) {
+    changes.forEach(function(change) {
+      var container = change.target;
+      var content = container.querySelector('template').content;
+      container.appendChild(content);
+      observer.unobserve(container);
+    });
+  }
+);
+
+query('.lazy-loaded').forEach(function (item) {
+  observer.observe(item);
+});
+
+</textarea>无限滚动(infinite scroll)的实现<textarea>
+var intersectionObserver = new IntersectionObserver(
+  function (entries) {  // 如果不可见就返回
+    if (entries[0].intersectionRatio <= 0) return;
+    loadItems(10);
+    console.log('Loaded new items');
+  });
+
+// 开始观察
+intersectionObserver.observe(
+  document.querySelector('.scrollerFooter')
+);
+无限滚动时最好在页面底部有一个页尾栏(又称sentinels)。一旦页尾栏可见,就表示用户到达了页面底部,从而加载新的条目放在页尾栏前面。这样做的好处是,不需要再一次调用observe()方法,现有的IntersectionObserver可以保持使用
+
+</textarea>懒加载和判断是否在可视区域内,需要用到 intersectionRatio来判断是否在可视区域内,当 intersectionRatio>0&&intersectionRatio<=1即在可视区域内<textarea>
+function checkImgs() {
+  const imgs = Array.from(document.querySelectorAll(".my-photo"));
+  imgs.forEach(item => io.observe(item));
+}
+  
+function loadImg(el) {
+  if (!el.src) {
+    el.src = el.dataset.src;
+  }
+}
+  
+const io = new IntersectionObserver(ioes => {
+  ioes.forEach(ioe => {
+    const el = ioe.target;
+    const intersectionRatio = ioe.intersectionRatio;
+    intersectionRatio > 0 && intersectionRatio <= 1 && loadImg(el);
+    el.onload = el.onerror = () => io.unobserve(el);
+  });
+});
 
 </textarea><pre>
 【 jquery尺寸 】
@@ -13843,7 +14202,7 @@ JSON.stringify(value[, replacer[, space]])
 用于控制如何筛选对象的键值,如果只想输出指定的属性可以传入Array
 如果replacer是一个数组,则仅转换该数组中具有键值的成员。成员的转换顺序与键在数组中的顺序一样。当value参数也为数组时将忽略replacer数组
 如果replacer为函数则JSON.stringify将调用该函数,并传入每个成员的键和值,使用返回值而不是原始值;如果此函数返回undefined则排除成员,根对象的键是一个空字符串:""
-JSON.stringify不能处理某些值，如Set类型的值就不能正常序列化,但可以通过传入函数的方式将Set类型的值转换为数组类型，从而使得数据能够被正常序列化
+JSON.stringify不能处理某些值,如Set类型的值就不能正常序列化,但可以通过传入函数的方式将Set类型的值转换为数组类型,从而使得数据能够被正常序列化
 
 参数space
 文本添加缩进、空格和换行符
@@ -26425,21 +26784,21 @@ renderMap(baiduMapAdapter)  // 开始渲染百度地图
 // 已经存在的接口,这个接口需要被适配
 var Adaptee = function () { };
 Adaptee.prototype.specificRequest = function () {
-	// 具体功能实现
+  // 具体功能实现
 };
 
 // 适配器
 // 构造器,传入需要被适配的对象
 var Adapter = function (adaptee) {
-	this.adaptee = adaptee;
+  this.adaptee = adaptee;
 };
 Adapter.prototype = {
-	request: function () {
-		// do sth
-		// 可能转调已经实现了的方法,进行适配
-		this.adaptee.specificRequest();
-		// other thing
-	}
+  request: function () {
+    // do sth
+    // 可能转调已经实现了的方法,进行适配
+    this.adaptee.specificRequest();
+    // other thing
+  }
 };
 
 var adaptee = new Adaptee();
@@ -26488,16 +26847,16 @@ target--Adapter--Adaptee
 </pre><textarea>
 // 如果有一个具有3个字符串参数的函数,但客户系统拥有的却是一个包含三个字符串元素的对象或数组,此时就可以用一个是配起来衔接二者。
 var clientObject = {
-	string1: 'foo',
-	string2: 'bar',
-	string3: 'baz'
+  string1: 'foo',
+  string2: 'bar',
+  string3: 'baz'
 };
 function interfaceMethod(str1, str2, str3) {
-	//...
+  //...
 }
 // 适配器
 function clientToInterfaceAdapter(o) {
-	interfaceMethod(o.string1, o.string2, o.string3);
+  interfaceMethod(o.string1, o.string2, o.string3);
 }
 clientToInterfaceAdapter(clientObject);
 
@@ -26512,44 +26871,44 @@ clientToInterfaceAdapter(clientObject);
 
 // Prototype $ function
 function $() {
-	var elements = [];
-	for (var i = 0; i < arguments.length; i++) {
-		var element = arguments[i];
-		if (typeof element === 'string') {
-			element = document.getElementById(element);
-		}
-		if (arguments.length === 1) {
-			return element;
-		}
-		elements.push(element);
-	}
-	return elements;
+  var elements = [];
+  for (var i = 0; i < arguments.length; i++) {
+    var element = arguments[i];
+    if (typeof element === 'string') {
+      element = document.getElementById(element);
+    }
+    if (arguments.length === 1) {
+      return element;
+    }
+    elements.push(element);
+  }
+  return elements;
 }
 
 // YUI get method
 YAHOO.util.Dom.get = function (el) {
-	if (YAHOO.lang.isString(el)) {
-		return document.getElementById(el);
-	}
-	if (YAHOO.lang.isArray(el)) {
-		var c = [];
-		for (var i = 0, len = el.length; i < len; ++i) {
-			c[c.length] = YAHOO.util.Dom.get(el[i]);
-		}
-		return c;
-	}
-	if (el) {
-		return el;
-	}
-	return null;
+  if (YAHOO.lang.isString(el)) {
+    return document.getElementById(el);
+  }
+  if (YAHOO.lang.isArray(el)) {
+    var c = [];
+    for (var i = 0, len = el.length; i < len; ++i) {
+      c[c.length] = YAHOO.util.Dom.get(el[i]);
+    }
+    return c;
+  }
+  if (el) {
+    return el;
+  }
+  return null;
 };
 
 // Adapter
 function PrototypeToYUIAdapter() {
-	return YAHOO.util.Dom.get(arguments);
+  return YAHOO.util.Dom.get(arguments);
 }
 function YUIToPrototypeAdapter(el) {
-	return $.apply(window, el instanceof Array ? el : [el]);
+  return $.apply(window, el instanceof Array ? el : [el]);
 }
 
 // 有了这些适配器,现有的客户系统就可以继续使用其熟悉的API。
@@ -26569,36 +26928,36 @@ YAHOO.util.Dom.get = YUIToPrototypeAdapter;
 
 </pre><textarea>
 var AjaxLogger = {
-	sendLog: function () {
-		var data = this.urlEncode(arguments);
+  sendLog: function () {
+    var data = this.urlEncode(arguments);
 
-		jQuery.ajax({
-			url: "http://example.com/log",
-			data: data
-		});
-	},
+    jQuery.ajax({
+      url: "http://example.com/log",
+      data: data
+    });
+  },
 
-	urlEncode: function (arg) {
-		//…
-		return encodedData;
-	}
-	//…
+  urlEncode: function (arg) {
+    //…
+    return encodedData;
+  }
+  //…
 };
 
 var AjaxLoggerAdapter = {
-	log: function (arg) {
-		AjaxLogger.sendLog(arg);
-	}
+  log: function (arg) {
+    AjaxLogger.sendLog(arg);
+  }
 };
 
 /* Adjust the LoggerFactory */
 
 var LoggerFactory = {
-	getLogger: function () {
-		// just gotta change what's returned here
-		return AjaxLoggerAdapter;
-	}
-	//…
+  getLogger: function () {
+    // just gotta change what's returned here
+    return AjaxLoggerAdapter;
+  }
+  //…
 };
 
 </textarea><pre>
@@ -26620,61 +26979,61 @@ var LoggerFactory = {
 
 </pre><textarea>
 (function () {
-	// old interface
-	function Shipping() {
-		this.request = function (zipStart, zipEnd, weight) {
-			// ...
-			return "$49.75";
-		}
-	}
+  // old interface
+  function Shipping() {
+    this.request = function (zipStart, zipEnd, weight) {
+      // ...
+      return "$49.75";
+    }
+  }
 
-	// new interface
-	function AdvancedShipping() {
-		this.login = function (credentials) { /* ... */ };
-		this.setStart = function (start) { /* ... */ };
-		this.setDestination = function (destination) { /* ... */ };
-		this.calculate = function (weight) { return "$39.50"; };
-	}
+  // new interface
+  function AdvancedShipping() {
+    this.login = function (credentials) { /* ... */ };
+    this.setStart = function (start) { /* ... */ };
+    this.setDestination = function (destination) { /* ... */ };
+    this.calculate = function (weight) { return "$39.50"; };
+  }
 
-	// adapter interface
-	function ShippingAdapter(credentials) {
-		var shipping = new AdvancedShipping();
-		shipping.login(credentials);
+  // adapter interface
+  function ShippingAdapter(credentials) {
+    var shipping = new AdvancedShipping();
+    shipping.login(credentials);
 
-		return {
-			request: function (zipStart, zipEnd, weight) {
-				shipping.setStart(zipStart);
-				shipping.setDestination(zipEnd);
-				return shipping.calculate(weight);
-			}
-		};
-	}
+    return {
+      request: function (zipStart, zipEnd, weight) {
+        shipping.setStart(zipStart);
+        shipping.setDestination(zipEnd);
+        return shipping.calculate(weight);
+      }
+    };
+  }
 
-	// log helper
-	var log = (function () {
-		var log = "";
-		return {
-			add: function (msg) { log += msg + "\n"; },
-			show: function () { alert(log); log = ""; }
-		}
-	})();
+  // log helper
+  var log = (function () {
+    var log = "";
+    return {
+      add: function (msg) { log += msg + "\n"; },
+      show: function () { alert(log); log = ""; }
+    }
+  })();
 
 
-	function run() {
-		var shipping = new Shipping();
-		var credentials = { token: "30a8-6ee1" };
-		var adapter = new ShippingAdapter(credentials);
+  function run() {
+    var shipping = new Shipping();
+    var credentials = { token: "30a8-6ee1" };
+    var adapter = new ShippingAdapter(credentials);
 
-		// original shipping object and interface
-		var cost = shipping.request("78701", "10010", "2 lbs");
-		log.add("Old cost: " + cost);
+    // original shipping object and interface
+    var cost = shipping.request("78701", "10010", "2 lbs");
+    log.add("Old cost: " + cost);
 
-		// new shipping object with adapted interface
-		cost = adapter.request("78701", "10010", "2 lbs");
-		log.add("New cost: " + cost);
+    // new shipping object with adapted interface
+    cost = adapter.request("78701", "10010", "2 lbs");
+    log.add("New cost: " + cost);
 
-		log.show();
-	}
+    log.show();
+  }
 }());
 
 </textarea>
@@ -27050,6 +27409,43 @@ for(let i = 0; i < 10; i++) {
   };
 }
 a[6](); // 6
+
+</textarea><textarea>
+// 任务队列的模型抽象
+var tasks = [];
+for(var i = 0; i < 4; i++){
+  tasks.push(function(){
+    console.log("i is " + i);
+  });
+}
+for(var j = 0; j < tasks.length; j++){
+  tasks[j]();
+}
+
+但是上面代码的执行输出是4,4,4,4,并且不是想要输出：0,1,2,3,所以每个task就不能取到它的index了,这是因为闭包都是用的同一个i变量,i已经变成4了,所以执行闭包的时候就都是4了。解决：
+var tasks = [];
+for(var i = 0; i < 4; i++){
+  !function(k){
+    tasks.push(function(){
+      console.log("i is " + k);
+    });
+  }(i);
+}
+for(var j = 0; j < tasks.length; j++){
+  tasks[j]();
+}
+
+把i赋值给k,由于k它是一个function的一个参数,每次执行函数的时候肯定会实例化新的k,所以每次的k都是不同的变量,这样就输出就正常了。但是代码看起来有点别扭,如果用ES6,只要把var改成let就可以了：
+var tasks = [];
+for(let i = 0; i <= 4; i++){
+  tasks.push(function(){
+    console.log("i is " + i);
+  });
+}
+for(var j = 0; j < tasks.length; j++){
+  tasks[j]();
+}
+只改动了3个字符就达到了目的。因为for循环里面有个大括号,大括号就是一个独立的作用域,let定义的变量在独立的作用域里面它的值也是独立的。当然即使没写大括号for循环执行也是独立的
 
 </textarea><textarea>
 //内部的变量i与循环变量i不在同一个作用域,有各自单独的作用域
@@ -28113,6 +28509,7 @@ let [x = y,y = 1] = [];     // ReferenceError ,是因为x用到默认值y时,y�
 let { foo,bar } = { foo: "aaa",bar: "bbb" };   // foo='aaa',bar='bbb'
 let { bar,foo } = { foo: "aaa",bar: "bbb" };   // foo='aaa',bar='bbb'
 let { baz } = { foo: "aaa",bar: "bbb" };       // baz=undefined
+let { baz } = { };       // baz=undefined
 
 对象的解构赋值是下面形式的简写
 let { foo: foo,bar: bar } = { foo: "aaa",bar: "bbb" };
@@ -28187,10 +28584,7 @@ const { education: { degree }} = userInfo || {};
 console.log(degree);
 
 // 后台返回的数据
-const userInfo = {
-  name: 'Lily',
-  age: '18'
-};
+const userInfo = { name: 'Lily', age: '18' };
 const { education: { degree } = {} } = userInfo || {};
 console.log(degree); // undefined
 
@@ -28199,18 +28593,12 @@ const userInfo = {
   name: 'Lily',
   age: 18,
   education: {
-    school: {
-      name: 'SYSU',
-      rank: '9'
-    }
+    school: { name: 'SYSU', rank: '9' }
   }
 }
 
 // 方式一：分别给education和school设置缺省值为{}
-const userInfo = {
-  name: 'Lily',
-  age: 18
-};
+const userInfo = { name: 'Lily', age: 18 };
 const {
   education: {
     school: { name, rank } = {}
@@ -28219,10 +28607,7 @@ const {
 console.log(name);    // undefined
 
 // 方式二: 直接给education设置缺省值为{school: {}}。
-const userInfo = {
-  name: 'Lily',
-  age: 18
-};
+const userInfo = { name: 'Lily', age: 18 };
 const {
   education: {
     school: { name, rank }
@@ -28334,11 +28719,11 @@ s === Boolean.prototype.toString    // true
 var obj = { x: 1, y: 2, z: 3 };
 [...obj]; // TypeError
 
-展开语法和for-of语句遍历iterable对象定义要遍历的数据。Array或Map是具有默认迭代行为的内置迭代器。对象不是可迭代的，但可以通过使用iterable和iterator协议使它们可迭代。
-在Mozilla文档中，如果一个对象实现了@@iterator方法，那么它就是可迭代的，这意味着这个对象或它原型链上的一个对象必须有一个带有@@iterator键的属性，这个键可以通过常量Symbol.iterator获得。
+展开语法和for-of语句遍历iterable对象定义要遍历的数据。Array或Map是具有默认迭代行为的内置迭代器。对象不是可迭代的,但可以通过使用iterable和iterator协议使它们可迭代。
+在Mozilla文档中,如果一个对象实现了@@iterator方法,那么它就是可迭代的,这意味着这个对象或它原型链上的一个对象必须有一个带有@@iterator键的属性,这个键可以通过常量Symbol.iterator获得。
 
 var obj = { x: 1, y: 2, z: 3 };
-obj[Symbol.iterator] = function() {   // iterator 是一个具有 next 方法的对象，它的返回至少有一个对象，两个属性：value＆done。返回一个 iterator 对象
+obj[Symbol.iterator] = function() {   // iterator 是一个具有 next 方法的对象,它的返回至少有一个对象,两个属性：value＆done。返回一个 iterator 对象
   return {
     next: function() {
       if (this._countDown === 3) {
@@ -32126,26 +32511,26 @@ export const updateUser = (user) => {
 
 </pre><textarea>
 async function func() {
-	try {
-		let res = await asyncFunc()
-	} catch (e) {
-		//......
-	}
+  try {
+    let res = await asyncFunc()
+  } catch (e) {
+    //......
+  }
 }
 
 async function errorCaptured(asyncFunc) {
-	try {
-		let res = await asynvFunc()
-		return [null, res]
-	} catch (e) {
-		return [e, null]
-	}
+  try {
+    let res = await asynvFunc()
+    return [null, res]
+  } catch (e) {
+    return [e, null]
+  }
 }
 
 async function func() {
-	let [err, res] = await errorCaptured(asyncFunc)
-	if (err) console.error('错误捕获', error)
-	if (res) console.log(res)
+  let [err, res] = await errorCaptured(asyncFunc)
+  if (err) console.error('错误捕获', error)
+  if (res) console.log(res)
 }
 
 </textarea><pre>
@@ -32155,25 +32540,25 @@ async function func() {
 </pre><textarea>
 // development
 async function func() {
-	let res = await asyncFunc()
-	//...其他逻辑
+  let res = await asyncFunc()
+  //...其他逻辑
 }
 
 // release
 async function func() {
-	try {
-		let res = await asyncFunc()
-	} catch (e) {
-		//......
-	}
-	//...其他逻辑
+  try {
+    let res = await asyncFunc()
+  } catch (e) {
+    //......
+  }
+  //...其他逻辑
 }
 
 </textarea><pre>
 在webpack中定义的一个个loader本质上只是一个函数,在定义loader同时还会定义一个test属性,webpack会遍历所有的模块名,当匹配test属性定义的正则时会将这个模块作为source参数传入loader中执行
 {
-	test: /\.vue$/,
-	use: "vue-loader",
+  test: /\.vue$/,
+  use: "vue-loader",
 }
 
 当匹配到.vue结尾的文件名时会将文件作为source参数传给vue-loader,use属性后面可以是一个字符串也可以是一个路径,当是字符串时默认会视为nodejs模块去node_modules中找
@@ -32204,11 +32589,11 @@ async function func() {
 }
 
 async function func() {
-	try {
-		await asyncFunc()
-	} catch (e) {
-		console.log(e)
-	}
+  try {
+    await asyncFunc()
+  } catch (e) {
+    console.log(e)
+  }
 }
 
 </textarea><pre>
@@ -32221,14 +32606,14 @@ const parser = require("@babel/parser")
 const traverse = require("@babel/traverse").default
 
 module.exports = function (source) {
-	let ast = parser.parse(source)
+  let ast = parser.parse(source)
 
-	traverse(ast, {
-		AwaitExpression(path) {
-			//... 
-		}
-	})
-	//...
+  traverse(ast, {
+    AwaitExpression(path) {
+      //... 
+    }
+  })
+  //...
 }
 
 </textarea>通过@babel/traverse能够轻松的找到await表达式对应的Node节点,接下来就是创建一个类型为TryStatement的Node节点,最后await放入其中。这里还需要依赖另外一个包@babel/types,可以理解为babel版的loadsh库,它提供了很多和AST的Node节点相关的辅助函数,需要用到其中的tryStatement方法,即创建一个TryStatement的Node节点<textarea>
@@ -32237,16 +32622,16 @@ const traverse = require("@babel/traverse").default
 const t = require("@babel/types")
 
 module.exports = function (source) {
-	let ast = parser.parse(source)
+  let ast = parser.parse(source)
 
-	traverse(ast, {
-		AwaitExpression(path) {
-			let tryCatchAst = t.tryStatement(
-				//...
-			)
-			//...
-		}
-	})
+  traverse(ast, {
+    AwaitExpression(path) {
+      let tryCatchAst = t.tryStatement(
+        //...
+      )
+      //...
+    }
+  })
 }
 
 // tryStatement接受3个参数,第一个是try子句,第二个是catch子句,第三个是finally子句,一个完整的try/catch语句对应的Node节点看起来像这样
@@ -32259,26 +32644,26 @@ const traverse = require("@babel/traverse").default
 const t = require("@babel/types")
 
 module.exports = function (source) {
-	let ast = parser.parse(source)
+  let ast = parser.parse(source)
 
-	traverse(ast, {
-		AwaitExpression(path) {
-			let tryCatchAst = t.tryStatement(
-				// try 子句(必需项)
-				t.blockStatement([
-					t.expressionStatement(path.node)
-				]),
-				// catch 子句
-				t.catchClause(
-						//...
-				)
-			)
-			path.replaceWithMultiple([
-				tryCatchAst
-			])
-		}
-	})
-	//...
+  traverse(ast, {
+    AwaitExpression(path) {
+      let tryCatchAst = t.tryStatement(
+        // try 子句(必需项)
+        t.blockStatement([
+          t.expressionStatement(path.node)
+        ]),
+        // catch 子句
+        t.catchClause(
+            //...
+        )
+      )
+      path.replaceWithMultiple([
+        tryCatchAst
+      ])
+    }
+  })
+  //...
 }
 
 </textarea><pre>
@@ -32298,43 +32683,43 @@ const traverse = require("@babel/traverse").default
 const t = require("@babel/types")
 
 module.exports = function (source) {
-	let ast = parser.parse(source)
-	traverse(ast, {
-		AwaitExpression(path) {
-			if (t.isVariableDeclarator(path.parent)) { // 变量声明
-				let variableDeclarationPath = path.parentPath.parentPath
-				let tryCatchAst = t.tryStatement(
-					t.blockStatement([
-						variableDeclarationPath.node // Ast
-					]),
-					t.catchClause(
-						//...
-					)
-				)
-				variableDeclarationPath.replaceWithMultiple([ tryCatchAst ])
-			} else if (t.isAssignmentExpression(path.parent)) {    // 赋值表达式
-				let expressionStatementPath = path.parentPath.parentPath
-				let tryCatchAst = t.tryStatement(
-					t.blockStatement([ expressionStatementPath.node ]),
-					t.catchClause(
-						//...
-					)
-				)
-				expressionStatementPath.replaceWithMultiple([
-						tryCatchAst
-				])
-			} else {    // await 表达式
-				let tryCatchAst = t.tryStatement(
-					t.blockStatement([ t.expressionStatement(path.node) ]),
-					t.catchClause(
-						//...
-					)
-				)
-				path.replaceWithMultiple([ tryCatchAst ])
-			}
-		}
-	})
-	//...
+  let ast = parser.parse(source)
+  traverse(ast, {
+    AwaitExpression(path) {
+      if (t.isVariableDeclarator(path.parent)) { // 变量声明
+        let variableDeclarationPath = path.parentPath.parentPath
+        let tryCatchAst = t.tryStatement(
+          t.blockStatement([
+            variableDeclarationPath.node // Ast
+          ]),
+          t.catchClause(
+            //...
+          )
+        )
+        variableDeclarationPath.replaceWithMultiple([ tryCatchAst ])
+      } else if (t.isAssignmentExpression(path.parent)) {    // 赋值表达式
+        let expressionStatementPath = path.parentPath.parentPath
+        let tryCatchAst = t.tryStatement(
+          t.blockStatement([ expressionStatementPath.node ]),
+          t.catchClause(
+            //...
+          )
+        )
+        expressionStatementPath.replaceWithMultiple([
+            tryCatchAst
+        ])
+      } else {    // await 表达式
+        let tryCatchAst = t.tryStatement(
+          t.blockStatement([ t.expressionStatement(path.node) ]),
+          t.catchClause(
+            //...
+          )
+        )
+        path.replaceWithMultiple([ tryCatchAst ])
+      }
+    }
+  })
+  //...
 }
 
 // 在拿到替换后的AST树后,使用@babel/core包中的transformFromAstSync方法将AST树重新转为对应的代码字符串返回即可
@@ -32344,21 +32729,21 @@ const t = require("@babel/types")
 const core = require("@babel/core")
 
 module.exports = function (source) {
-	let ast = parser.parse(source)
-	traverse(ast, {
-		AwaitExpression(path) {
-			// 同上
-		}
-	})
-	return core.transformFromAstSync(ast).code
+  let ast = parser.parse(source)
+  traverse(ast, {
+    AwaitExpression(path) {
+      // 同上
+    }
+  })
+  return core.transformFromAstSync(ast).code
 }
 
 // 在这基础上还暴露了一些loader配置项以提高易用性,例如如果await语句已经被try/catch包裹则不会再次注入,其原理也是基于AST,利用path参数的findParent方法向上遍历所有父节点,判断是否被try/catch的Node包裹
 traverse(ast, {
-	AwaitExpression(path) {
-		if (path.findParent((path) => t.isTryStatement(path.node))) return
-		// 处理逻辑
-	}
+  AwaitExpression(path) {
+    if (path.findParent((path) => t.isTryStatement(path.node))) return
+    // 处理逻辑
+  }
 })
 
 </textarea><pre>
@@ -32371,17 +32756,17 @@ traverse(ast, {
 
 </pre><textarea>
 async function func() {
-	let res = await asyncFunc()
-	let res2 = await asyncFunc()
+  let res = await asyncFunc()
+  let res2 = await asyncFunc()
 }
 
 async function func() {
-	try {
-		let res = await asyncFunc()
-		let res2 = await asyncFunc()
-	} catch (e) {
-		console.error(e)
-	}
+  try {
+    let res = await asyncFunc()
+    let res2 = await asyncFunc()
+  } catch (e) {
+    console.error(e)
+  }
 }
 
 <textarea>这只是最基本的async函数声明的node节点,另外还有函数表达式,箭头函数,作为对象的方法等这些表现形式,当满足其中一种情况就注入try/catch代码块<textarea>
@@ -32397,11 +32782,11 @@ const func2 = async () => {
 
 // 方法
 const vueComponent = {
-	methods: {
-		async func() {
-			await asyncFunc()
-		}
-	}
+  methods: {
+    async func() {
+      await asyncFunc()
+    }
+  }
 }
 
 </textarea>【 函数的实现原理就是将Generator函数和自动执行器包装在一个函数里 】<textarea>
@@ -34907,7 +35292,7 @@ foo()   // Error: Missing parameter
 
 </textarea>
 
-<h4>rest参数</h4><pre>
+<h4>rest参数 剩余参数</h4><pre>
 ES6引入rest参数(...变量名),用于获取函数的多余参数,这样就不需要使用arguments对象了
 rest参数搭配的变量是一个数组,该变量将多余的参数放入数组中
 rest参数之后不能再有其他参数(即只能是最后一个参数),否则会报错
@@ -34929,6 +35314,12 @@ function add(...values) {
   return sum;
 }
 add(2,5,3) // 10
+
+function myFunc(...args) {
+  console.log(args[0] + args[1]);
+}
+myFunc(1, 2, 3, 4);
+// 3
 
 </textarea><pre>
 arguments对象不是数组,而是一个类似数组的对象,所以为了使用数组的方法必须使用Array.prototype.slice.call先将其转为数组;
@@ -39645,23 +40036,23 @@ console.log(str);   // *** is a *****
 
 // 账号*格式化
 replaceNum = function(str = '1922 1234 1234 1234 12'){
-	return str.split(' ').map((nums, index) => (index == 0 ? nums : nums.replace(/\d/g, '*'))).join(' ')
+  return str.split(' ').map((nums, index) => (index == 0 ? nums : nums.replace(/\d/g, '*'))).join(' ')
 }
 console.log(replaceNum())
 
 // 银行卡号*格式化
 const targetStr = '2174987648973765834657843657438'
 function fascinatingCardNumber(str) {
-	return str.replace(/(\d{4})(\d+)(\d{4})/, () => {
-		const matches = [RegExp.$1, RegExp.$2, RegExp.$3]
-		const [startNum, middleNum, endNum] = matches
-		const group = []
-		const GAP = 4
-		for(var i = 0; i < middleNum.length; i+=GAP){
-			group.push(middleNum.substring(i, i + GAP))
-		}
-		return startNum + ' ' + group.join(' ').replace(/\d/g, '*') + ' ' + endNum
-	})
+  return str.replace(/(\d{4})(\d+)(\d{4})/, () => {
+    const matches = [RegExp.$1, RegExp.$2, RegExp.$3]
+    const [startNum, middleNum, endNum] = matches
+    const group = []
+    const GAP = 4
+    for(var i = 0; i < middleNum.length; i+=GAP){
+      group.push(middleNum.substring(i, i + GAP))
+    }
+    return startNum + ' ' + group.join(' ').replace(/\d/g, '*') + ' ' + endNum
+  })
 }
 console.log(fascinatingCardNumber(targetStr))  // 2174 **** **** **** **** **** *** 7438
 
@@ -39783,8 +40174,8 @@ var reg3=new RegExp("(http://www.qidian.com/)(\\d+),(\\d+).aspx","gmi");  //获�
 reg3.test("http://www.qidian.com/1017141,20361055.aspx");
 console.log(RegExp.$1,RegExp.$2,RegExp.$3);          // http://www.qidian.com/ 1017141 20361055
 
-</textarea>优雅的实现金钱格式化：1234567890 --> 1,234,567,890<textarea>
-// 用正则魔法实现：
+</textarea>数字千分位分割,优雅的实现金钱格式化：1234567890 --> 1,234,567,890<textarea>
+// 正则实现：
 var test1 = '1234567890'
 var format = test1.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 console.log(format);                  // 1,234,567,890
@@ -39795,14 +40186,18 @@ function format(num){
 
 // 非正则的优雅实现：
 function formatCash(str) {
-  return str.split('').reverse().reduce((prev, next, index) => {
-    return((index % 3) ? next :(next + ',')) + prev
-  })
+  return str.split('').reverse().reduce((prev, next, index) => ((index % 3) ? next : (next + ',')) + prev})
 }
 console.log(formatCash('1234567890')) // 1,234,567,890
 
 // 方法三
 (23333333).toLocaleString('en-US')    // "23,333,333"
+
+function commafy(num) {
+  return num.toString().indexOf(".") !== -1
+    ? num.toLocaleString()
+    : num.toString().replace(/(\d)(?=(?:\d{3})+$)/g, "$1,");
+}
 
 </textarea>根据半角符号全角符号查字节长度<textarea>
 byte(str) {
@@ -40314,6 +40709,27 @@ setCookie("pass","12335","7");
 console.log(document.cookie);
 console.log(getCookie("user"););
 removeCookie("user");
+
+</textarea>cookie增删改查<textarea>
+function setCookie(key, value, expiredays) {
+  var exdate = new Date();
+  exdate.setDate(exdate.getDate() + expiredays);
+  document.cookie = key + "=" + escape(value) + (expiredays == null ? "" : ";expires=" + exdate.toGMTString());
+}
+function delCookie(name) {
+  var exp = new Date();
+  exp.setTime(exp.getTime() - 1);
+  var cval = getCookie(name);
+  if (cval != null) document.cookie = name + "=" + cval + ";expires=" + exp.toGMTString();
+}
+function getCookie(name) {
+  var arr, reg = new RegExp("(^| )" + name + "=([^;]*)(;|$)");
+  if ((arr = document.cookie.match(reg))) {
+    return arr[2];
+  } else {
+    return null;
+  }
+}
 
 </textarea>
 </div>
@@ -42074,6 +42490,12 @@ setTimeout('jump()',5000);
 setInterval(run,1000);
 setTimeout(jump,5000);
 
+function say(){
+  alert("sss")
+}
+setInterval(say(),2000);  // 这么写函数setInterval将直接执行say（）函数，应该讲代码改为
+setInterval("say()",2000);//或者"say()"改为say
+
 数码时钟
 获取系统时间Date对象
 str[i]存在兼容性问题
@@ -42557,6 +42979,25 @@ document.getElementById("run").addEventListener("click",function() {
   progress = 0;
   requestAnimationFrame(step);
 },false);
+
+</textarea>滚动条回到顶部动画<textarea>
+// 获取滚动条位置
+function getScrollPosition(el = window) {
+  return {
+    x: el.pageXOffset !== undefined ? el.pageXOffset : el.scrollLeft,
+    y: el.pageYOffset !== undefined ? el.pageYOffset : el.scrollTop,
+  };
+}
+
+function scrollToTop() {
+  const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+  if (scrollTop > 0) {
+    window.requestAnimationFrame(scrollToTop);
+    window.scrollTo(0, c - c / 8);
+  } else {
+    window.cancelAnimationFrame(scrollToTop);
+  }
+}
 
 </textarea>setInterval、setTimeout、requestAnimationFrame对比<textarea>
 <div id="myDiv" style="background-color: lightblue;width: 0;height: 20px;line-height: 20px;">0%</div>
@@ -46229,27 +46670,27 @@ function foo() {
   setTimeout(foo, 0); // 是否存在堆栈溢出错误?
 }; 
 不会溢出,Js并发模型基于“事件循环”,浏览器提供运行时环境来执行JS代码。
-浏览器的主要组件包括调用堆栈，事件循环**，任务队列和Web API**。 像setTimeout，setInterval和Promise这样的全局函数不是Js的一部分，而是Web API的一部分
-JS调用栈是后进先出(LIFO),引擎每次从堆栈中取出一个函数，然后从上到下依次运行代码。每当它遇到一些异步代码如setTimeout，它就把它交给Web API。因此每当事件被触发时callback都会被发送到任务队列
-事件循环(Event loop)不断地监视任务队列(Task Queue)，并按它们排队的顺序一次处理一个回调。每当调用堆栈(call stack)为空时，Event loop获取回调并将其放入堆栈(stack )中进行处理。如果调用堆栈不是空的，则事件循环不会将任何回调推入堆栈
+浏览器的主要组件包括调用堆栈,事件循环**,任务队列和Web API**。 像setTimeout,setInterval和Promise这样的全局函数不是Js的一部分,而是Web API的一部分
+JS调用栈是后进先出(LIFO),引擎每次从堆栈中取出一个函数,然后从上到下依次运行代码。每当它遇到一些异步代码如setTimeout,它就把它交给Web API。因此每当事件被触发时callback都会被发送到任务队列
+事件循环(Event loop)不断地监视任务队列(Task Queue),并按它们排队的顺序一次处理一个回调。每当调用堆栈(call stack)为空时,Event loop获取回调并将其放入堆栈(stack )中进行处理。如果调用堆栈不是空的,则事件循环不会将任何回调推入堆栈
 
 步骤：
 1、调用 foo()会将foo函数放入调用堆栈(call stack)。
-2、在处理内部代码时，JS引擎遇到setTimeout。
-3、然后将foo回调函数传递给WebAPIs并从函数返回，调用堆栈再次为空
-4、计时器被设置为0，因此foo将被发送到任务队列
-5、由于调用堆栈是空的，事件循环将选择foo回调并将其推入调用堆栈进行处理。
-6、进程再次重复，堆栈不会溢出
+2、在处理内部代码时,JS引擎遇到setTimeout。
+3、然后将foo回调函数传递给WebAPIs并从函数返回,调用堆栈再次为空
+4、计时器被设置为0,因此foo将被发送到任务队列
+5、由于调用堆栈是空的,事件循环将选择foo回调并将其推入调用堆栈进行处理。
+6、进程再次重复,堆栈不会溢出
 
-如果在控制台中运行以下函数，页面(选项卡)的UI是否仍然响应
+如果在控制台中运行以下函数,页面(选项卡)的UI是否仍然响应
 function foo() {
  return Promise.resolve().then(foo);
 }; 
 答案 : 不会响应
-大多数时候，开发人员假设在事件循环图中只有一个任务队列。但事实并非如此，可以有多个任务队列。由浏览器选择其中的一个队列并在该队列中处理回调。
-在底层来看，JavaScript中有宏任务和微任务。setTimeout回调是宏任务，而Promise回调是微任务。
-主要的区别在于他们的执行方式。宏任务在单个循环周期中一次一个地推入堆栈，但是微任务队列总是在执行后返回到事件循环之前清空。因此如果以处理条目的速度向这个队列添加条目，那么就永远在处理微任务。只有当微任务队列为空时，事件循环才会重新渲染页面
-每次调用foo()都会继续在微任务队列上添加另一个'foo'回调，因此事件循环无法继续处理其他事件（滚动，单击等），直到该队列完全清空为止。 因此，它会阻止渲染。
+大多数时候,开发人员假设在事件循环图中只有一个任务队列。但事实并非如此,可以有多个任务队列。由浏览器选择其中的一个队列并在该队列中处理回调。
+在底层来看,JavaScript中有宏任务和微任务。setTimeout回调是宏任务,而Promise回调是微任务。
+主要的区别在于他们的执行方式。宏任务在单个循环周期中一次一个地推入堆栈,但是微任务队列总是在执行后返回到事件循环之前清空。因此如果以处理条目的速度向这个队列添加条目,那么就永远在处理微任务。只有当微任务队列为空时,事件循环才会重新渲染页面
+每次调用foo()都会继续在微任务队列上添加另一个'foo'回调,因此事件循环无法继续处理其他事件(滚动,单击等),直到该队列完全清空为止。 因此,它会阻止渲染。
 
 </textarea>
 </div>
