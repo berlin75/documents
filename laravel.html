@@ -709,7 +709,7 @@ Laravel使得实现身份验证非常简单,几乎所有的配置都是现成的
 Laravel附带了几个预构建的身份验证控制器,位于App\Http\Controllers\Auth命名空间中。RegisterController处理新用户注册,LoginController处理身份验证,ForgotPasswordController处理用于重置密码的电子邮件链接,ResetPasswordController包含重置密码的逻辑。这些控制器中的每一个都使用一个特性来包含它们的必要方法
 控制器已默认包含了验证用户是否存在和保存用户到数据库中的认证逻辑,通过traits实现的
 
-laravel 5.2的Route::auth();包含哪些路由，在哪里可以看到
+laravel 5.2的Route::auth();包含哪些路由,在哪里可以看到
 @see Illuminate\Routing\Router.php
 public function auth(){
   // Authentication Routes...
@@ -5836,7 +5836,7 @@ class ProductsSeeder extends Seeder {
     $products = factory(\App\Models\Product::class, 30)->create();  // 创建30个商品
     foreach ($products as $product) {
       $skus = factory(\App\Models\ProductSku::class, 3)->create(['product_id' => $product->id]);  // 创建3个SKU,每个SKU的product_id字段都设为当前循环的商品id
-      $product->update(['price' => $skus->min('price')]);  // 找出价格最低的SKU价格，把商品价格设置为该价格
+      $product->update(['price' => $skus->min('price')]);  // 找出价格最低的SKU价格,把商品价格设置为该价格
     }
   }
 }
@@ -6019,10 +6019,10 @@ class Order extends Model{
 
   protected static function boot(){
     parent::boot();
-    static::creating(function ($model) {         // 监听模型创建事件，在写入数据库之前触发
+    static::creating(function ($model) {         // 监听模型创建事件,在写入数据库之前触发
       if (!$model->no) {                         // 如果模型的no字段为空
         $model->no = static::findAvailableNo();  // 调用 findAvailableNo 生成订单流水号
-        if (!$model->no) {                       // 如果生成失败，则终止创建订单
+        if (!$model->no) {                       // 如果生成失败,则终止创建订单
           return false;
         }
       }
@@ -6089,7 +6089,7 @@ $factory->define(Order::class, function (Faker $faker) {
   $ship = $faker->randomElement(array_keys(Order::$shipStatusMap));  // 随机生成发货状态
   $coupon = null;                                                    // 优惠券
   if (random_int(0, 10) < 3) {                                       // 30% 概率该订单使用了优惠券
-    $coupon = CouponCode::query()->where('min_amount', 0)->inRandomOrder()->first();  // 为了避免出现逻辑错误，只选择没有最低金额限制的优惠券
+    $coupon = CouponCode::query()->where('min_amount', 0)->inRandomOrder()->first();  // 为了避免出现逻辑错误,只选择没有最低金额限制的优惠券
     $coupon->changeUsed();                                           // 增加优惠券的使用量
   }
   return [
@@ -6144,7 +6144,7 @@ class OrdersSeeder extends Seeder {
   public function run() {
     $faker = app(Faker\Generator::class);  // 获取Faker实例
     $orders = factory(Order::class, 100)->create();  // 创建100笔订单
-    $products = collect([]);               // 被购买的商品，用于后面更新商品销量和评分
+    $products = collect([]);               // 被购买的商品,用于后面更新商品销量和评分
     foreach ($orders as $order) {          // 每笔订单随机1-3个商品
       $items = factory(OrderItem::class, random_int(1, 3))->create([  
         'order_id'    => $order->id,
@@ -6356,13 +6356,13 @@ class CouponCode extends Model{
 
   public function getAdjustedPrice($orderAmount){  // 调整后的价格
     if ($this->type === self::TYPE_FIXED) {        // 固定金额
-      return max(0.01, $orderAmount - $this->value);  // 为了保证系统健壮性，需要订单金额最少为0.01元
+      return max(0.01, $orderAmount - $this->value);  // 为了保证系统健壮性,需要订单金额最少为0.01元
     }
     return number_format($orderAmount * (100 - $this->value) / 100, 2, '.', '');
   }
 
-  public function changeUsed($increase = true){  // 传入true代表新增用量，否则是减少用量
-    if ($increase) {                             // 与检查SKU库存类似，这里需要检查当前用量是否已经超过总量
+  public function changeUsed($increase = true){  // 传入true代表新增用量,否则是减少用量
+    if ($increase) {                             // 与检查SKU库存类似,这里需要检查当前用量是否已经超过总量
       return $this->newQuery()->where('id', $this->id)->where('used', '<', $this->total)->increment('used');
     } else {
       return $this->decrement('used');
@@ -6371,7 +6371,7 @@ class CouponCode extends Model{
 
   public static function findAvailableCode($length = 16){
     do {
-      $code = strtoupper(Str::random($length));               // 生成一个指定长度的随机字符串，并转成大写
+      $code = strtoupper(Str::random($length));               // 生成一个指定长度的随机字符串,并转成大写
     } while (self::query()->where('code', $code)->exists());  // 如果生成的码已存在就继续循环
     return $code;
   }
@@ -6382,7 +6382,7 @@ $factory->define(App\Models\CouponCode::class, function (Faker $faker) {
   $value = $type === App\Models\CouponCode::TYPE_FIXED ? random_int(1, 200) : random_int(1, 50);  // 根据取得的类型生成对应折扣
   if ($type === App\Models\CouponCode::TYPE_FIXED) {                            // 如果是固定金额则最低订单金额必须要比优惠金额高0.01元
     $minAmount = $value + 0.01;
-  } else {                                                      // 如果是百分比折扣，有50%概率不需要最低订单金额
+  } else {                                                      // 如果是百分比折扣,有50%概率不需要最低订单金额
     $minAmount = random_int(0, 100) < 50 ? 0 : random_int(100, 1000);
   }
   return [
@@ -7319,14 +7319,14 @@ $ composer require encore/laravel-admin "1.7.7"
 $ php artisan vendor:publish --provider="Encore\Admin\AdminServiceProvider"  // 将Laravel-Admin的文件发布到项目目录中,如JS/CSS文件、配置文件等
 $ php artisan admin:install  // 执行数据库迁移、创建默认管理
 $ php artisan serve  // 运行服务查看效果
-几个命令就可以完成一个功能比较齐全的资源操作后台管理系统，/admin,账号和密码都是admin
+几个命令就可以完成一个功能比较齐全的资源操作后台管理系统,/admin,账号和密码都是admin
 所有的配置都在config/admin.php文件中,代码主要集中在\APP\Admin中,默认系统提供了一个Dashboard界面,其它的静态资源文件放在/public/vendor/laravel-admin目录下
 app/Admin/routes.php配置后台路由
 app/Admin/bootstrap.php是laravel-admin的启动文件
-app/Admin/Controllers目录用来存放后台控制器文件，该目录下的HomeController.php文件是后台首页的显示控制器
+app/Admin/Controllers目录用来存放后台控制器文件,该目录下的HomeController.php文件是后台首页的显示控制器
 
 配置文件上传目录
-编辑config/filesystems.php文件，在disks配置下添加如下内容,.env配置APP_URL=http://localhost:8002中的端口号
+编辑config/filesystems.php文件,在disks配置下添加如下内容,.env配置APP_URL=http://localhost:8002中的端口号
 'admin' => [
   'driver' => 'local',
   'root' => public_path('upload'),

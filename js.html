@@ -1897,8 +1897,8 @@ for(; i < 9; i++) {
 
 </textarea>condition可选,为了不要创建了死循环(无限循环),必须使用break确保循环体内存在可以退出循环的语句<textarea>
 for(var i = 0;; i++) {
-   console.log(i);
-   if(i > 3) break;
+  console.log(i);
+  if(i > 3) break;
 }
 
 </textarea>可以忽略所有的表达式。同样确保使用break语句来退出循环且还要修改(递增)一个变量,确保能正常执行break语句<textarea>
@@ -1976,7 +1976,7 @@ for (var i = 0; i < 3; i++) {  // 三个箭头函数体中的每个`'i'`都指�
 var newArray = array.map(el => el());
 console.log(newArray); // [3, 3, 3]
 
-如果2、用 let 声明一个具有块级作用域的变量,则为每个循环迭代创建一个新的绑定。
+2、如果用let声明一个具有块级作用域的变量,则为每个循环迭代创建一个新的绑定。
 
 // 使用ES6块级作用域
 var array = [];
@@ -1986,7 +1986,7 @@ for (let i = 0; i < 3; i++) {  // 这一次,每个'i'指的是一个新的的绑
 var newArray = array.map(el => el());
 console.log(newArray); // [0, 1, 2]
 
-3、解决这个问题的另一种方法是使用闭包。
+3、解决这个问题的另一种方法是使用闭包
 let array = [];
 for (var i = 0; i < 3; i++) {
  array[i] = (function(x) {
@@ -2069,9 +2069,9 @@ while(1){console.log("有本事关了我！");}  // console.log换成alert
 var x="";
 var i= 0;
 do{
-    x=x + "该数字为 " + i + "<br>";
-    i++;
-    console.log(x);
+  x=x + "该数字为 " + i + "<br>";
+  i++;
+  console.log(x);
 }
 while(i < 5) ;
 
@@ -2100,11 +2100,11 @@ switch(n){
 //首先获取用户的一个输入,并用Number()强制转换为数字
 var iNumber = Number(prompt("输入一个5到100之间的数字",""));//第二个参数,用于显示输入框的默认值
 if(isNaN(iNumber))                            //判断输入的是否是数字NaN "Not a Number"
-    console.log("请确认你的输入正确");
+  console.log("请确认你的输入正确");
 else if(iNumber > 100 || iNumber < 5)         //判断输入的数字范围
-    console.log("你输入的数字范围不在5和100之间");
+  console.log("你输入的数字范围不在5和100之间");
 else
-    console.log("你输入的数字是:" + iNumber);
+  console.log("你输入的数字是:" + iNumber);
 
 </textarea><textarea>
 iWeek = parseInt(prompt("输入1到7之间的整数",""));
@@ -2166,13 +2166,8 @@ var codeList  = {
   "002":"密码输入错误",
   "003":"用户被锁定"
 }
-$.ajax(option,function(result){
-  var errCode = result.errCode;
-  if(errCode){
-    console.log(codeList[errCode]);
-  }else{
-    console.log("登录成功")
-  }
+$.ajax(option, function(result){
+  console.log(result.errCode ? codeList[errCode] : "登录成功")
 },function(err){
 
 })
@@ -2195,7 +2190,7 @@ function type(obj){
 (function(window,undefined){
   var class2type = {};   // 用于预存储一张类型Hash表用于hook
   jQuery.each("Boolean Number String Function Array Date RegExp Object Error".split(" "),function(i,name) {
-      class2type["[object " + name + "]"] = name.toLowerCase();
+    class2type["[object " + name + "]"] = name.toLowerCase();
   });
 
   jQuery.extend({
@@ -2204,8 +2199,8 @@ function type(obj){
     type: function(obj) {
       if(obj == null) return String(obj);
       return typeof obj === "object" || typeof obj === "function" ?
-          class2type[core_toString.call(obj)] || "object" :
-          typeof obj;
+        class2type[core_toString.call(obj)] || "object" :
+        typeof obj;
     }
   })
 })(window);
@@ -2297,8 +2292,8 @@ var Hook =(function(){
       var s = parameter + "_func";
       var f = [];
       for(var h in window) {
-          if(h.indexOf(s) != 0) continue;
-          f.push(h);
+        if(h.indexOf(s) != 0) continue;
+        f.push(h);
       }
       this.actionHook(f);
     },
@@ -4996,6 +4991,96 @@ export const arrObjSum = (obj, key) => {
   return obj.reduce((prev, cur) => prev + cur.key, 0)
 }
 
+</textarea>
+
+<h4>拷贝数组</h4><pre>
+JS中的数组是可变的,在创建数组之后还可以修改数组的内容。这意味着要拷贝一个数组,就不能简单地将旧数组分配给一个新变量,它也是一个数组。如果这样做,它们将共享相同的引用,并且在更改一个变量之后,另一个变量也将受到更改的影响,所以我们需要拷贝这个数组。
+
+以下方法执行的是浅拷贝,就是数组是元素是对象的时候,更改对象的值,另一个也会跟着变。所以上面的技巧适合简单的数据结构,复杂的结构要使用深拷贝
+
+</pre><textarea>
+const numbers = [1, 2, 3, 4, 5]
+
+1、使用Array.slice方法
+const copy = numbers.slice()
+copy.push(6)     // 添加新项以证明不会修改原始数组,后面同理
+console.log(copy,numbers)
+
+2、使用Array.map方法
+const copy = numbers.map( num => num )
+copy.push(6)
+console.log(copy,numbers)
+
+3、使用Array.from方法
+const copy = Array.from(new Set(numbers));
+copy.push(6);
+console.log(copy,numbers);
+
+4、使用展开操作符
+const copy = [...numbers];
+copy.push(6);
+console.log(copy,numbers)
+
+5、使用Array.of方法和展开操作符
+const copy = Array.of(...numbers);
+copy.push(6);
+console.log(copy,numbers)
+
+6、使用 Array 构造函数和展开操作符
+const copy = new Array(...numbers);
+copy.push(6);
+console.log(copy,numbers)
+
+7、使用解构
+const [...copy] = numbers;
+copy.push(6);
+console.log(copy,numbers)
+
+8、使用 Array.concat 方法
+const copy = numbers.concat();
+copy.push(6);
+console.log(copy,numbers)
+
+9、使用 Array.push 方法和展开操作符
+let copy = [];
+copy.push(...numbers);
+copy.push(6);
+console.log(copy,numbers)
+
+10、使用Array.unshift方法和展开操作符
+let copy = [];
+copy.unshift(...numbers);
+copy.push(6);
+console.log(copy,numbers)
+
+11、使用Array.forEach方法和展开操作符
+let copy = [];
+numbers.forEach((value) => copy.push(value));
+copy.push(6);
+console.log(copy,numbers)
+
+12、使用for循环
+let copy = [];
+for (let i = 0; i < numbers.length; i++) {
+copy.push(numbers[i]);
+}
+copy.push(6);
+console.log(copy,numbers)
+
+13、使用 Array.reduce 方法
+不推荐
+const copy = numbers.reduce((acc, x) => { acc.push(x); return acc; }, []);
+copy.push(6);
+console.log(copy,numbers)
+
+14、使用古老的 apply 方法
+let copy = [];
+Array.prototype.push.apply(copy, numbers);
+copy.push(6);
+console.log(copy,numbers)
+
+以上所有的方法输入分别为
+// (6)[1, 2, 3, 4, 5, 6] (5)[1, 2, 3, 4, 5]
 
 </textarea>
 </div>
@@ -42493,7 +42578,7 @@ setTimeout(jump,5000);
 function say(){
   alert("sss")
 }
-setInterval(say(),2000);  // 这么写函数setInterval将直接执行say（）函数，应该讲代码改为
+setInterval(say(),2000);  // 这么写函数setInterval将直接执行say（）函数,应该讲代码改为
 setInterval("say()",2000);//或者"say()"改为say
 
 数码时钟

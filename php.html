@@ -189,23 +189,27 @@
   <li>
       <a href="#swoole">swoole ▼</a>
       <ul>
+        <li><a href="#swoole_install">install</a></li>
         <li><a href="#swoole_protocols">protocols</a></li>
-      <li><a href="#swoole_timer">timer</a></li>
-      <li><a href="#swoole_server">swoole_server</a></li>
-      <li><a href="#swoole_http_server">http_server</a></li>
-      <li><a href="#swoole_websocket_server">websocket_server</a></li>
-      <li><a href="#swoole_coroutine">coroutine</a></li>
-      <li><a href="#swoole_client">swoole_client</a></li>
-      <li><a href="#swoole_mysql_redis">mysql_redis</a></li>
-      <li><a href="#swoole_async_file">async_file</a></li>
-      <li><a href="#eventLoop">eventLoop</a></li>
-      <li><a href="#swoole_task">swoole_task</a></li>
-      <li><a href="#swoole_process">swoole_process</a></li>
-      <li><a href="#swoole_memory">swoole_memory</a></li>
-      <li><a href="#swoole_lock">swoole_lock</a></li>
-      <li><a href="#swoole_buffer">swoole_buffer</a></li>
-      <li><a href="#swoole_table">swoole_table</a></li>
-      <li><a href="#swoole_atomic">swoole_atomic</a></li>
+        <li><a href="#swoole_timer">timer</a></li>
+        <li><a href="#swoole_server">swoole_server</a></li>
+        <li><a href="#swoole_http_server">http_server</a></li>
+        <li><a href="#swoole_websocket_server">websocket_server</a></li>
+        <li><a href="#swoole_coroutine">coroutine</a></li>
+        <li><a href="#swoole_client">swoole_client</a></li>
+        <li><a href="#swoole_mysql_redis">mysql_redis</a></li>
+        <li><a href="#swoole_async_file">async_file</a></li>
+        <li><a href="#eventLoop">eventLoop</a></li>
+        <li><a href="#swoole_task">swoole_task</a></li>
+        <li><a href="#swoole_process">swoole_process</a></li>
+        <li><a href="#swoole_memory">swoole_memory</a></li>
+        <li><a href="#swoole_lock">swoole_lock</a></li>
+        <li><a href="#swoole_buffer">swoole_buffer</a></li>
+        <li><a href="#swoole_table">swoole_table</a></li>
+        <li><a href="#swoole_atomic">swoole_atomic</a></li>
+        <li><a href="#swoole_mmap">swoole_mmap</a></li>
+        <li><a href="#swoole_channel">swoole_channel</a></li>
+        <li><a href="#swoole_easy-swoole">easy-swoole</a></li>
     </ul>
   </li>
   <li><a href="#attack">attack</a></li>
@@ -283,27 +287,87 @@ Apache和Tomcat都可以做为独立的web服务器来运行。
 <h3>CGI、FAST-CGI、PHP-FPM</h3><pre>
 PHP常见的四种运行方式：CGI、FastCGI、Mod_PHP及CLI,Nginx与PHP的合作就是通过FastCGI运行
 
+cgi(common gateway interface公共网关接口)、fast-cgi协议
+早期的webserver只处理html等静态文件,webserver处理不了php等动态语言只能交给php解释器来处理
+cgi协议为解决不同的语言解释器(如php、python解释器)与webserver的通信,只要按照cgi协议编写程序就能实现语言解释器与webwerver的通信,如php-cgi程序
+
+fast-cgi的改进
+cgi协议解决了php解释器与webserver通信的问题webserver终于可以处理动态语言
+但是webserver每收到一个请求都会去fork一个cgi进程,请求结束再kill掉这个进程。这样有10000个请求就需要fork、kill php-cgi进程10000次,很浪费资源
+于是出现了cgi的改良版本fast-cgi。fast-cgi每次处理完请求后不会kill掉这个进程,而是保留这个进程,使这个进程可以一次处理多个请求。这样每次就不用重新fork一个进程了,大大提高了效率。
+
 FastCGI是CGI(即通用网关接口)的升级版
 传统的CGI模式把网页和WEB服务器中的执行程序连接起来,它把网页发送的指令传递给服务器的执行程序,再把服务器执行程序的结果返还给网页
 在这种运行方式下服务器有多少连接请求就会有多少CGI子进程,当用户请求数量非常多时会大量挤占系统的资源如内存、CPU时间等,造成效能低下
 
 FastCGI作为CGI的升级版,它将CGI解释器进程保持在内存中
-
 1、Web Server启动时载入FastCGI进程管理器(如php-fpm)
 2、FastCGI进程管理器自身初始化,启动多个CGI解释器进程,并等待来自Web Server的连接。
 3、当客户端请求到达Web Server时FastCGI进程管理器选择并连接到一个CGI解释器,Web server将CGI环境变量和标准输入发送到FastCGI子进程。
 4、FastCGI子进程完成处理后将标准输出和错误信息从同一连接返回Web Server。当FastCGI子进程关闭连接时,请求便告处理完成。FastCGI子进程接着等待并处理来自FastCGI进程管理器的下一个连接。
 
-PHP-FPM是一个实现了Fastcgi的程序,简称FastCGI进程管理器(FastCGI Process Manager),从PHP5.3.3开始就成为了PHP的内置管理器,PHP5.3.3之后编译事安装时使用--enalbe-fpm编译参数就可以启用PHP-FPM
+PHP-FPM是一个实现了Fastcgi的程序,简称FastCGI进程管理器(FastCGI Process Manager)
+FPM (FastCGI进程管理器)是一个可选的PHP FastCGI实现并且附加了对高负载网站很有用的特性,用于替换PHP FastCGI的大部分附加功能
+这个SAPI在PHP5.3.3以后已经被绑定,从PHP5.3.3开始就成为了PHP的内置管理器,PHP5.3.3之后编译事安装时使用--enalbe-fpm编译参数就可以启用PHP-FPM
 使用PHP-FPM就意味着不用Apache内置的mod_php,也就是要在Apache之外处理php程序的解释运行问题。看起来是多引入了一个额外的程序PHP-FPM,既占CPU又占内存。但这样一来,因为Apache可以专心处理除php之外的静态网页及元素,反而httpd进程本身占用的CPU和内存可以显著降低,从而从整体上降低资源消耗。
 apt install -y php-fpm
 
+php-fpm即php-Fastcgi Process Manager,php-fpm是FastCGI的实现,并提供了进程管理的功能。
+进程包含master进程和worker进程两种进程。
+实现了fastCGI协议的nginx,第一次启动时会启动一个php-fpm的master进程,该master进程初始化环境后,启动多个worker进程(即php-fpm进程池中的php-fpm)
+master进程只有一个,负责监听端口,接收来自Web Server的请求,而worker进程则一般有多个(具体数量根据实际需要配置),每个进程内部都嵌入了一个PHP解释器,是PHP代码真正执行的地方
+
+当请求发来后,master进程把请求分发到进程池中的php-fpm,分发完后就可以接下一个请求了,避免了重复劳动(重复加载php.ini初始化环境),效率自然提升了
+当请求多的时候master会启动更多的php-fpm子进程,当请求少的时候master也会停掉一些子进程。既提高了性能也节省资源。
+当php-fpm设定的上限不足以支持更高的并发请求时,nginx只能返回502错误了,因为没有更多的php-fpm进程可用了。
+
+php54之前php-fpm(第三方编译)是管理器,php-cgi是解释器
+php54之后php-fpm(官方自带),master与pool模式。php-fpm和php-cgi没有关系了,php-fpm又是解释器,又是管理器
+php-fpm是管理php-cgi的说法是针对php54之前的
+
+安装
+从源代码编译
+编译PHP时需要--enable-fpm配置选项来激活FPM支持
+以下为FPM编译的具体配置参数（全部为可选参数）：
+--with-fpm-user - 设置FPM运行的用户身份（默认 - nobody）
+--with-fpm-group - 设置FPM运行时的用户组（默认 - nobody）
+--with-fpm-systemd - 启用systemd集成 (默认 - no)
+--with-fpm-acl - 使用POSIX访问控制列表 (默认 - no) 5.6.5版本起有效
+
+1、下载php源码包 http://www.php.net/downloads.php
+2 、安装php
+tar -xvf php-5.5.13.tar.bz2
+cd php-5.5.13
+./configure --prefix=/usr/local/php --with-config-file-path=/etc --enable-inline-optimization --disable-debug --disable-rpath --enable-shared --enable-opcache --enable-fpm --with-fpm-user=www --with-fpm-group=www --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-gettext --enable-mbstring --with-iconv --with-mcrypt --with-mhash --with-openssl --enable-bcmath --enable-soap --with-libxml-dir --enable-pcntl --enable-shmop --enable-sysvmsg --enable-sysvsem --enable-sysvshm --enable-sockets --with-curl --with-zlib --enable-zip --with-bz2 --with-readline --without-sqlite3 --without-pdo-sqlite --with-pear
+make 
+make install 
+
+FPM的功能包括：
+1、支持平滑停止/启动的高级进程管理功能;
+2、可以工作于不同的uid/gid/chroot环境下,并监听不同的端口和使用不同的php.ini配置文件(可取代safe_mode的设置);
+3、stdout和stderr日志记录;
+4、在发生意外情况的时候能够重新启动并缓存被破坏的opcode;
+5、文件上传优化支持;
+6、"慢日志" - 记录脚本(不仅记录文件名,还记录PHP backtrace信息,可以使用ptrace或类似工具读取和分析远程进程的运行数据)运行所导致的异常缓慢;
+7、fastcgi_finish_request() - 特殊功能：用于在请求完成和刷新数据后,继续在后台执行耗时的工作(录入视频转换、统计处理等);
+8、动态／静态子进程产生;
+9、基本SAPI运行状态信息(类似Apache的mod_status);
+10、基于php.ini的配置文件
+
+php-cgi不是FastCGI进程管理器,php-fpm才是
+要对php-cgi进程进行管理,需要使用特别的模块:比如Apache的mod_fcgid,IIS的PHP Manager.而Nginx只负责反向代理/请求转发,不负责管理php-cgi进程,所以Nginx一般配合能够自行管理工作进程(子进程)的php-fpm使用
+php-fpm是一个独立的SAPI,其管理的不是php-cgi,也就是说php-fpm跟php-cgi无关,php-fpm内置php解释器,php-fpm的子进程是自己fork出来的,并不会调用php-cgi,你把系统中的php-cgi删了也不会影响到php-fpm服务的正常运行
+php-fpm在pm = static配置下工作进程常驻后台,也就是如果你配置了5个工作进程pm.max_children = 5,那php-fpm服务启动时就会自动fork出5个子进程并常驻后台,不会在请求处理结束后退出,也不会在空闲时退出.如果你在php脚本中使用了数据库持久连接,这时这5个工作进程还会建立并维持5个到数据库的持久连接,实现在处理多个请求的时候重用数据库连接资源,避免每个请求都建立/释放一次数据库连接.持久连接还能做到超时自动重连,对php-fpm里的脚本来说是完全透明的,脚本只需在启动时指明使用持久连接即可
+php-fpm在pm = dynamic配置下工作进程【部分】常驻后台,也就是维持一定数量的常驻进程,服务繁忙时fork出更多的进程,服务闲置时自动关掉一些进程,把内存资源归还给操作系统.虚拟主机提供商应该是比较喜欢这种方式的.总而言之,PHP-FPM这种运行模式类似于Apache的prefork MPM,能静能动的多进程网络服务
+
+配置
+FPM使用类似php.ini语法的php-fpm.conf和进程池配置文件
+
 PHP-FPM既可以寄宿于web服务器运行,也可以独立于web服务器运行,PHP-FPM的配置文件内容：
-listen_address 127.0.0.1:9000
+listen_address 127.0.0.1:9000  // 默认监听127.0.0.1:9000,在实际的工作中这个地址监听地址是可以更改的
 start_servers
 min_spare_servers
 max_spare_servers
-从中可以知道PHP-FPM默认监听127.0.0.1:9000,在实际的工作中这个地址监听地址是可以更改的。
 
 </pre>配置nginx<textarea>
 nginx将该请求传递给127.0.0.1:9000的PHP-FPM,PHP-FPM解析完内容后将内容返回给nginx,然后nginx再返回给客户端
@@ -317,12 +381,13 @@ server{
   }
   # 请求php文件时反向代理到php-fpm
   location ~ \.php$ {
-    include /usr/local/etc/nginx/fastcgi.conf;  # 加载nginx的fastcgi模块
+    include /usr/local/etc/nginx/fastcgi.conf;  # 加载nginx的fastcgi模块配置
     fastcgi_intercept_errors on;
     fastcgi_pass 127.0.0.1:9000;                # nginx fastcgi进程监听的地址和端口
   }
 }
 
+# 访问www.example.com时处理流程
 www.example.com
        |
      nginx
@@ -8933,6 +8998,83 @@ echo preg_replace('/.+(http\:[\w\-\/\.]+\/)[^\w\-\!]+([\w\-\!]+).+/','\\1',$weig
 echo preg_replace('/^(.+)网址：(http\:[\w\-\/\.]+\/)[^\w\-\!]+([\w\-\!]+).+$/','栏目：$1<br>网址：$2<br>商标：$3',$weigeti);
 
 </pre>
+
+<h4>正则常用函数<h4><pre>
+【 preg_match 】
+执行匹配正则表达式
+
+preg_match ( string $pattern , string $subject [, array &$matches [, int $flags = 0 [, int $offset = 0 ]]] ) : int
+pattern: 要搜索的模式，字符串类型。
+subject：输入字符串。
+match： 如果提供了参数matches，它将被填充为搜索结果,数据结构为一维数组。
+flags: 可以设置为PREG_OFFSET_CAPTURE，使用搜索结果的第0个元素为匹配的字符串，第1个元素为对应的偏移量（位置）
+offset: 搜索从目标字符串的起始位置开始匹配。
+返回值：匹配次数
+
+类似函数preg_match_all，参数与preg_match一致
+区别：
+preg_match：只匹配一次，搜索结构match的数据结果为一维数组
+preg_match_all：匹配全部，搜索结果match的数据结构为二维数组。
+
+【 preg_replace 】
+执行一个正则表达式搜索和替换，返回值为替换后的字符串
+
+preg_replace ( mixed $pattern , mixed $replacement , mixed $subject [, int $limit = -1 [, int &$count ]] ) : mixed
+pattern：要搜索的模式。可以是一个字符串或字符串数组。
+replacement：用于替换的字符串或字符串数组
+subject：要进行搜索和替换的字符串或字符串数组。
+limit：替换的最大次数。默认是 -1(无限)。
+count：替换次数。
+
+类似函数preg_filter，参数与preg_replace一致
+区别(使用数组进行匹配的时候才看得出区别)：
+preg_replace：不管是否有替换，返回全部结果
+preg_filter：只返回匹配的结果。
+
+【 preg_split 】
+通过一个正则表达式分隔字符串
+
+preg_split ( string $pattern , string $subject [, int $limit = -1 [, int $flags = 0 ]] ) : array
+$pattrn：用于搜索的模式，字符串形式。
+subject：输入字符串
+limit：将限制分隔得到的子串最多只有limit个，返回的最后一个子串将包含所有剩余部分。
+flags：有以下标记的组合：
+-- 1. PREG_SPLIT_NO_EMPTY: 返回分隔后的非空部分。
+-- 2. PREG_SPLIT_DELIM_CAPTURE: 用分隔符'()'括号把匹配的捕获并返回。
+-- 3. PREG_SPLIT_OFFSET_CAPTURE： 匹配返回时将会附加字符串偏移量
+
+$subject = "1a23b";  
+$a = preg_split('/[\d]/', $subject, -1, PREG_SPLIT_NO_EMPTY);  
+var_dump($a);  
+$a = preg_split('/([\d])/', $subject, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE); 
+var_dump($a);  
+输出如下：
+array (size=2)
+0 => string 'a' (length=1)
+1 => string 'b' (length=1)
+array (size=5)
+0 => string '1' (length=1)
+1 => string 'a' (length=1)
+2 => string '2' (length=1)
+3 => string '3' (length=1)
+4 => string 'b' (length=1)
+
+【 preg_grep 】
+返回匹配模式的数组条目
+
+preg_grep ( string $pattern , array $input [, int $flags = 0 ] ) : array
+$pattern：要搜索的模式，字符串形式
+$input：输入数组
+flags：如果不设置则返回匹配的数目，设置PREG_GREP_INVERT则返回不匹配的数目。
+
+【 preg_quote 】
+转义正则表达式字符，返回为转义后的字符串
+
+preg_quote ( string $str [, string $delimiter = NULL ] ) : string
+str：输入字符串
+delimiter：需要转义的字符串
+
+</pre>
 </div>
 
 <div id="array">
@@ -10656,7 +10798,7 @@ Y   m : 01-12  d : 01-31   l:星期  h :01-12  i: 00-59   s : 00-59  a : am/pm
 echo date(DATE_RFC2822);                     // Fri, 27 Dec 2018 19:17:49 +0800
 echo date(DATE_ATOM,mktime(0,0,0,7,1,2000)); // 2000-07-01T00:00:00+08:00
 
-</pre>date()<textarea>
+</pre><textarea>
 自动版权年份 ©2016-< ?php  echo date(Y);?>
 echo "倒计时:距离春节还有 ".ceil((strtotime("January 28 2020")-time())/60/60/24)." 天！";
 
@@ -10706,7 +10848,7 @@ echo date('a');  // pm
 echo date('T');  // CST,大写T表示服务器的时间区域设置
 echo date('I');  // 大写I表示判断当前是否为夏令时,为真返回1,否则为0
 echo date('U');  // 1573105926,大写U表示从1970年1月1日到现在的总秒数,就是Unix时间纪元的UNIX时间戳
-echo date('c');  // 2007-02-06T14:24:43+00:00,小写c表示ISO8601日期,日期格式为YYYY-MM-DD,用字母T来间隔日期和时间,时间格式为HH:MM:SS,时区使用格林威治标准时间(GMT)的偏差
+echo date('c');  // 2007-02-06T14:24:43+00:00,小写c表示ISO8601日期,格式为YYYY-MM-DD,用T间隔日期和时间,时间格式为HH:MM:SS,时区使用格林威治标准时间(GMT)的偏差
 echo date('r');  // Tue,06 Feb 2007 14:25:52 +0000,小写r表示RFC822日期
 
 5、格式化时间
@@ -10887,15 +11029,13 @@ echo "Did nothing in $time seconds\n";  // 0.065834045410156
 </div>
 
 <div id="global">
-<h2>超全局变量</h2>
-<h4>
+<h2>超全局变量</h2><h4>
 所有超全局变量都是数组,预定义变量
 $_GET      $_POST       $_REQUEST
 $_SERVER   $_ENV        $_GLOBALS
 $_COOKIE   $_SESSION    $_FILES
-</h4>
 
-<pre>
+</h4><pre>
 【 $GLOBALS 】
 引用全局作用域中可用的全部变量
 $GLOBALS是PHP的一个包含了全部变量的超级全局变量数组,变量的名字就是数组的键,在一个PHP脚本的全部作用域中都可以访问
@@ -15540,16 +15680,18 @@ function test_input($data) {
 
 $keyword = strip_tags(addslashes(trim($_GET['query'])));  // 完全过滤掉html内容
 
+</pre><textarea>
 // 过滤列表只写了iframe和script,如果需要过滤其他内容,比如某些人评论总是带上链接,这些都是可以过滤的
 if ( '' != $comment_content ) {
   $filter = '/<(iframe|script)/i';   // $filter是需要过滤的关键词,关键词之间用分隔符|隔开即可
   if (preg_match($filter,$comment_content,$matches)) {
     $comment_content = strip_tags($comment_content);            // 直接过滤,允许提交
     err( __('警告：评论含有危险内容,已被拦截,请在更正后重试。') );   // 提出警告,禁止提交
-    $comment_content = htmlspecialchars($comment_content).'<br />(<font color="red">系统提示：评论含危险内容,已被转义处理。</font>)';              // 内容转义,允许提交
+    $comment_content = htmlspecialchars($comment_content).'< br />(< font color="red">系统提示：评论含危险内容,已被转义处理。</font>)';              // 内容转义,允许提交
   }
 }
 
+</textarea><pre>
 方法一、利用php htmlentities函数
 php防止XSS跨站脚本攻击的方法:针对非法的HTML代码包括单双引号等使用htmlspecialchars()函数
 在使用htmlspecialchars()函数的时候注意第二个参数,htmlspecialchars($string)第二个参数默认是ENT_COMPAT,默认只是转化双引号而不对单引号转义
@@ -15617,7 +15759,7 @@ $_POST    && SafeFilter($_POST);
 $_COOKIE  && SafeFilter($_COOKIE);
 
 function SafeFilter (&$arr){
-   $ra=Array('/([\x00-\x08,\x0b-\x0c,\x0e-\x19])/','/script/','/javascript/','/vbscript/','/expression/','/applet/','/meta/','/xml/','/blink/','/link/','/style/','/embed/','/object/','/frame/','/layer/','/title/','/bgsound/','/base/','/onload/','/onunload/','/onchange/','/onsubmit/','/onreset/','/onselect/','/onblur/','/onfocus/','/onabort/','/onkeydown/','/onkeypress/','/onkeyup/','/onclick/','/ondblclick/','/onmousedown/','/onmousemove/','/onmouseout/','/onmouseover/','/onmouseup/','/onunload/');
+   $ra = Array('/([\x00-\x08,\x0b-\x0c,\x0e-\x19])/','/script/','/javascript/','/vbscript/','/expression/','/applet/','/meta/','/xml/','/blink/','/link/','/style/','/embed/','/object/','/frame/','/layer/','/title/','/bgsound/','/base/','/onload/','/onunload/','/onchange/','/onsubmit/','/onreset/','/onselect/','/onblur/','/onfocus/','/onabort/','/onkeydown/','/onkeypress/','/onkeyup/','/onclick/','/ondblclick/','/onmousedown/','/onmousemove/','/onmouseout/','/onmouseover/','/onmouseup/','/onunload/');
 
    if (is_array($arr)){
      foreach ($arr as $key => $value){
@@ -17225,7 +17367,7 @@ MySQL8.0 For Windows zip包下载地址https://dev.mysql.com/downloads/mysql/,�
 为避免操作到已经设置环境变量的mysql实例,指定命令的路径再执行
 
 初始化数据库
-在MySQL安装目录的bin目录下执行命令mysqld --initialize --console,执行输出结果里面"A temporary password is generated for root@localhost: rI5rvf5x5G,E",其中root@localhost:后面的"rI5rvf5x5G,E"就是root默认初始密码。在没有更改密码前,需要记住这个密码,后续登录需要用到,要是没记住则删掉初始化的datadir目录,再执行一遍初始化命令,又会重新生成,也可以使用安全工具,强制改密码
+在MySQL安装目录的bin目录下执行命令mysqld --initialize --console,输出"A temporary password is generated for root@localhost: rI5rvf5x5G,E",其中"rI5rvf5x5G,E"就是root默认初始密码。在没有更改密码前需要记住这个密码,后续登录需要用到,要是没记住则删掉初始化的datadir目录,再执行一遍初始化命令,又会重新生成,也可以使用安全工具,强制改密码
 E:\wnmp\mysql\bin> .\mysqld.exe --initialize-insecure --user=mysql  # 生成data目录,并建好默认数据库,登录的用户名为root,密码为空
 E:\wnmp\mysql\bin> .\mysqld.exe --initialize --user=mysql --console # 初始化命令生成一个临时密码
 E:\wnmp\mysql\bin> .\mysqld.exe --defaults-file=E:\wnmp\mysql\my.ini --initialize --console  # 初始化时指定dedaults-file(推荐)
@@ -17248,7 +17390,7 @@ mysqladmin shutdown
 mysqladmin start
 
 更改密码和密码认证插件
-E:\wnmp\mysql\bin>.\mysql.exe -u oot -p
+E:\wnmp\mysql\bin>.\mysql.exe -u root -p
 mysql> select Host,User,plugin,authentication_string from mysql.user;
 在MySQL安装目录的bin目录下执行命令mysql -u root -p,这时会提示输入密码,填入root默认初始密码即可登录成功,进入MySQL命令模式。
 
@@ -17264,7 +17406,7 @@ mysql> update mysql.user set authentication_string='' where user='root'
 mysql> alter mysql.user 'root'@'localhost' identified with mysql_native_password by '新密码';
 mysql> flush privileges;
 
-一定不要采取如下形式该密码：
+一定不要采取如下形式改密码：
 update mysql.user set authentication_string="newpassword" where user="root";
 这样会给user表中root用户的authentication_string字段下设置了newpassword值
 当再使用alter user 'root'@'localhost' identifited by 'newpassword'时会报错
@@ -17302,6 +17444,9 @@ grant select,insert,update,delete,create,drop,alter on *.* to 'xxh'@'%'; #授权
 查看用户权限
 show grants for 'xxh'@'%';
 
+如果知道要连接的mysql版本为8以及8以上最好在创建用户的时候加上
+CREATE USER 'admin'@'%' IDENTIFIED WITH mysql_native_password BY '';
+
 【 安装mysql管理工具phpMyAdmin 】
 下载解压到/phpmyadmin,localhost:8000/setup设置服务器,将设置的配置config.inc.php拷贝或下载到phpmyadmin目录即可
 
@@ -17335,6 +17480,189 @@ iconv('utf-8','gbk',$content);
 meta是属于html信息的,仅仅是一个声明,它起作用表明服务器已经把HTML信息传到了浏览器
 meta charset="utf-8"
 
+【 mysqld.exe 】
+mysql\bin> .\mysqld.exe --help
+mysqladmin variables  // To see what values a running MySQL server is using
+
+mysqld.exe --init-file=file_name
+
+mysqld install MySQL57 --defaults-file="D:/ProgramData/MySQL/MySQL Server 5.7/my.ini"
+
+Usage: mysqld [OPTIONS]
+NT and Win32 specific options:
+  --install                     Install the default service (NT).
+  --install-manual              Install the default service started manually (NT).
+  --install service_name        Install an optional service (NT).
+  --install-manual service_name Install an optional service started manually (NT).
+  --remove                      Remove the default service from the service list (NT).
+  --remove service_name         Remove the service_name from the service list (NT).
+  --enable-named-pipe           Only to be used for the default server (NT).
+  --standalone                  Dummy option to start as a standalone server (NT).
+
+-v, --verbose       Used with --help option for detailed help.
+-V, --version       Output version information and exit.
+
+-P, --port=#   Port number to use for connection or 0 to default to,my.cnf, $MYSQL_TCP_PORT, /etc/services, built-in default (3306), whatever comes first
+
+mysqld --console 启动失败时查看ERROR日志
+
+查看mysql服务器ip
+select SUBSTRING_INDEX(host,':',1) as ip , count(*) from information_schema.processlist group by ip;
+查看数据库端口：
+show variables like 'port' ;
+
+【 mysql登录登出 】
+cmd > mysql -u root -p     // 密码不要在这里输入,会被记录,不要分号,直接enter之后再输密码
+cmd > mysql -h 主机名或IP地址 -u root -p 123;
+cmd > mysql -h 主机名或IP地址 -P 3306 -u root -p 123;
+cmd > mysql restart        // 重启mysql
+mysql> quit/exit           // 退出mysql
+
+修改MySQL管理员的口令：
+cmd> mysqldmin –u root password 密码字符串
+如已有密码需修改root密码:
+cmd> mysqladmin –u root –p password 新密码字符串
+
+【 mysq -e参数使用 】
+可以用shell脚本操作mysql数据库，使用mysql的-e参数可以执行各种sql的(创建，删除，增，删，改、查)等各种操作
+mysql -hhostname -Pport -uusername -ppassword -e 相关mysql的sql语句，不用在mysql的提示符下运行mysql，即可以在shell中操作mysql的方法。
+
+> mysql -hlocalhost -P8080 -uroot -p123456 -e'set names utf8;use report;select * from table;';
+
+#!/bin/bash
+ 
+HOSTNAME="192.168.111.84"     #数据库信息
+PORT="3306"
+USERNAME="root"
+PASSWORD=""
+ 
+DBNAME="test_db_test"         #数据库名称
+TABLENAME="test_table_test"   #数据库中表的名称
+ 
+#创建数据库
+create_db_sql="create database IF NOT EXISTS ${DBNAME}"
+mysql -h${HOSTNAME}  -P${PORT}  -u${USERNAME} -p${PASSWORD} -e"${create_db_sql}"
+ 
+#创建表
+create_table_sql="create table IF NOT EXISTS ${TABLENAME} (  name varchar(20), id int(11) default 0 )"
+mysql -h${HOSTNAME}  -P${PORT}  -u${USERNAME} -p${PASSWORD} ${DBNAME} -e"${create_table_sql}"
+
+#插入数据
+insert_sql="insert into ${TABLENAME} values('billchen',2)"
+mysql -h${HOSTNAME}  -P${PORT}  -u${USERNAME} -p${PASSWORD} ${DBNAME} -e"${insert_sql}"
+ 
+#查询
+select_sql="select * from ${TABLENAME}"
+mysql -h${HOSTNAME}  -P${PORT}  -u${USERNAME} -p${PASSWORD} ${DBNAME} -e"${select_sql}"
+ 
+#更新数据
+update_sql="update ${TABLENAME} set id=3"
+mysql -h${HOSTNAME}  -P${PORT}  -u${USERNAME} -p${PASSWORD} ${DBNAME} -e"${update_sql}"
+mysql -h${HOSTNAME}  -P${PORT}  -u${USERNAME} -p${PASSWORD} ${DBNAME} -e"${select_sql}"
+ 
+#删除数据
+delete_sql="delete from ${TABLENAME}"
+mysql -h${HOSTNAME}  -P${PORT}  -u${USERNAME} -p${PASSWORD} ${DBNAME} -e"${delete_sql}"
+mysql -h${HOSTNAME}  -P${PORT}  -u${USERNAME} -p${PASSWORD} ${DBNAME} -e"${select_sql}"
+
+【 mysql操作 】
+mysql> select now();
+mysql> select "welecome to my blog!";
+mysql> select ((4 * 4) / 10 ) + 25;
+
+mysql> show variables;                      // 查看MySQL服务器配置信息
+mysql> show variables like '%datadir%';
+mysql> show grants for root@'localhost';    // 查看用户权限
+mysql> select * from mysql.user where user='root'\G
+mysql> select * from mysql.db where user='root'\G
+mysql> select Host,User,plugin,authentication_string from mysql.user;
+mysql> select distinct concat('User: ''',user,'''@''',host,''';') as query from mysql.user; //查看所有用户
+mysql> show privileges;                     // 显示服务器所支持的不同权限
+mysql> select version();                    // 显示服务器版本
+mysql> status;                              // 显示mysql版本、当前用户、字符集、端口号等简要信息
+mysql> show status;                         // 显示一些系统特定资源的信息
+mysql> show global status;                  // 查看MySQL服务器运行的各种状态值,同show status
+mysql> show databases;                      // 显示当前服务器中的所有数据库
+mysql> use 数据库名;                         // 连接数据库
+mysql> select database();                   // 显示当前连接的数据库
+mysql> select user();                       // 显示当前登录的用户
+mysql> select current_user();               // 显示当前登录的用户
+mysql> show tables;                         // 显示当前数据库中的所有表名
+mysql> select COLUMN_NAME,column_comment from INFORMATION_SCHEMA.Columns where table_name='表名' and table_schema='数据库名'  // 查询表中所有字段的名字
+mysql> describe tablename;                  // 显示表结构
+mysql> desc tablename;                      // 显示表结构
+mysql> show create table user \g                // 查看创建表的SQL语句
+mysql> show index from table_name;              // 显示表的所有索引
+mysql> show engines;                            // 查看数据库支持的引擎
+mysql> show variables like '%storage_engine%';  // 查看当前存储引擎
+mysql> alter table wp_posts engine=innodb;      // 修改为innodb
+mysql> rename table MyClass to YouClass;    // 重命名数据表
+mysql> drop database name                   // 删除数据库
+mysql> drop table tableName                 // 删除数据表
+mysql> drop table tbname1,tablename2;       // 删除多个表,表间有外键关联时会报错,忽略,执行两次即可全部删除
+mysql> truncate tableName                   // 清空数据表
+mysql> delete from tableName                // 删除数据表的所有数据
+mysql> show table status\G                  // 获取当前数据库中所有表的信息
+mysql> show table status like 'tableName' \G
+
+source命令导入执行SQL文件
+mysql> source D:/www/sql/back.sql;
+
+source命令导入多个sql文件,可以新建一个sou.sql文件,里面存放下面的命令
+source d:/check1.sql;
+source d:/check2.sql;
+mysql> source d:/sou.sql;
+
+【 optimize优化表 】
+当对MySQL进行大量的增删改操作的时候,很容易产生一些碎片,这些碎片占据着空间,所以可能会出现删除很多数据后,数据文件大小变化不大的现象。当然新插入的数据仍然会利用这些碎片,但过多的碎片对数据的插入操作是有一定影响的,此时可以通过optimize来对表的优化。
+为了更加直观的看到数据碎片,Mysql可以使用如下命令查看
+show table status like 'table_name'
+
+data_free选项代表数据碎片。
+针对MySQL的不同数据库存储引擎,在optimize使用清除碎片,回收闲置的数据库空间,把分散存储(fragmented)的数据和索引重新挪到一起(defragmentation),对I/O速度有好处。优化之后无论是innodb还是myisam表都被收缩
+当然optimize在对表进行操作的时候会加锁,所以不宜经常在程序中调用。
+
+MyISAM存储引擎
+针对MyISAM表,直接使用如下命令进行优化
+optimize table table1[,table2][,table3]
+如果同时优化多个表可以使用逗号分隔,优化后data_free值为0
+
+对于myisam表,optimize table操作执行以下工作：
+1.如果表含有删除的列、分列的列,optimize table会修复表
+2.如果索引页没有排序,optimize table会将索引页进行排序
+3.如果表的统计信息不是最新的,optimize table会更新索引信息
+
+InnoDB存储引擎
+InnoDB引擎的表分为独享表空间和同享表空间的表,可以通过show variables like 'innodb_file_per_table';来查看是否开启独享表空间。
+开启了独享表空间是无法对表进行optimize操作的,如果操作会返回信息如Table does not support optimize, doing recreate + analyze instead,并不是说innodb不支持optimize table,因为对于innodb表,optimize table被映射成alter table ... force,重建表和更新索引统计信息并释放空间
+
+repair table table1[,table2][,table3]
+数据表修复
+
+</pre><textarea>
+if (is_array($tables)) {
+    $tables = implode('`,`', $tables);
+    $lists = Db::query("OPTIMIZE TABLE `{$tables}`");
+
+    if ($lists) {
+        $this->success("数据表优化完成！");
+    } else {
+        $this->error("数据表优化出错请重试！");
+    }
+}
+
+if (is_array($tables)) {
+    $tables = implode('`,`', $tables);
+    $lists = Db::query("REPAIR TABLE `{$tables}`");
+
+    if ($lists) {
+        $this->success("数据表修复完成！");
+    } else {
+        $this->error("数据表修复出错请重试！");
+    }
+}
+
+</textarea><pre>
 【 utf8mb4与emoji表情 】
 MYSQL5.5之前UTF8编码只支持1-3个字节,只支持BMP这部分的unicode编码区
 从MYSQL5.5开始可支持4个字节UTF编码utf8mb4,一个字符最多能有4字节,所以能支持更多的字符集。
@@ -17692,7 +18020,7 @@ class Pinyin{
   protected function num2str($num) {    
     if (!$this->lib) $this->parse_lib();
         
-    if ($num>0&&$num<160) { 
+    if ($num > 0 && $num < 160) { 
       return chr($num);
     } elseif($num<-20319||$num>-10247) {
       return '';
@@ -17752,138 +18080,8 @@ class Pinyin{
   }
 }
 
-</textarea><pre>
-【 mysqld.exe 】
-mysql\bin> .\mysqld.exe --help
-
-mysqld.exe --init-file=file_name
-
-mysqld install MySQL57 --defaults-file="D:/ProgramData/MySQL/MySQL Server 5.7/my.ini"
-
-Usage: mysqld [OPTIONS]
-NT and Win32 specific options:
-  --install                     Install the default service (NT).
-  --install-manual              Install the default service started manually (NT).
-  --install service_name        Install an optional service (NT).
-  --install-manual service_name Install an optional service started manually (NT).
-  --remove                      Remove the default service from the service list (NT).
-  --remove service_name         Remove the service_name from the service list (NT).
-  --enable-named-pipe           Only to be used for the default server (NT).
-  --standalone                  Dummy option to start as a standalone server (NT).
-
--v, --verbose       Used with --help option for detailed help.
--V, --version       Output version information and exit.
-
--P, --port=#   Port number to use for connection or 0 to default to,my.cnf, $MYSQL_TCP_PORT, /etc/services, built-in default (3306), whatever comes first
-
-【 mysql登录登出 】
-cmd > mysql -u root -p     // 密码不要在这里输入,会被记录,不要分号,直接enter之后再输密码
-cmd > mysql -h 主机名或IP地址 -u root -p 123;
-cmd > mysql restart        // 重启mysql
-mysql> quit/exit           // 退出mysql
-
-修改MySQL管理员的口令：
-cmd> mysqldmin –u root password 密码字符串
-如已有密码需修改root密码:
-cmd> mysqladmin –u root –p password 新密码字符串
-
-【 mysql操作 】
-mysql> select now();
-mysql> select "welecome to my blog!";
-mysql> select ((4 * 4) / 10 ) + 25;
-
-mysql> show variables;                      // 查看MySQL服务器配置信息
-mysql> show variables like '%datadir%';
-mysql> show grants for root@'localhost';    // 查看用户权限
-mysql> select * from mysql.user where user='root'\G
-mysql> select * from mysql.db where user='root'\G
-mysql> select distinct concat('User: ''',user,'''@''',host,''';') as query from mysql.user; //查看所有用户
-mysql> show privileges;                     // 显示服务器所支持的不同权限
-mysql> select version();                    // 显示服务器版本
-mysql> status;                              // 显示mysql版本、当前用户、字符集、端口号等简要信息
-mysql> show status;                         // 显示一些系统特定资源的信息
-mysql> show global status;                  // 查看MySQL服务器运行的各种状态值,同show status
-mysql> show databases;                      // 显示当前服务器中的所有数据库
-mysql> use 数据库名;                         // 连接数据库
-mysql> select database();                   // 显示当前连接的数据库
-mysql> select user();                       // 显示当前登录的用户
-mysql> select current_user();               // 显示当前登录的用户
-mysql> show tables;                         // 显示当前数据库中的所有表名
-mysql> select COLUMN_NAME,column_comment from INFORMATION_SCHEMA.Columns where table_name='表名' and table_schema='数据库名'                      // 查询表中所有字段的名字
-mysql> describe tablename;                  // 显示表结构
-mysql> desc tablename;                      // 显示表结构
-mysql> show create table user \g                // 查看创建表的SQL语句
-mysql> show index from table_name;              // 显示表的所有索引
-mysql> show engines;                            // 查看数据库支持的引擎
-mysql> show variables like '%storage_engine%';  // 查看当前存储引擎
-mysql> alter table wp_posts engine=innodb;      // 修改为innodb
-mysql> rename table MyClass to YouClass;    // 重命名数据表
-mysql> drop database name                   // 删除数据库
-mysql> drop table tableName                 // 删除数据表
-mysql> drop table tbname1,tablename2;       // 删除多个表,表间有外键关联时会报错,忽略,执行两次即可全部删除
-mysql> truncate tableName                   // 清空数据表
-mysql> delete from tableName                // 删除数据表的所有数据
-mysql> show table status\G                  // 获取当前数据库中所有表的信息
-mysql> show table status like 'tableName' \G
-
-source命令导入执行SQL文件
-mysql> source D:/www/sql/back.sql;
-
-source命令导入多个sql文件,可以新建一个sou.sql文件,里面存放下面的命令
-source d:/check1.sql;
-source d:/check2.sql;
-mysql> source d:/sou.sql;
-
-【 optimize优化表 】
-当对MySQL进行大量的增删改操作的时候,很容易产生一些碎片,这些碎片占据着空间,所以可能会出现删除很多数据后,数据文件大小变化不大的现象。当然新插入的数据仍然会利用这些碎片,但过多的碎片对数据的插入操作是有一定影响的,此时可以通过optimize来对表的优化。
-为了更加直观的看到数据碎片,Mysql可以使用如下命令查看
-show table status like 'table_name'
-
-data_free选项代表数据碎片。
-针对MySQL的不同数据库存储引擎,在optimize使用清除碎片,回收闲置的数据库空间,把分散存储(fragmented)的数据和索引重新挪到一起(defragmentation),对I/O速度有好处。优化之后无论是innodb还是myisam表都被收缩
-当然optimize在对表进行操作的时候会加锁,所以不宜经常在程序中调用。
-
-MyISAM存储引擎
-针对MyISAM表,直接使用如下命令进行优化
-optimize table table1[,table2][,table3]
-如果同时优化多个表可以使用逗号分隔,优化后data_free值为0
-
-对于myisam表,optimize table操作执行以下工作：
-1.如果表含有删除的列、分列的列,optimize table会修复表
-2.如果索引页没有排序,optimize table会将索引页进行排序
-3.如果表的统计信息不是最新的,optimize table会更新索引信息
-
-InnoDB存储引擎
-InnoDB引擎的表分为独享表空间和同享表空间的表,可以通过show variables like 'innodb_file_per_table';来查看是否开启独享表空间。
-开启了独享表空间是无法对表进行optimize操作的,如果操作会返回信息如Table does not support optimize, doing recreate + analyze instead,并不是说innodb不支持optimize table,因为对于innodb表,optimize table被映射成alter table ... force,重建表和更新索引统计信息并释放空间
-
-repair table table1[,table2][,table3]
-数据表修复
-
-</pre><textarea>
-if (is_array($tables)) {
-    $tables = implode('`,`', $tables);
-    $lists = Db::query("OPTIMIZE TABLE `{$tables}`");
-
-    if ($lists) {
-        $this->success("数据表优化完成！");
-    } else {
-        $this->error("数据表优化出错请重试！");
-    }
-}
-
-if (is_array($tables)) {
-    $tables = implode('`,`', $tables);
-    $lists = Db::query("REPAIR TABLE `{$tables}`");
-
-    if ($lists) {
-        $this->success("数据表修复完成！");
-    } else {
-        $this->error("数据表修复出错请重试！");
-    }
-}
-
 </textarea>
+
 </div>
 
 <div id="mysql_user">
@@ -27419,13 +27617,13 @@ mysql主从同步：当master(主)库的数据发生变化的时候,变化会实
 步骤四：从库启动之后,创建一个I/O线程,读取主库传过来的binlog内容并写入到relay log
 步骤五：还会创建一个SQL线程,从relay log里面读取内容,从Exec_Master_Log_Pos位置开始执行读取到的更新事件,将更新内容写入到slave的db
 
-不管是delete、update、insert,还是创建函数、存储过程,所有的操作都在master上。当master有操作的时候,slave会快速的接收到这些操作,从而做同步
-
-在master机器上,主从同步事件会被写到特殊的log文件中(binary-log);在slave机器上,slave读取主从同步事件,并根据读取的事件变化,在slave库上做相应的更改,从而实现主从同步
+不管是delete、update、insert,还是创建函数、存储过程,所有的操作都在master上。当master有操作的时候,slave会快速的接收到这些操作实现同步
 
 主从同步事件
 在master机器上,主从同步事件会被写到特殊的log文件中(binary-log);
-主从同步事件有3种形式:statement、row、mixed。
+在slave机器上,slave读取主从同步事件,并根据读取的事件变化,在slave库上做相应的更改,从而实现主从同步
+
+主从同步事件有3种形式:
 statement：会将对数据库操作的sql语句写入到binlog中。
 row：会将每一条数据的变化写入到binlog中。
 mixed：statement与row的混合。Mysql决定什么时候写statement格式的,什么时候写row格式的binlog。
@@ -27437,14 +27635,13 @@ binlog dump线程
 当slave连接到master的时候,master机器会为slave开启binlog dump线程。当master的binlog发生变化的时候,binlog dump线程会通知slave,并将相应的binlog内容发送给slave。
 
 在slave机器上的操作
-当主从同步开启的时候,slave上会创建2个线程。
-1、I/O线程。该线程连接到master机器,master机器上的binlog dump线程会将binlog的内容发送给该I/O线程。该I/O线程接收到binlog内容后,再将内容写入到本地的relay log。
-2、SQL线程。该线程读取I/O线程写入的relay log。并且根据relay log的内容对slave数据库做相应的操作。
+当主从同步开启的时候slave上会创建2个线程
+1、I/O线程,该线程连接到master机器,master机器上的binlog dump线程会将binlog的内容发送给该I/O线程,该I/O线程接收到binlog内容后,再将内容写入到本地的relay log。
+2、SQL线程,该线程读取I/O线程写入的relay log,并且根据relay log的内容对slave数据库做相应的操作。
 
 对于每一个主从复制的连接都有三个线程,拥有多个从库的主库为每一个连接到主库的从库创建一个binlog输出线程,每一个从库都有它自己的I/O线程和SQL线程
 
-如何在master、slave上查看上述的线程？
-使用SHOW PROCESSLIST命令可以查看。
+在master、slave上使用SHOW PROCESSLIST命令可以查看上述的线程
 在master机器上查看command字段即binlog dump线程
 在slave机器上查看state字段即I/O、SQL线程
 
@@ -27464,7 +27661,7 @@ binlog_do_db = my_db01                 # 指定记录二进制日志的数据库
 binlog_ignore_db = mysql               # 指定不记录二进制日志的数据库,这里指不同步mysql系统数据库
 注释掉binlog_do_db 和 binlog_ignore_db则表示备份全部数据库
 
-2、重启mysql,以使配置文件生效
+2、重启mysql使配置文件生效
 sudo systemctl restart mysql
 
 3、登陆主服务器mysql创建从服务器用到的账户和权限,创建主从同步的mysql user。
@@ -60152,9 +60349,9 @@ swoole采用多线程Reactor+多进程Worker
         |
 swoole->|                                   | receive
         |                                   | sendto
-        |               |->   reactor线程-> |  close
-        |               |                   |  buffer
-        |               |                   |  dispatch
+        |               |->   reactor线程-> | close
+        |               |                   | buffer
+        |               |                   | dispatch
         |               |
         |-> master进程->|->  reactor线程
                         |
@@ -60192,117 +60389,187 @@ task worker进程用来处理耗时较长的请求,比如数据库的I/O操作�
 如此通过worker、task worker结合的方式就实现了异步I/O
 
 </pre>
+<div>
 
-<h3>Ubuntu16.04编译安装Swoole http://pecl.php.net/package/swoole</h3><pre>
-Swoole扩展是按照php标准扩展构建的。使用phpize来生成php编译配置,./configure来做编译配置检测,make进行编译,make install进行安装
+<div id="swoole_install">
+<h3>快速安装</h3><pre>
+查看已安装的swoole版本
+php --ri swoole
+php --info
+phpinfo();
 
-安装准备
-php-5.3.10+
-gcc-4.4+
-
-1. Install via pecl 不推荐,坑多
+【 pecl安装,Install via pecl - 不推荐,坑多 】
 swoole是pecl的项目,所以用pecl安装是最简单的方法,pecl工具基本都会被安装在与php相同的目录,往往也是$PATH目录
 swoole项目已收录到PHP官方扩展库,除了手工下载编译外,还可以通过PHP官方提供的pecl命令,一键下载安装swoole
 pecl install swoole
 
-2. Install from source
-git clone https://github.com/swoole/swoole-src.git && \
+【 编译安装,Install from source 】
+Swoole扩展是按照php标准扩展构建的。使用phpize来生成php编译配置,./configure来做编译配置检测,make进行编译,make install进行安装
+
+1. 下载swoole源码
+https://github.com/swoole/swoole-src/releases   
+http://pecl.php.net/package/swoole
+http://git.oschina.net/swoole/swoole
+
+2. 从源码编译安装
+下载源代码包后,在终端进入源码目录,执行下面的命令进行编译和安装
+ubuntu 没有安装 phpize 可执行命令：sudo apt-get install php-dev 来安装 phpize
 cd swoole-src && \
 phpize && \
 ./configure && \
-make && make install
+make && sudo make install
+Copy to clipboardErrorCopied
 
-配置php.ini
-编译安装成功后,修改php.ini加入
-extension=swoole.so
+3. 启用扩展
+编译安装到系统成功后,需要在php.ini中加入extension=swoole.so启用Swoole扩展
+
+wget -c https://pecl.php.net/get/swoole-4.0.3.tgz  // 选择最新的4.0.3版本下载
+tar -zvxf swoole-4.0.3.tgz  // 解压
+cd swoole-4.0.3  // 目录切换到解压完成的包里面
+
+git clone https://github.com/swoole/swoole-src.git && cd swoole-src && phpize && ./configure && make && make install
+
+/usr/local/php/bin/phpize  // 通过phpize建立php的外挂模块
+./configure --with-php-config=/usr/local/php/bin/php-config && make && make install  // 配置编译安装
+将扩展extension=swoole.so添加到 /usr/local/php/etc/php.ini 中,找到php.ini所在位置
+
+重启
+lnmp restart
+或者
+/etc/init.d/php-fpm restart
+service php-fpm restart
 
 通过php -m或phpinfo()来查看是否成功加载了swoole,如果没有可能是php.ini的路径不对,可以使用php -i |grep php.ini来定位到php.ini的绝对路径
 
-【 docker swoole 】
-https://github.com/cmptech/auto_cmp_php_docker_server
+参考以下命令：
+PHP-FPM状态管理：/etc/init.d/php-fpm {start|stop|quit|restart|reload|logrotate}
+Nginx状态管理：/etc/init.d/nginx {start|stop|reload|restart}
+MySQL状态管理：/etc/init.d/mysql {start|stop|restart|reload|force-reload|status}
+Memcached状态管理：/etc/init.d/memcached {start|stop|restart}
+PureFTPd状态管理： /etc/init.d/pureftpd {start|stop|restart|kill|status}
+ProFTPd状态管理： /etc/init.d/proftpd {start|stop|restart|reload}
+Redis状态管理： /etc/init.d/redis {start|stop|restart|kill}
+
+</pre>
+
+<h4>docker swoole</h4><pre>
+swoole官方镜像 docker pull phpswoole/swoole
+docker run --rm phpswoole/swoole "php -m"
+docker run --rm phpswoole/swoole "php --ri swoole"
+docker run --rm phpswoole/swoole "composer --version"
+
+https://github.com/swoole/docker-swoole, various examples included under folder "examples/" to help developers better use the image
+./bin/example.sh start   00 # To start container(s) of the first example.
+./bin/example.sh stop    00 # To stop container(s) of the first example.
+./bin/example.sh restart 00 # To restart container(s) of the first example.
+
+</pre>Dockerfile<textarea>
+FROM arm64v8/php:7.4-cli
+
+ENV DEBIAN_FRONTEND noninteractive
+ENV TERM            xterm-color
+
+ARG DEV_MODE
+ENV DEV_MODE $DEV_MODE
+
+COPY ./rootfilesystem/ /
+
+RUN \
+    curl -sfL --connect-timeout 5 --max-time 15 --retry 5 --retry-delay 2 --retry-max-time 60 http://getcomposer.org/installer | php -- --install-dir="/usr/bin" --filename=composer && \
+    chmod +x "/usr/bin/composer" && \
+    composer self-update 1.10.6 && \
+    apt-get update && \
+    apt-get install -y inotify-tools libssl-dev supervisor unzip zlib1g-dev --no-install-recommends && \
+    install-swoole.sh master && \
+    mkdir -p /var/log/supervisor && \
+    rm -rf /var/lib/apt/lists/* /usr/bin/qemu-*-static
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD []
+
+WORKDIR "/var/www/"
+
+</textarea><pre>
+【 dnmp 】
+https://github.com/yeszao/dnmp
+
+【 自定义php+swoole的Docker环境 】
+github auto_cmp_php_docker_server
 
 # 运行容器,映射端口:9501,存储卷 宿主机当前目录:容器/root,准备好后运行 php7 /root/test_swoole_server.php
 docker run  -ti -p 9501:9501 -v `pwd`:/root/www -d cmptech/auto_cmp_php_docker_server php7 /root/test_swoole_server.php
 
-【 制作php+swoole的Docker环境 】
-docker build -t swoole .
+</pre>制作php+swoole的Docker环境 Dockerfile wsl ubuntu18 php-fpm<textarea>
+# ================================
+# docker build -t php:swoole-fpm .
+# docker run --name php -d -p 9000:9000 -v /mnt/e/study:/var/www/html php:swoole-fpm
+# docker run --name=nginx --link php:php -v /mnt/e/study:/usr/share/nginx/html  -v /mnt/e/wsl/docker/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf -p 80:80 -d nginx
 
-</pre>Dockerfile<textarea>
-# 获取官方PHP7.1-cli镜像,并在此基础上进行修改
-# docker build -t swoole .
-# docker run -it -p 9501:9501 -v /mnt:/root/www swoole /bin/bash
-FROM php
+# server {
+#   listen       80;
+#   server_name  localhost;
+# 
+#   access_log  /var/log/nginx/access.log  main;
+#   error_log  /var/log/nginx/error.log;
+# 
+#   root   /usr/share/nginx/html;
+#   index  index.html index.htm;
+# 
+#   location / {
+#       try_files $uri $uri/ =404;
+#   }
+# 
+#   location ~ \.php$ {
+#      fastcgi_pass   php:9000;
+#      fastcgi_index  index.php;
+#      fastcgi_param  SCRIPT_FILENAME  /var/www/html/$fastcgi_script_name; // php容器的pwd环境变量,防止响应404 File not found
+#      include        fastcgi_params;
+#   }
+# }
+# ================================
+
+##########################################
+# PHP_INI_DIR => /usr/local/etc/php
+# PWD => /var/www/html
+# php /root/www/e/study/php/hello.php
+# which php-cgi  # /usr/local/bin/php-cgi
+# ifconfig  // http://172.29.139.85/
+##########################################
+
+# 安装docker hub官方php的fpm版本
+FROM php:7.2.5-fpm
 
 WORKDIR /usr/src/swoole
 
-RUN buildDeps='unzip wget git' \
-# 修改apt源为163的源
-&& echo "deb http://mirrors.163.com/debian/ jessie main non-free contrib" > /etc/apt/sources.list \
-&& echo "deb http://mirrors.163.com/debian/ jessie-updates main non-free contrib" >> /etc/apt/sources.list \
-&& echo "deb http://mirrors.163.com/debian/ jessie-backports main non-free contrib" >> /etc/apt/sources.list \
-&& echo "deb-src http://mirrors.163.com/debian/ jessie main non-free contrib" >> /etc/apt/sources.list \
-&& echo "deb-src http://mirrors.163.com/debian/ jessie-updates main non-free contrib" >> /etc/apt/sources.list \
-&& echo "deb-src http://mirrors.163.com/debian/ jessie-backports main non-free contrib" >> /etc/apt/sources.list \
-&& echo "deb http://mirrors.163.com/debian-security/ jessie/updates main non-free contrib" >> /etc/apt/sources.list \
+RUN buildDeps='unzip git' \
 && apt-get update \
 && apt-get install -y $buildDeps \
-# 安装ifconfig、ping、service、ps、ab命令
-&& apt install -y net-tools inetutils-ping initscripts procps apache2-utils \
+# 安装ifconfig、ping、service、ps、ab、vim、curl命令
+&& apt install -y net-tools inetutils-ping initscripts procps apache2-utils vim curl \
+# 安装swoole扩展
+&& git clone https://github.com/swoole/swoole-src.git \
+&& cd swoole-src && phpize && ./configure && make && make install \
+&& docker-php-ext-enable swoole \
 # 安装igbinary扩展
 && pecl install -o -f igbinary \
 && rm -rf /tmp/pear \
 && docker-php-ext-enable igbinary \
 # 安装redis扩展
-&& pecl install -o -fredis\
+&& pecl install -o -f redis\
 && rm -rf /tmp/pear \
-&& docker-php-ext-enableredis\
+&& docker-php-ext-enable redis\
 # 安装mysql扩展
 && docker-php-ext-install pdo_mysql \
-# 安装swoole扩展
-&& git clone https://github.com/swoole/swoole-src.git \
-&& cd swoole-src \
-&& phpize \
-&& ./configure \
-&& make \
-&& make install \
-&& docker-php-ext-enable swoole \
 && rm -rf /var/lib/apt/lists/* \
 && rm -rf /tmp/swoole-src \
 && rm -rf /usr/src/swoole \
 && apt-get purge -y --auto-remove $buildDeps \
-&& echo "alias ll='ls -alF'" >> /root/.bashrc
+&& echo "alias ll='ls -alF'" >> /root/.bashrc \
+&& echo 'PS1="${debian_chroot:+($debian_chroot)}\[\e[01;36m\]\u@\h:\w\[\e[0m\]\$ "' >> ~/.bashrc
 
-WORKDIR /root/www
+WORKDIR /var/www/html
 
-</textarea><pre>
-docker下php找不到php.ini 安装swoole
-
-echo phpinfo();找到ini的path:(/usr/local/etc/php )
-在里面的conf.d中创建docker-php-ext-mysqli.ini文件里加上
-extension=swoole.so
-------------------------------------------------------------------------------------------------
-下载swoole:
-http://pecl.php.net/package/swoole
-解压:cd swoole-src-swoole-1.7.6-stable/
-phpize
-./configure --enable-async-mysql --with-php-config=/usr/local/bin/php-config
-make && make install
-------------------------------------------------------------------------------------------------
-docker上传:
-1.commit制作镜像
-2.push上传
-------------------------------------------------------------------------------------------------
-docker创建php容器时要把需要暴露的接口写上
-docker run -d -p 9000:9000 -p 9501:9501 --name php7 -v /home/ubuntu/nginx/www:/www php7.2:v1
-
-cat ~/.docker/config.json //查看login docker仓库信息
-docker login registry.cn-hangzhou.aliyuncs.com/stoicer/php
-
-docker ps -a
-docker commit [CONTAINER ID] [name]:[tag]
-docker images
-sudo docker push registry.cn-hangzhou.aliyuncs.com/stoicer/nginx:1.11.1
-
+</textarea>
 </pre>
 
 <h3>Swoole编程须知</h3><pre>
@@ -60310,17 +60577,16 @@ Swoole提供的绝大部分模块只能用于cli命令行终端,无法在Web环�
 Swoole扩展提供的所有类均以Swoole作为命名空间
 Worker进程不得共用同一个Redis或MySQL等网络服务客户端,Redis/MySQL创建连接的相关代码可以放到onWorkerStart回调函数中
 
-【 异步IO程序中不得使用sleep/usleep/time_sleep_until/time_nanosleep等睡眠函数,会导致整个进程阻塞 】
+【 异步IO程序中不得使用sleep/usleep/time_sleep_until/time_nanosleep等导致整个进程阻塞的睡眠函数 】
 sleep函数会使进程陷入睡眠阻塞,直到指定的时间后操作系统才会重新唤醒当前的进程
 sleep过程中只有信号可以打断,由于swoole的信号处理是基于signalfd实现的,所以即使发送信号也无法中断sleep
-
-swoole提供的swoole_event_add、swoole_timer_tick、swoole_timer_after、swoole_process::signal、异步swoole_client在进程sleep后会停止工作,swoole_server也无法再处理新的请求。
+swoole_event_add、swoole_timer_tick、swoole_timer_after、swoole_process::signal、异步swoole_client在进程sleep后会停止工作,swoole_server也无法再处理新的请求。
 
 </pre>onReceive事件中执行了sleep函数,server在100秒内无法再收到任何客户端请求<textarea>
 $serv = new swoole_server("127.0.0.1",9501);
 $serv->on('receive',function ($serv,$fd,$from_id,$data) {
-    sleep(100);
-    $serv->send($fd,'Swoole: '.$data);
+  sleep(100);
+  $serv->send($fd,'Swoole: '.$data);
 });
 $serv->start();
 
@@ -60393,17 +60659,17 @@ apcu扩展
 yac扩展
 不适合用于保存数据,其设计原理导致存在一定的数据miss率,仅作为缓存,不可作为存储
 
-swoole_table
-Swoole官方提供的共享内存读写工具,提供了Key-Value操作方式,使用非常简单。底层使用自旋锁实现,在大量并发读写操作时性能依然非常强劲。推荐使用。swoole_table仍然存在一个两个缺点,使用时需要根据实际情况来选择。
+swoole_table 推荐使用
+Swoole官方提供的共享内存读写工具,提供了Key-Value操作方式,使用简单。底层使用自旋锁实现,在大量并发读写操作时性能依然非常强劲。swoole_table仍然存在一个两个缺点,使用时需要根据实际情况来选择。
 
 【 类/函数重复定义 】
-由于swoole是常驻内存的,所以加载类/函数定义的文件后不会释放。因此引入类/函数的php文件时必须要使用include_once或require_once,否则发生cannot redeclare function/class的致命错误。
+swoole常驻内存,所以加载类/函数定义的文件后不会释放。因此引入类/函数的php文件时必须要使用include_once或require_once,否则发生cannot redeclare function/class的致命错误。
 
 【 内存管理 】
 PHP守护进程与普通Web程序的变量生命周期、内存管理方式完全不同。编写swoole_server或其他常驻进程时需要特别注意。
 
 【 进程隔离 】
-修改了全局变量的值,为什么不生效,原因就是全局变量在不同的进程,内存空间是隔离的,所以无效。所以使用swoole开发Server程序需要了解进程隔离问题。
+修改了全局变量的值不生效,原因就是全局变量在不同的进程,内存空间是隔离的,所以无效。所以使用swoole开发Server程序需要了解进程隔离问题。
 
 不同的进程中PHP变量不是共享,即使是全局变量,在A进程内修改了它的值,在B进程内是无效的
 如果需要在不同的Worker进程内共享数据,可以用Redis、MySQL、文件、Swoole\Table、APCu、shmget等工具实现
@@ -60478,14 +60744,14 @@ function child_async(swoole_process $worker) {
 
 <div id="swoole_protocols">
 <h4>网络通信协议设计</h4><pre>
-一个完整的TCP服务需要处理OnConnect建立连接、OnReceive收到消息、OnClose关闭连接这三个过程,而访问网页的时候,这些过程都被浏览器\服务程序内部处理掉了,平时写网页的时候只需要考虑对请求作出响应即可。这种抽象进一步降低了PHP的上手门槛,也让很多人低估了PHP的能力。
-而使用Swoole Server的时候,需要自己来管理这个过程,同时也可以在这个基础上做到更多的事情
+一个完整的TCP服务需要处理OnConnect建立连接、OnReceive收到消息、OnClose关闭连接这三个过程,而访问网页的时候这些过程都被浏览器\服务程序内部处理掉了,平时写网页的时候只需要考虑对请求作出响应即可。这种抽象进一步降低了PHP的上手门槛,也让很多人低估了PHP的能力。
+而使用Swoole Server的时候需要自己来管理这个过程,同时也可以在这个基础上做到更多的事情
 
 通信的双方约定一种理解的规则,以便对理解对方想表达的信息,这种解析信息的规则就是协议
 TCP就是传输层的协议,而HTTP(HyperText Transfer Protocol)是应用层
 
 </pre>浏览器中输入http://127.0.0.1:9501/,而不是telnet访问的tcp服务器<textarea>
-$serv = new swoole_server("127.0.0.1",9501);
+$serv = new swoole_server("127.0.0.1", 9501);
 
 $serv->on('Start',function ($serv) {
   echo "Start\n";
@@ -60528,20 +60794,20 @@ Client: Close.
 </textarea><pre>
 每次通过浏览器访问不同的网站时,浏览器都会默默生成类似的文本作为WebRequest的正文,提交给对应的服务端
 超文本传输协议的本体,它是通过特定格式的字符串完成请求的描述的
-HTTP协议有一个基本规则,各个字段之间是通过"\r\n"进行分割的,收到一个"完整的"HTTP请求的时候,可以用explode方法快速的划分区段,然后再根据区段进行解析,就能知道用户请求的是什么了,HTTP协议对返回值的格式也有约定
+HTTP协议有一个基本规则,各个字段之间是通过"\r\n"进行分割的,收到一个完整的HTTP请求的时候,可以用explode方法快速的划分区段,然后再根据区段进行解析就能知道用户请求的是什么了,HTTP协议对返回值的格式也有约定
 
 </pre><textarea>
-$serv->on('receive',function ($serv,$fd,$from_id,$data){
-  $reqAry = explode("\r\n",$data);
-  if (stripos($reqAry[0],"Hello.php") !== FALSE ){
+$serv->on('receive', function ($serv, $fd, $from_id, $data){
+  $reqAry = explode("\r\n", $data);
+  if (stripos($reqAry[0], "Hello.php") !== FALSE ){
     echo "用户想调用Hello.php".PHP_EOL;
-    $serv->send($fd,"你调用了Hello.php方法");
-  }else if (stripos($reqAry[0],"World.php") !== FALSE ){
+    $serv->send($fd, "你调用了Hello.php方法");
+  }else if (stripos($reqAry[0], "World.php") !== FALSE ){
     echo "用户想调用World.php".PHP_EOL;
-    $serv->send($fd,"你调用了World.php方法");
+    $serv->send($fd, "你调用了World.php方法");
   }else{
     echo "用户想请求了一个不支持的方法".PHP_EOL;
-    $serv->send($fd,"404,你调用的方法我们不支持。");
+    $serv->send($fd, "404,你调用的方法我们不支持。");
   }
 }
 
@@ -60554,12 +60820,12 @@ TCP也有自己的交互流程和解析机制,但要比HTTP复杂
 而HTTP协议是应用层协议,它关注的是应用,也就是收到传输层TCP收到的消息以后,根据具体的应用进行处理。
 除了HTTP以外,常见的诸如HTTPS、FTP、WebSocket等,也都是应用层协议,而它们的传输层都是TCP实现的。
 应用层协议百花齐放,传输层的协议却要凋零的多,最常见的无非是TCP和UDP。
-所以在架设自己的TCP Server的时候,要解决的第一个问题,就是应用层协议是什么？
+所以在架设自己的TCP Server的时候,要解决的第一个问题就是应用层协议是什么？
 
 要解决应用层协议的问题,先要选择一个传输层协议,基于这个协议的特点再去设计应用层协议
 
 TCP协议最大的一个特点就是其传输的数据流是连续的,就像打电话是以语气的停顿、语音、语调等作为理解对方意图的辅助元素,那TCP协议传输的数据流,OnReceive也遇到类似这样的问题
-主要因为网络通畅和输入的速度,OnReceive方法被回调次数不一定,可能会回调1次就收到了所有数据,也可能要回调多次才能完整的收到所有数据,但是无论回调多少次收到的顺序是与发送顺序保持一致的
+主要因为网络通畅和输入的速度,OnReceive方法被回调次数不一定,可能会回调1次就收到了所有数据,也可能要回调多次才能完整的收到所有数据,但无论回调多少次收到的顺序是与发送顺序保持一致的
 
 所以很多时候会称呼TCP的数据叫数据流,从传输层来看,TCP的数据包之间没有边界,怎么从TCP的数据流中正确的截取每个数据包,是设计TCP协议的第一步,这就是传说中的分包和合包
 
@@ -60572,7 +60838,7 @@ TCP协议在底层机制上解决了UDP协议的顺序和丢包重传问题。�
 
 分包：Server收到了多个数据包,需要拆分数据包
 合包：Server收到的数据只是包的一部分,需要缓存数据,合并成完整的包
-所以TCP网络通信时需要设定通信协议。常见的TCP网络通信协议有HTTP、HTTPS、FTP、SMTP、POP3、IMAP、SSH、Redis、Memcache、MySQL 。
+所以TCP网络通信时需要设定通信协议,常见的TCP网络通信协议有HTTP、HTTPS、FTP、SMTP、POP3、IMAP、SSH、Redis、Memcache、MySQL 。
 
 如果要设计一个通用协议的Server,那么就要按照通用协议的标准去处理网络数据。除了通用协议外还可以自定义协议。Swoole支持了2种类型的自定义网络通信协议。
 
@@ -60631,10 +60897,10 @@ $server->set([
 
 <div id="swoole_timer">
 <h3>异步毫秒定时器</h3><pre>
-swoole提供了类似JS的setInterval/setTimeout异步高精度定时器,粒度为毫秒级,无法用于Manager管理进程中
+swoole提供类似JS的setInterval/setTimeout异步高精度定时器,粒度为毫秒级,无法用于Manager管理进程中
 底层基于epoll_wait和setitimer实现,数据结构使用最小堆,可支持添加大量定时器。
 定时器是基于epoll方法的timeout机制实现的,不再依赖单独的定时线程,更准确,且Swoole扩展使用最小堆存储定时器,减少定时器的检索次数,提高了运行效率
-定时器的添加和删除,全部为内存操作,因此性能是非常高的。官方的基准测试脚本添加或删除10万个随机时间的定时器耗时为0.08s左右
+定时器的添加和删除全部为内存操作,因此性能非常高。官方的基准测试脚本添加或删除10万个随机时间的定时器耗时为0.08s左右
 
 swoole timer基于epoll的timeout机制实现,基于reactor线程epoll实例来运行,在task worker中使用系统定时器
 
@@ -60752,7 +61018,7 @@ swoole_timer_clear不能用于清除其他进程的定时器,只作用于当前�
 </pre><textarea>
 function onWorkerStart($serv,$worker_id){
   if($worker_id == 0){
-    swoole_timer_tick(1000,function($timer_id,$params){
+    swoole_timer_tick(1000,function($timer_id, $params){
       echo "timer running\n";
       echo "receive $params\n";
     },'hello');
@@ -60857,28 +61123,28 @@ swoole_server是异步服务器,所以是通过监听事件的方式来编写程
 客户端可能会主动断开连接,此时会触发onClose事件回调
 
 </pre><div style="font-size: 1.2rem;padding-bottom: 1rem;">
-  <a href="#swoole_server_tcp">tcp server</a>
-  <a href="#swoole_server_udp">udp server</a>
-  <a href="#swoole_server_set">set</a>
-  <a href="#swoole_server_mode">mode</a>
-  <a href="#swoole_server_reload">reload</a>
-  <a href="#swoole_server_listen">listen</a>
-  <a href="#swoole_server_prototype">prototype</a>
-  <a href="#swoole_server_method">method</a>
-  <a href="#swoole_server_event">event</a>
-  <a href="#swoole_server_constant">constant</a>
+  <a href="#swoole_server_tcp" style="margin-right: 1rem;">tcp server</a>
+  <a href="#swoole_server_udp" style="margin-right: 1rem;">udp server</a>
+  <a href="#swoole_server_set" style="margin-right: 1rem;">set</a>
+  <a href="#swoole_server_mode" style="margin-right: 1rem;">mode</a>
+  <a href="#swoole_server_reload" style="margin-right: 1rem;">reload</a>
+  <a href="#swoole_server_listen" style="margin-right: 1rem;">listen</a>
+  <a href="#swoole_server_prototype" style="margin-right: 1rem;">prototype</a>
+  <a href="#swoole_server_method" style="margin-right: 1rem;">method</a>
+  <a href="#swoole_server_event" style="margin-right: 1rem;">event</a>
+  <a href="#swoole_server_constant" style="margin-right: 1rem;">constant</a>
 </div>
 
 <div id="swoole_server_tcp">
 <h4>TCP服务器</h4><pre>
 简单Swoole tcp server实例
-在命令行下运行server.php程序,启动成功后可以使用netstat工具看到,已经在监听9501端口。这时就可以使用telnet/netcat工具连接服务器。
+命令行运行server.php程序,启动成功后可使用netstat工具看到已经在监听9501端口,这时可使用telnet/netcat工具连接服务器
 telnet 127.0.0.1 9501
 hello
 Swoole: hello
 
 无法连接到服务器的简单检测手段
-1、在Linux下,使用netstat -an | grep 端口,查看端口是否已经被打开处于Listening状态
+1、在Linux下使用netstat -an | grep 端口,查看端口是否已经被打开处于Listening状态
 2、上一步确认后,检查防火墙问题
 3、注意服务器所使用的IP地址,如果是127.0.0.1回环地址,则客户端只能使用127.0.0.1才能连接上
 
@@ -60920,10 +61186,8 @@ class Server{
   private $serv;
 
   public function __construct() {
-    // 创建swoole_server对象
-    $this->serv = new swoole_server("0.0.0.0",9501);
-    // 调用set函数设置swoole_server的相关配置选项
-    $this->serv->set(array(
+    $this->serv = new swoole_server("0.0.0.0",9501);  // 创建swoole_server对象
+    $this->serv->set(array(  // 调用set函数设置swoole_server的相关配置选项
       'worker_num' => 8,
       'daemonize' => false,
       'max_request' => 10000,
@@ -60931,13 +61195,10 @@ class Server{
       'debug_mode'=> 1
     ));
     // 调用on函数设置相关回调函数
-    // onStart回调在server运行前被调用,onConnect在有新客户端连接过来时被调用,onReceive函数在有数据发送到server时被调用,onClose在有客户端断开连接时被调用
-    // 在onConnect处监听新的连接;在onReceive处接收数据并处理,然后可以调用send函数将处理结果发送出去;在onClose处处理客户端下线的事件
-    $this->serv->on('Start',array($this,'onStart'));
-    $this->serv->on('Connect',array($this,'onConnect'));
-    $this->serv->on('Receive',array($this,'onReceive'));
-    $this->serv->on('Close',array($this,'onClose'));
-
+    $this->serv->on('Start',array($this,'onStart'));  // onStart回调在server运行前被调用
+    $this->serv->on('Connect',array($this,'onConnect'));  // onConnect在有新客户端连接过来时被调用,在onConnect处监听新的连接
+    $this->serv->on('Receive',array($this,'onReceive'));  // onReceive函数在有数据发送到server时被调用,在onReceive处接收数据并处理,然后可以调用send函数将处理结果发送出去
+    $this->serv->on('Close',array($this,'onClose'));  // onClose在有客户端断开连接时被调用,在onClose处处理客户端下线的事件
     $this->serv->start();
   }
 
@@ -60990,9 +61251,9 @@ $client->connect();
 
 <div id="swoole_server_udp">
 <h4>UDP服务器</h4><pre>
-UDP服务器与TCP服务器不同,UDP没有连接的概念。启动Server后,客户端无需Connect,直接可以向Server监听的端口发送数据包。对应的事件为onPacket。
+UDP服务器与TCP服务器不同,UDP没有连接的概念。启动Server后客户端无需Connect,直接可以向Server监听的端口发送数据包。对应的事件为onPacket。
 
-$clientInfo是客户端的相关信息的数组,有客户端的IP和端口等内容
+$clientInfo是客户端的IP和端口等相关信息的数组
 调用 $server->sendto 方法向客户端发送数据
 
 php udp_server.php
@@ -61037,9 +61298,8 @@ $serv->set(array(
 </textarea><pre>
 1.worker_num：指定启动的worker进程数。
 swoole是master->n*worker的模式,开启的worker进程数越多,server负载能力越大,比如1个请求耗时100ms,要提供1000QPS的处理能力,那必须配置100个进程或更多,每个进程占用40M内存,那100个进程就需要占用4G内存
-但是相应的server占有的内存也会更多,worker进程数过多时进程间切换带来的系统开销也会更大
-所以这里适当即可,不要配置过大
-因此业务代码是全异步非阻塞时设置为开启的worker进程数为cpu核数的1-4倍最合理,业务代码为同步阻塞,需要根据请求响应时间和系统负载来调整
+但相应的server占有的内存也会更多,worker进程数过多时进程间切换带来的系统开销也会更大,所以这里适当即可,不要配置过大
+因此业务代码是全异步非阻塞时设置为开启的worker进程数为cpu核数的1-4倍最合理,业务代码为同步阻塞需要根据请求响应时间和系统负载来调整
 默认设置为SWOOLE_CPU_NUM,最大不得超过SWOOLE_CPU_NUM * 1000
 测试SWOOLE_PROCESS模式下worker_num默认为4,SWOOLE_BASE模式下worker_num默认为1
 'worker_num' => 8
@@ -61049,14 +61309,12 @@ swoole是master->n*worker的模式,开启的worker进程数越多,server负载�
 max_request只能用于同步阻塞、无状态的请求响应式服务器程序,纯异步的Server不应当设置max_request,使用Base模式时max_request是无效的
 在swoole中真正维持客户端TCP连接的是master进程,worker进程仅处理客户端发送来的请求,因为客户端是不需要感知Worker进程重启的
 当worker进程内发生致命错误或人工执行exit时,进程会自动退出。master进程会重新启动一个新的worker进程来继续处理请求
-
 'max_request' => 10000
 
 3.max_conn(max_connection)：服务器允许维持的最大TCP连接数
 当服务器已有的连接数达到该值时新的连接会被拒绝。该参数的值不能超过操作系统ulimit -n的值,默认值为ulimit -n的值,同时此值也不宜设置过大,因为swoole会一次性申请一大块内存用于存放每一个connection的信息。
 此选项设置过小底层会抛出错误,并设置为ulimit -n的值。
 最小值为(serv->worker_num + SwooleG.task_worker_num) * 2 + 32
-
 'max_conn' => 10000
 
 4.ipc_mode：设置进程间的通信方式,共有三种通信方式,参数如下：
@@ -61070,7 +61328,7 @@ max_request只能用于同步阻塞、无状态的请求响应式服务器程序
 2 => 固定模式,根据连接的文件描述符分配worker。这样可以保证同一个连接发来的数据只会被同一个worker处理
 3 => 抢占模式,主进程会根据Worker的忙闲状态选择投递,只会投递给处于闲置状态的Worker
 4 => IP分配,根据客户端IP进行取模hash,分配给一个固定的worker进程。可以保证同一个来源IP的连接数据总会被分配到同一个worker进程。算法为ip2long(ClientIP) % worker_num
-5 => UID分配,需要用户代码中调用$serv-> bind()将一个连接绑定1个uid。然后swoole根据UID的值分配到不同的worker进程。算法为UID%worker_num,如果需要使用字符串作为UID,可以使用crc32(UID_STRING)
+5 => UID分配,需要用户代码中调用$serv->bind()将一个连接绑定1个uid,然后swoole根据UID的值分配到不同的worker进程。算法为UID%worker_num,如果需要使用字符串作为UID,可以使用crc32(UID_STRING)
 7 => stream模式,空闲的worker会accept连接,并接受reactor的新请求
 
 无状态Server可以使用1或3,同步阻塞Server使用3,异步非阻塞Server使用1
@@ -61084,7 +61342,6 @@ dispatch_mode=1/3时随机分配到不同的worker进程
 
 BASE模式
 dispatch_mode配置在BASE模式是无效的,因为BASE不存在投递任务,当Reactor线程收到客户端发来的数据后会立即在当前线程/进程回调onReceive,不需要投递Worker进程
-
 'dispatch_mode' => 2
 
 6.task_worker_num：服务器开启task进程数。
@@ -61168,7 +61425,7 @@ SWOOLE_LOG_DEBUG和SWOOLE_LOG_TRACE仅在编译为--enable-debug-log和--enable-
 在开启daemonize守护进程时,底层将把程序中的所有打印屏幕的输出内容写入到log_file,这部分内容不受log_level控制。
 
 12.heartbeat_check_interval：设置心跳检测间隔
-此选项表示每隔多久轮循一次,单位为秒。每次检测时遍历所有连接,如果某个连接在间隔时间内没有数据发送,则强制关闭连接(会有onClose回调)。
+此选项表示每隔多久轮循一次,单位秒。每次检测时遍历所有连接,如果某个连接在间隔时间内没有数据发送,则强制关闭连接(会有onClose回调)。
 'heartbeat_check_interval' => 60
 
 13.heartbeat_idle_time：设置某个连接允许的最大闲置时间。
@@ -61271,8 +61528,8 @@ tcp有三次握手的过程,客户端syn=>服务端syn+ack=>客户端ack,当服�
 
 <div id="swoole_server_mode">
 <h4>Server的两种运行模式</h4><pre>
-软件开发中,最常见的并发问题解决方案,莫过于多线程/多进程两种模式,协程则又是另一个解决方案了
-并发中最迫切需要解决的问题之一,就是数据的可靠性问题,就是防止脏读脏写,而不同的并发模型,其并发数据可靠性的机制往往各有特点
+软件开发中最常见的并发问题解决方案莫过于多线程/多进程两种模式,协程则又是另一个解决方案了
+并发中最迫切需要解决的问题之一就是数据的可靠性问题,就是防止脏读脏写,而不同的并发模型其并发数据可靠性的机制往往各有特点
 
 Swoole目前总共有三种运行模式,其中Base模式基本没有生产应用价值,Swoole的多进程模式是官方目前最推荐用于生产环境的模式
 
@@ -61329,15 +61586,15 @@ Worker进程发送致命错误时,连接并不会被切断
 存在2次IPC的开销,master进程与worker进程需要使用UnixSocket进行通信
 不支持某些高级功能,如sendwait、pause、resume等操作
 
-当执行的start方法之后,发生了什么：
+当执行的start方法之后发生了什么：
 1、守护进程模式下,当前进程fork出Master进程,然后退出,Master进程触发OnMasterStart事件。
 2、Master进程启动成功之后,fork出Manager进程,并触发OnManagerStart事件。
 3、Manager进程启动成功时候,fork出Worker进程,并触发OnWorkerStart事件。
 非守护进程模式下,则当前进程直接作为Master进程工作。
 
-一个最基础的Swoole Server,至少需要有3个进程,分别是Master进程、Manager进程和Worker进程
-一个多进程模式下的Swoole Server中,有且只有一个Master进程;有且只有一个Manager进程;却可以有n个Worker进程
-服务器启动后,可以通过kill 主进程ID来结束所有工作进程
+一个最基础的Swoole Server至少需要有3个进程: Master进程、Manager进程和Worker进程
+一个多进程模式下的Swoole Server中有且只有一个Master进程;有且只有一个Manager进程;却可以有n个Worker进程
+服务器启动后可以通过kill 主进程ID来结束所有工作进程
 
 Swoole是一个多进程模式的框架(可以类比Nginx的进程模型),当启动一个Swoole应用时一共会创建2+n+m个进程,其中n为Worker进程数,m为TaskWorker进程数,2为一个Master进程和一个Manager进程
 其中Master进程为主进程,该进程会创建Manager进程、Reactor线程等工作进/线程。
@@ -61577,13 +61834,13 @@ kill -15命令是通知Swoole正常终止服务,首先停止Worker进程,触发O
 
 <div id="swoole_server_reload">
 <h4>服务器热重启</h4><pre>
-在传统的LAMP环境中调试应用有时候非常简单,修改,保存,重新访问网页就能看到刚刚修改的代码的效果,随改随用,可是当业务来到Swoole Server的时候却发现了一些不同。
+在传统的LAMP环境中调试应用有时候非常简单,修改、保存、重新访问网页就能看到刚刚修改的代码的效果,随改随用,可是当业务来到Swoole Server的时候却发现了一些不同。
 
 $server->on('receive',function ($serv,$fd,$from_id,$data){
   echo "Receive something\n";
 });
 
-这段DEMO的逻辑每当Server收到一个包的时候,输出一段文字。模拟一个业务调整的场景,希望Server在收到包的时候,输出两段文字,现在简单修改一下代码如下并保存：
+这段DEMO的逻辑每当Server收到一个包的时候输出一段文字。模拟一个业务调整的场景,希望Server在收到包的时候,输出两段文字,现在简单修改一下代码如下并保存：
 
 $server->on('receive',function ($serv,$fd,$from_id,$data){
   echo "Receive something\n";
@@ -61598,11 +61855,11 @@ $server->on('receive',function ($serv,$fd,$from_id,$data){
 
 Apache并不止可以处理PHP的服务,它本质上是一个Web Server的容器
 
-换个角度讲,之所以在使用LAMP的过程中,修改PHP代码以后可以马上看到效果,是因为每个新的请求都是重新调用Zend重新解析硬盘上的PHP代码文件而获得的。
+换个角度讲,之所以在使用LAMP的过程中修改PHP代码以后可以马上看到效果,是因为每个新的请求都是重新调用Zend重新解析硬盘上的PHP代码文件而获得的。
 这种模式的优点就是开发简便,快速;这也是PHP为什么能在WEB开发中雄霸天下的重要原因之一。
 然而有利就自然有弊,可以想象当业务正式上线,代码趋于稳定,不需要经常修改的时候,每次收到业务请求的时候都要重新从硬盘中读取文件,再加载到内存,然后解析执行显然会造成大量的时间浪费。
 传统的PHP模型中,显然也不会忽略这个问题,有大量的工具都可用于或设计于解决这个问题
-而SWOOLE Server作为PHP的进阶工具,它设计之初就是面向高性能以及更底层的业务开发而设计的,所以它的默认设计下并不能支持即改即用。
+而SWOOLE Server作为PHP的进阶工具,它设计之初就是面向高性能及更底层的业务开发而设计的,所以它的默认设计下并不能支持即改即用。
 
 修改PHP文件后代码并不能生效是因为PHP代码中的内容已经被加载到了内存中,每次收到业务请求的时候,SWOOLE Server并不会重新从硬盘中读取新的PHP文件,而是直接根据已加载到内存中的代码执行业务逻辑。
 所以最简单的重载方法就粗线了：把当前Server相关进程干掉,然后重启服务
@@ -62069,7 +62326,7 @@ $port1->set([
 ]);
 
 </textarea><pre>
-在实际运用场景中,服务器可能需要监听不同host下的不同端口。比如,一个应用服务器,可能需要监听外网的服务端口,同时也需要监听内网的管理端口。在Swoole中可以轻松的实现这样的功能,Swoole提供了addlistener函数用于给服务器添加一个需要监听的host及port,并指定对应的Socket类型(TCP,UDP,Unix Socket以及对应的IPv4和IPv6版本)
+在实际运用场景中,服务器可能需要监听不同host下的不同端口。比如一个应用服务器,可能需要监听外网的服务端口,同时也需要监听内网的管理端口。在Swoole中可以轻松的实现这样的功能,Swoole提供了addlistener函数用于给服务器添加一个需要监听的host及port,并指定对应的Socket类型(TCP,UDP,Unix Socket以及对应的IPv4和IPv6版本)
 
 此时swoole_server就会同时监听两个host下的两个端口。来自两个端口的数据会在同一个onReceive中获取到,这时就要用到swoole的另一个成员函数connection_info,通过这个函数获取到fd的server_port就可以判定消息的类型
 
@@ -62215,7 +62472,7 @@ Reload有效范围
 Reload操作只能重新载入Worker进程启动后加载的PHP文件,建议使用get_included_files函数来列出哪些文件是在WorkerStart之前就加载的PHP文件,在此列表中的PHP文件,即使进行了reload操作也无法重新载入。比如要关闭服务器重新启动才能生效。
 
 $serv->on('WorkerStart',function($serv,$workerId) {
-    var_dump(get_included_files()); //此数组中的文件表示进程启动前就加载了,所以无法reload
+  var_dump(get_included_files()); //此数组中的文件表示进程启动前就加载了,所以无法reload
 });
 
 APC/OpCache
@@ -62231,7 +62488,7 @@ $waitEvent可以控制退出策略,默认为false表示立即退出,设置为tru
 如果要结束其他Worker进程,可以在stop里面加上worker_id作为参数或使用swoole_process::kill($worker_pid)
 
 异步退出
-异步服务器在调用stop退出进程时,可能仍然有事件在等待。比如使用了Swoole\MySQL->query,发送了SQL语句,但还在等待MySQL服务器返回结果。这时如果进程强制退出,SQL的执行结果就会丢失了。
+异步服务器在调用stop退出进程时可能仍然有事件在等待,比如使用了Swoole\MySQL->query,发送了SQL语句,但还在等待MySQL服务器返回结果。这时如果进程强制退出,SQL的执行结果就会丢失了。
 
 设置$waitEvent = true后,底层会使用异步安全重启策略。先通知Manager进程,重新启动一个新的Worker来处理新的请求。当前旧的Worker会等待事件,直到事件循环为空或者超过max_wait_time后,退出进程,最大限度的保证异步事件的安全性。
 
@@ -62519,19 +62776,10 @@ $uid 指定UID
 
 因此如果要使用bind机制,网络通信协议需要设计握手步骤。客户端连接成功后,先发一个握手请求,之后客户端不要发任何包。在服务器bind完后,并回应之后。客户端再发送新的请求。
 
-【 Server->stats 】
-得到当前Server的活动TCP连接数,启动时间,accpet/close的总次数等信息。
+【 array Server->stats(); 】
+得到当前Server的活动TCP连接数、启动时间、accpet/close的总次数等信息
 
-array Server->stats();
-返回的结果数组示例：
-array (
-  'start_time' => 1409831644,
-  'connection_num' => 1,
-  'accept_count' => 1,
-  'close_count' => 0,
-);
-
-start_time     服务器启动的时间
+start_time     服务器启动的时间,如1409831644
 connection_num 当前连接的数量
 accept_count   接受了多少个连接
 close_count    关闭的连接数量
@@ -62544,16 +62792,12 @@ worker_request_count => 当前Worker进程收到的请求次数
 消息队列状态
 1.8.5版本增加了Task消息队列的统计数据。
 array (
-  'task_queue_num' => 10,
-  'task_queue_bytes' => 65536,
+  'task_queue_num' => 10,      // 消息队列中的task数量
+  'task_queue_bytes' => 65536, // 消息队列的内存占用字节数
 );
-task_queue_num 消息队列中的task数量
-task_queue_bytes 消息队列的内存占用字节数
 
 协程相关
-array (
-  'coroutine_num' => 10,
-);
+array ( 'coroutine_num' => 10, );
 当前协程数量coroutine_num
 
 【 Server->task 】
@@ -62563,7 +62807,6 @@ array (
 int Server::task(mixed $data,int $dst_worker_id = -1)
 
 $task_id = $serv->task("some data");
-//swoole-1.8.6或更高版本
 $serv->task("taskcallback",-1,function (swoole_server $serv,$task_id,$data) {
   echo "Task Callback: ";
   var_dump($task_id,$data);
@@ -62828,12 +63071,13 @@ Swoole\Server是事件驱动模式,所有的业务逻辑代码必须写在事件
 在swoole中,一个swoole_server的拥有若干回调函数,这些回调函数决定了swoole_server的相关功能。可以通过$serv->on( string $event,mixed $callback );函数来配置
 
 【 PHP中可以使用4种回调函数的风格 】
-</pre>1、匿名函数 可使用use向匿名函数传递参数<textarea>
+</pre><textarea>
+1、匿名函数 可使用use向匿名函数传递参数
 $server->on('Request',function ($req,$resp) use ($a,$b,$c) {
   echo "hello world";
 });
 
-</textarea>2、类静态方法<textarea>
+2、类静态方法
 class A{
   static function test($req,$resp){
     echo "hello world";
@@ -62842,13 +63086,13 @@ class A{
 $server->on('Request','A::Test');
 $server->on('Request',array('A','Test'));
 
-</textarea>3、函数<textarea>
+3、函数
 function my_onRequest($req,$resp){
   echo "hello world";
 }
 $server->on('Request','my_onRequest');
 
-</textarea>4、对象方法<textarea>
+4、对象方法
 class A{
   function test($req,$resp){
     echo "hello world";
@@ -62873,7 +63117,7 @@ onStart/onManagerStart/onWorkerStart 3个事件的执行顺序是不确定的
 swoole不支持set_exception_handler函数,如果PHP代码有抛出异常逻辑,必须在事件回调函数顶层进行try/catch来捕获异常
 
 $serv->on('Receive',function() {
-  try    {
+  try{
     //some code
   }catch(Exception $e){
     //exception code
@@ -63210,13 +63454,13 @@ SWOOLE_DTLSv1_CLIENT_METHOD
 <div id="swoole_http_server">
 <h3>swoole_http_server 创建Web服务器</h3><pre>
 swoole-1.7.7增加了内置Http服务器的支持,通过几行代码即可写出一个异步非阻塞多进程的Http服务器。
-swoole_http_server对Http协议的支持并不完整,建议仅作为应用服务器。并且在前端增加Nginx作为代理
+swoole_http_server对Http协议的支持并不完整,建议仅作为应用服务器,并且在前端增加Nginx作为代理
 
 常见使用场景：因为swoole是在cli命令下执行的,在传统通过nginx+fastcgi模式下很多root的shell无法执行,而使用这个swoole服务器就很好的控制rsync,git,svn等。
 
 Http\Server->on注册事件回调函数,与Server->on相同,不同之处是：
-Http\Server->on不接受onConnect/onReceive回调设置,额外接受1种新的事件类型onRequest
-可以使用task worker和定时器
+1、Http\Server->on不接受onConnect/onReceive回调设置,额外接受1种新的事件类型onRequest,Http服务器只需要关注请求响应即可,所以只需要监听一个onRequest事件,当有新的Http请求进入就会触发此事件
+2、可以使用task worker和定时器
 
 </pre><textarea>
 $http_server->on('request',function(swoole_http_request $request,swoole_http_response $response) {
@@ -63225,8 +63469,8 @@ $http_server->on('request',function(swoole_http_request $request,swoole_http_res
 
 </textarea><pre>
 在收到一个完整的Http请求后会回调此函数。回调函数共有2个参数：
-$request是Http请求信息对象,包含了header/get/post/cookie等相关信息,post的content-type限定为application/x-www-form-urlencode
-$response是Http响应对象,支持cookie/header/status等Http操作
+1、$request是Http请求信息对象,包含了header/get/post/cookie等请求相关信息,如GET/POST请求的数据,post的content-type限定为application/x-www-form-urlencode
+2、$response是Http响应对象,支持cookie/header/status等Http操作,对request的响应可以通过操作response对象来完成。$response->end()方法表示输出一段HTML内容,并结束此请求
 在onRequest回调函数返回时底层会销毁$request和$response对象,如果未执行$response->end()操作,底层会自动执行一次$response->end("")
 Request对象销毁时会自动删除上传的临时文件
 
@@ -63235,22 +63479,18 @@ $response/$request对象传递给其他函数后,引用计数会增加,onRequest
 
 Http\Server->start启动后开始监听端口,并接收新的Http和WebSocket请求。使用on方法注册的事件回调,如onWorkerStart/onShutdown等事件回调函数依然有效
 
-Http服务器只需要关注请求响应即可,所以只需要监听一个onRequest事件。当有新的Http请求进入就会触发此事件。
-事件回调函数有2个参数,一个是$request对象,包含了请求的相关信息,如GET/POST请求的数据。
-另外一个是response对象,对request的响应可以通过操作response对象来完成。$response->end()方法表示输出一段HTML内容,并结束此请求
-
 【 Swoole_HTTP_SERVER的事件顺序 】
 server -> Start
 server -> ManagerStart ; WorkerStart ; 并发处理
 
-进入 worker 进程事件循环
+进入worker进程事件循环
 等待客户端连接…
 
 worker -> Connect
 worker -> Request
 worker -> Close 连接超时则关闭连接,重启时不会触发
 
-exit|die 或 reload 重启 worker 进程
+exit|die或reload重启worker进程
 
 server -> WorkerStop
 server -> WorkerStart
@@ -63264,7 +63504,7 @@ server -> WorkerStop
 server -> Shutdown
 
 【 Swoole_HTTP_SERVER实例 】
-0.0.0.0表示监听所有IP地址,一台服务器可能同时有多个IP,如127.0.0.1本地回环IP、192.168.1.100局域网IP、210.127.20.2 外网IP,也可以单独指定监听一个IP
+0.0.0.0表示监听所有IP地址,一台服务器可能同时有多个IP,如127.0.0.1本地回环IP、192.168.1.100局域网IP、210.127.20.2外网IP,也可以单独指定监听一个IP
 9501 监听的端口,如果被占用程序会抛出致命错误,中断执行
 
 启动服务:php http_server.php
@@ -63276,18 +63516,15 @@ $serv = new Swoole\Http\Server("127.0.0.1",9501);
 $http = new swoole_http_server("0.0.0.0",9501);
 
 $http->set(array(
-  // 设置上传文件的临时目录
-  'upload_tmp_dir' => '/data/uploadfiles/',
-  // 设置上传文件的最大尺寸
-  'max_package_length' => 20000000,
+  'upload_tmp_dir' => '/data/uploadfiles/',  // 设置上传文件的临时目录
+  'max_package_length' => 20000000,          // 设置上传文件的最大尺寸
 
   // 配置静态文件根目录后,底层收到Http请求会先判断document_root路径下是否存在此文件,如果存在会直接发送文件内容给客户端,不再触发onRequest回调
   // 使用静态文件处理特性时,应当将动态PHP代码和静态文件进行隔离,静态文件存放到特定的目录
   'document_root' => '/data/webroot/example.com',
   'enable_static_handler' => true,
 
-  // 启用压缩。默认为开启;http-chunk不支持分段单独压缩,已强制关闭压缩
-  // 目前支持gzip、br、deflate三种压缩格式,底层会根据浏览器客户端传入的Accept-Encoding头自动选择压缩方式
+  // 启用压缩,默认开启;http-chunk不支持分段单独压缩,已强制关闭压缩,目前支持gzip、br、deflate三种压缩格式,底层会根据浏览器客户端传入的Accept-Encoding头自动选择压缩方式
   'http_compression' => true,
 ));
 
@@ -63295,7 +63532,7 @@ $http->on('request',function ($request,$response) use ($http){
   // 除header和server外其他变量可能没赋值,所以先用isset判定
   var_dump($request->get,$request->post,$request->cookie,$request->files,$request->header,$request->server);
   var_dump($request->rawContent); // 获取原始的POST包体,用于非application/x-www-form-urlencoded格式的Http POST请求,等同于PHP的fopen('php://input')
-  var_dump($request->getData);    // 获取完整的原始Http请求报文。包括Http Header和Http Body
+  var_dump($request->getData);    // 获取完整的原始Http请求报文,包括Http Header和Http Body
 
   if($request->get['hello']){
     $response->cookie("User","Swoole");      // cookie设置必须在end方法之前
@@ -63415,13 +63652,13 @@ class Login{
 kill -USR1 $(pidof route_master)
 
 </textarea><pre>
-通过使用apache bench工具进行压力测试,在Inter Core-I5 4核 + 8G内存的普通PC机器上,swoole_http_server可以达到近11万QPS。远远超过php-fpm,golang自带http服务器,node.js自带http服务器。性能几乎接近与Nginx的静态文件处理。
+通过使用apache bench工具进行压力测试,在Inter Core-I5 4核 + 8G内存的普通PC机器上,swoole_http_server可以达到近11万QPS,远超php-fpm、golang、node.js自带http服务器。性能几乎接近与Nginx的静态文件处理。
 ab -c 200 -n 200000 -k http://127.0.0.1:9501
 
-Http/WebSocket服务器都是继承自Server,所以Server提供的API,如task/finish/tick等都可以使用
+Http、WebSocket服务器都是继承自Server,所以Server提供的API,如task/finish/tick等都可以使用
 
-Http\Server继承自Server,是一个完整的http服务器实现。Http\Server支持同步和异步2种模式。
-无论是同步模式还是异步模式,Http\Server都可以维持大量TCP客户端连接。同步/异步仅仅体现在对请求的处理方式上。
+Http\Server继承自Server,是一个完整的http服务器实现,支持同步和异步2种模式。
+无论是同步模式还是异步模式,Http\Server都可以维持大量TCP客户端连接,同步/异步仅仅体现在对请求的处理方式上。
 
 同步模式
 这种模式等同于nginx+php-fpm/apache,需要设置大量Worker进程来完成并发请求处理。Worker进程内可以使用同步阻塞IO,编程方式与普通PHP Web程序完全一致。
@@ -63457,15 +63694,15 @@ server {
   listen 8080;
   server_name localhost;
   index index.html index.htm index.php;
-    root /data/wwwroot/;
+  root /data/wwwroot/;
 
-    location / {
-      if (!-e $request_filename) {
-        proxy_pass http://127.0.0.1:9501;
-        proxy_http_version 1.1;
-        proxy_set_header Connection "keep-alive";
-      }
+  location / {
+    if (!-e $request_filename) {
+      proxy_pass http://127.0.0.1:9501;
+      proxy_http_version 1.1;
+      proxy_set_header Connection "keep-alive";
     }
+  }
 }
 
 </textarea><textarea>
@@ -63473,16 +63710,16 @@ server {
   listen 8080;
   server_name localhost;
   index index.html index.htm index.php;
-    root /data/wwwroot/;
+  root /data/wwwroot/;
 
-    location / {
-      if (!-e $request_filename) {
-        rewrite ^/(.*)$ /index.php/$1 last;
-        break;
-      }
+  location / {
+    if (!-e $request_filename) {
+      rewrite ^/(.*)$ /index.php/$1 last;
+      break;
     }
+  }
 
-    location /public {
+  location /public {
     root /path/to/swoole.thinkphp/;
   }
 
@@ -63505,11 +63742,11 @@ server {
 5、优化执行结果
 
 【 异步Http/WebSocket客户端 】
-Swoole-1.8.0版本增加了对异步Http/WebSocket客户端的支持。底层是用纯C编写,拥有超高的性能。
+Swoole-1.8.0版本增加了对异步Http/WebSocket客户端的支持,底层是用纯C编写,拥有超高的性能。
 异步HTTP客户端目前仍在实验阶段,请谨慎使用
 
 启用Http客户端
-1.8.6版本之前,需要在编译swoole时增加--enable-async-httpclient来开启此功能。
+1.8.6版本之前需要在编译swoole时增加--enable-async-httpclient来开启此功能。
 swoole_http_client不依赖任何第三方库
 支持Http-Chunk、Keep-Alive特性,暂不支持form-data格式
 Http协议版本为HTTP/1.1
@@ -63627,22 +63864,21 @@ server();
 <h3>Swoole WebSocket</h3><pre>
 swoole-1.7.9增加了内置的websocket服务器支持,通过几行PHP代码就可写出一个异步非阻塞多进程的WebSocket服务器
 
-常见使用场景：在使用php开发的时候,原生最不好用的是socket类库了,而在开发IM和及时通信项目时有了新的选择后端使用php Swoole WebSocket + 前端 html5 WebSocket;
+常见使用场景：原生php最不好用的是socket类库,而在开发IM和及时通信项目时有了新的选择,后端使用php Swoole WebSocket + 前端 html5 WebSocket;
 
-WebSocket服务器是建立在Http服务器之上的长连接服务器,客户端首先会发送一个Http的请求与服务器进行握手。握手成功后会触发onOpen事件表示连接已就绪,onOpen函数中可以得到$request对象,包含了Http握手的相关信息,如GET参数、Cookie、Http头信息等。建立连接后客户端与服务器端就可以双向通信了。
+WebSocket服务器是建立在Http服务器之上的长连接服务器,客户端首先会发送一个Http的请求与服务器进行握手,握手成功后会触发onOpen事件表示连接已就绪,onOpen函数中可以得到$request对象,包含了Http握手的GET参数、Cookie、Http头信息等相关信息,建立连接后客户端与服务器端就可以双向通信了。
 
-客户端向服务器端发送信息时,服务器端触发onMessage事件回调
+客户端向服务器端发送信息时服务器端触发onMessage事件回调
 服务器端可以调用$server->push()向某个客户端(使用$fd标识符)发送消息
+服务器端可以设置onHandShake事件回调来手工处理WebSocket握手
 
 systemd
-使用systemd管理Swoole服务时,请勿设置daemonize=1。主要原因是systemd的机制与init不同。init进程的PID为1,程序使用daemonize后,会脱离终端,最终被init进程托管,与init关系变为父子进程关系。
-
-但systemd是启动了一个单独的后台进程,自行fork管理其他服务进程,因此不需要daemonize,反而使用了daemonize=1会使得Swoole程序与该管理进程失去父子进程关系
-
-服务器端可以设置onHandShake事件回调来手工处理WebSocket握手
+使用systemd管理Swoole服务时勿设置daemonize=1,systemd的机制与init不同,init进程的PID为1,程序使用daemonize后会脱离终端,最终被init进程托管,与init关系变为父子进程关系。
+但systemd是启动了一个单独的后台进程,自行fork管理其他服务进程,因此不需要daemonize,使用了daemonize=1反而会使得Swoole程序与该管理进程失去父子进程关系
 
 swoole_http_server是swoole_server的子类,内置了Http的支持
 swoole_websocket_server是swoole_http_server的子类,内置了WebSocket的支持
+Swoole\WebSocket\Server是Swoole\Server的子类,因此可以调用Swoole\Server的全部方法
 
 如何判断连接是否为WebSocket客户端
 通过使用$server->connection_info($fd)获取连接信息,返回的数组中有一项为websocket_status,根据此状态可以判断是否为WebSocket客户端。
@@ -63660,25 +63896,21 @@ foreach($this->server->connections as $connection){
 }
 
 </pre>ws_server.php<textarea>
-// 创建websocket服务器对象,监听0.0.0.0:9502端口
-$server = new swoole_websocket_server("0.0.0.0",9501);
+$server = new swoole_websocket_server("0.0.0.0",9501);  // 创建websocket服务器对象,监听0.0.0.0:9502端口
 
-// 监听WebSocket连接打开事件
-$server->on('open',function (swoole_websocket_server $server,$request) {
+$server->on('open',function (swoole_websocket_server $server,$request) {  // 监听WebSocket连接打开事件
   var_dump($request);
   echo "server: handshake success with fd{$request->fd}\n";
   $server->push($request->fd,"hello,welcome\n");
 });
 
-// 监听WebSocket消息事件
-$server->on('message',function (swoole_websocket_server $server,$frame) {
+$server->on('message',function (swoole_websocket_server $server,$frame) {  // 监听WebSocket消息事件
   var_dump($frame);
   echo "receive from {$frame->fd}:{$frame->data},opcode:{$frame->opcode},fin:{$frame->finish}\n";
   $server->push($frame->fd,"this is server");
 });
 
-// 监听WebSocket连接关闭事件
-$server->on('close',function ($ser,$fd) {
+$server->on('close',function ($ser,$fd) {  // 监听WebSocket连接关闭事件
   echo "client {$fd} closed\n";
 });
 
@@ -63800,13 +64032,9 @@ WebSocket服务器除了提供WebSocket功能之外,实际上也可以处理Http
 </pre>
 
 <h4>swoole/websocket/server方法</h4><pre>
-Swoole\WebSocket\Server是Swoole\Server的子类,因此可以调用Swoole\Server的全部方法。
-WebSocket服务器向客户端发送数据应当使用Swoole\WebSocket\Server::push方法,此方法会进行WebSocket协议打包。而Swoole\Server::send方法是原始的TCP发送接口。
-
-Swoole\WebSocket\Server::disconnect方法可以从服务端主动关闭一个WebSocket连接,可以指定状态码(根据WebSocket协议,可使用的状态码为十进制的一个整数,取值可以是1000或4000-4999)和关闭原因(采用utf-8编码、字节长度不超过125的字符串)。在未指定情况下状态码为1000,关闭原因为空。
-
 【 WebSocket\Server->push 】
-向websocket客户端连接推送数据,长度最大不得超过2M。
+向websocket客户端连接推送数据,长度最大不得超过2M
+WebSocket服务器向客户端发送数据应当使用Swoole\WebSocket\Server::push方法,此方法会进行WebSocket协议打包,而Swoole\Server::send方法是原始的TCP发送接口。
 function WebSocket\Server->push(int $fd,$data,int $opcode = 1,bool $finish = true);
 
 参数模式1
@@ -63827,26 +64055,25 @@ function WebSocket\Server->exist(int $fd);
 连接不存在或尚未完成握手,返回false
 
 【 WebSocket\Server->disconnect 】
-主动向websocket客户端发送关闭帧并关闭该连接
+主动向websocket客户端发送关闭帧并关闭该连接,从服务端主动关闭一个WebSocket连接
 
 function WebSocket\Server->disconnect(int $fd,int $code = 1000,string $reason = "");
 $fd 客户端连接的ID,如果指定的$fd对应的TCP连接并非websocket客户端,将会发送失败
-$code 关闭连接的状态码,根据RFC6455,对于应用程序关闭连接状态码,取值范围为1000或4000-4999之间
-$reason 关闭连接的原因,utf-8格式字符串,字节长度不超过125
+$code 指定关闭连接的状态码,根据RFC6455 WebSocket协议,可使用的状态码为十进制的一个整数,对于应用程序关闭连接状态码,取值范围为1000或4000-4999之间,默认1000
+$reason 指定关闭连接的原因,utf-8格式字符串,字节长度不超过125,默认为空
 发送成功返回true,发送失败或状态码非法时返回false
 
 </pre>
 
 <h4>swoole/websocket/server回调函数</h4><pre>
 WebSocket除了接收Swoole\Server和Swoole\Http\Server基类的回调函数外,额外增加了3个回调函数设置:
-onMessage回调函数为必选
+onMessage回调函数为必选,未设置服务器将无法启动
 onOpen和onHandShake回调函数为可选
 
 【 onMessage事件 】
 当服务器收到来自客户端的数据帧时会回调此函数。
 function onMessage(swoole_websocket_server $server,swoole_websocket_frame $frame)
-$frame 是swoole_websocket_frame对象,包含了客户端发来的数据帧信息
-onMessage回调必须被设置,未设置服务器将无法启动
+$frame是swoole_websocket_frame对象,包含了客户端发来的数据帧信息
 客户端发送的ping帧不会触发onMessage,底层会自动回复pong包
 
 swoole_websocket_frame共有4个属性
@@ -63941,8 +64168,7 @@ $server->on('close',function ($ser,$fd) {
 });
 $server->on('request',function (Swoole\Http\Request $request,Swoole\Http\Response $response) {
   global $server;//调用外部的server
-  // $server->connections遍历所有websocket连接用户的fd,给所有用户推送
-  foreach ($server->connections as $fd) {
+  foreach ($server->connections as $fd) {  // 遍历所有websocket连接用户的fd,给所有用户推送
     $server->push($fd,$request->get['message']);
   }
 });
@@ -63963,11 +64189,9 @@ class WebsocketTest {
     $this->server->on('close',function ($ser,$fd) {
       echo "client {$fd} closed\n";
     });
-    $this->server->on('request',function ($request,$response) {
-      // 接收http请求从get获取message参数的值,给用户推送
-      // $this->server->connections 遍历所有websocket连接用户的fd,给所有用户推送
-      foreach ($this->server->connections as $fd) {
-          $this->server->push($fd,$request->get['message']);
+    $this->server->on('request',function ($request,$response) { // 接收http请求从get获取message参数的值,给用户推送
+      foreach ($this->server->connections as $fd) {             // 遍历所有websocket连接用户的fd,给所有用户推送
+        $this->server->push($fd,$request->get['message']);
       }
     });
     $this->server->start();
@@ -65941,14 +66165,17 @@ $serv->start();
 
 <div id="swoole_client">
 <h3>swoole_client</h3><pre>
-swoole_client提供了tcp/udp socket的客户端的封装代码,使用时仅需new swoole_client
+所有Swoole提供的客户端，包括同步阻塞客户端和协程客户端，Swoole4不再支持异步客户端，相应的需求完全可以用协程客户端代替
+swoole_client提供了tcp/udp、socket的客户端的封装代码,使用时仅需new Swoole\Client,可用于FPM/Apache环境
 
-swoole的socket client对比PHP提供的stream族函数有哪些好处：
+swoole的socket client对比PHP提供的stream系统函数有哪些好处：
 1、stream函数存在超时设置的陷阱和Bug,一旦没处理好会导致Server端长时间阻塞
-2、fread有8192长度限制,无法支持UDP的大包
+2、stream函数的fread有8192长度限制,无法支持UDP的大包
 3、swoole_client支持waitall,在知道包长度的情况下可以一次取完,不必循环取。
 4、swoole_client支持UDP connect,解决了UDP串包问题
 5、swoole_client是纯C的代码,专门处理socket,stream函数非常复杂。swoole_client性能更好
+6、swoole_client支持长连接
+7、可以使用swoole_client_select函数实现多个Client的并发控制
 除了普通的同步阻塞+select的使用方法外,swoole_client还支持异步非阻塞回调。
 
 SSL/TLS
@@ -66597,39 +66824,29 @@ TCP长连接可以减少connect 3次握手/close 4次挥手带来的额外IO消�
 
 <div id="swoole_mysql_redis">
 <h3>使用异步客户端</h3><pre>
-PHP提供的MySQL、CURL、Redis等客户端是同步的,会导致服务器程序发生阻塞。Swoole提供了常用的异步客户端组件来解决此问题。编写纯异步服务器程序时,可以使用这些异步客户端。
+PHP提供的MySQL、CURL、Redis等客户端是同步的,会导致服务器程序发生阻塞,Swoole提供了常用的异步客户端组件来解决此问题。编写纯异步服务器程序时,可以使用这些异步客户端。
 
-异步客户端可以配合使用SplQueue实现连接池,以达到长连接复用的目的。在实际项目中可以使用PHP提供的Yield/Generator语法实现半协程的异步框架。也可以基于Promises简化异步程序的编写
+异步客户端可以配合使用SplQueue实现连接池,以达到长连接复用的目的。在实际项目中可以使用PHP提供的Yield/Generator语法实现半协程的异步框架,也可以基于Promises简化异步程序的编写
 
 Swoole底层目前只提供了最常用的MySQL、Redis、Http异步客户端,如果应用程序中需要实现其他协议客户端,如Kafka、AMQP等协议,可以基于Swoole\Client异步TCP客户端,开发相关协议解析代码来自行实现
 
 </pre>
 
-<h3>Swoole异步MySQL</h3><pre>
+<h4>Swoole异步MySQL</h4><pre>
 MySQL异步指将MySQL连接事件驱动化,这样就编程了非阻塞IO。使用Swoole可以实现mysql异步链接,Mysql连接池等。
-
-与mysqli和PDO等客户端不同,Swoole\MySQL是异步非阻塞的,连接服务器、执行SQL时,需要传入一个回调函数。connect的结果不在返回值中,而是在回调函数中。query的结果也需要在回调函数中进行处理
+与mysqli和PDO等客户端不同,Swoole\MySQL是异步非阻塞的,连接服务器、执行SQL时需要传入一个回调函数。connect的结果不在返回值中,而是在回调函数中。query的结果也需要在回调函数中进行处理
 
 </pre><textarea>
 $db = new Swoole\MySQL;
-$config = array(
-  'host' => '192.168.43.27',
-  'port' => 3306,
-  'user' => 'admin',
-  'password' => '',
-  'database' => 'my_db01',
-  'charset' => 'utf8'
-);
+$config = array( 'host' => '192.168.43.27', 'port' => 3306, 'user' => 'admin', 'password' => '', 'database' => 'my_db01', 'charset' => 'utf8' );
 
-$db->connect($config,function ($db,$result) {
-  if($result === false){
-    die("连接失败,errno: ".$db->connect_errno.',error: '.$db->connect_error);
-  }
+$db->connect($config, function ($db, $result) {
+  if($result === false) die("连接失败, errno: ".$db->connect_errno.',error: '.$db->connect_error);
   $db->query("show tables",function (Swoole\MySQL $db,$result) {
     if ($result === false) {
       die("操作失败,errno: ".$db->errno.",error: ".$db->error);
     } elseif ($result === true) {
-      var_dump($db->affected_rows,$db->insert_id);
+      var_dump($db->affected_rows, $db->insert_id);
     } else {
       var_dump($result);
     }
@@ -66642,14 +66859,7 @@ $s = microtime(true);
 for ($c = 100; $c--;) {
   go(function () {
     $mysql = new Swoole\Coroutine\MySQL;
-    $mysql->connect([
-      'host' => '192.168.43.27',
-      'port' => 3306,
-      'user' => 'admin',
-      'password' => '',
-      'database' => 'my_db01',
-      'charset' => 'utf8'
-    ]);
+    $mysql->connect([ 'host' => '192.168.43.27', 'port' => 3306, 'user' => 'admin', 'password' => '', 'database' => 'my_db01', 'charset' => 'utf8' ]);
     $statement = $mysql->prepare('SELECT * FROM `user`');
     for ($n = 100; $n--;) {
       $result = $statement->execute();
@@ -66662,8 +66872,7 @@ echo 'use ' . (microtime(true) - $s) . ' s\n';
 
 </textarea><pre>
 【 MySQL长连接 】
-MySQL短连接每次请求操作数据库都需要建立与MySQL服务器建立TCP连接,这是需要时间开销的。TCP连接需要3次网络通信。这样就增加了一定的延时和额外的IO消耗。请求结束后会关闭MySQL连接,还会发生3/4次网络通信。
-close操作不会增加响应延时,原因是close后是由操作系统自动进行通信的,应用程序感知不到
+MySQL短连接每次请求操作数据库都需要建立与MySQL服务器建立TCP连接,这是需要时间开销的,TCP连接需要3次网络通信,这样就增加了一定的延时和额外的IO消耗。请求结束后会关闭MySQL连接,还会发生3/4次网络通信。close操作不会增加响应延时,原因是close后是由操作系统自动进行通信的,应用程序感知不到
 长连接就可以避免每次请求都创建连接的开销,节省了时间和IO消耗,提升了PHP程序的性能。
 
 断线重连
@@ -66673,10 +66882,10 @@ MySQL-Server会在一定时间内自动切断连接
 PHP程序遇到空闲期时长时间没有MySQL查询,MySQL-Server也会切断连接回收资源
 其他情况在MySQL服务器中执行kill process杀掉某个连接,MySQL服务器重启,这时PHP程序中的MySQL连接就失效了。如果仍然执行mysql_query,就会报一个"MySQL server has gone away"的错误,程序处理不当就直接遇到致命错误并退出了,所以PHP程序中需要断线重连。
 
-有很多人提出了mysql_ping的方案,每次mysql_query进行连接检测或定时连接检测。这个方案不是最好的。原因是mysql_ping需要主动侦测连接,带来了额外的消耗;定时执行mysql_ping不能解决问题,如刚刚执行过mysql_ping检测之后连接就关闭了
+有很多人提出了mysql_ping的方案,每次mysql_query进行连接检测或定时连接检测,这个方案不是最好的,原因是mysql_ping需要主动侦测连接,带来了额外的消耗;定时执行mysql_ping不能解决问题,如刚刚执行过mysql_ping检测之后连接就关闭了
 最佳的方案是进行断线重连,原理是：
 1、mysql_query执行后检测返回值
-2、如果mysql_query返回失败,检测错误码发现为2006/2013(这2个错误表示连接失败),再执行一次mysql_connect
+2、如果mysql_query返回失败,检测错误码发现为2006/2013 表示连接失败,再执行一次mysql_connect
 3、执行mysql_connect后,重新执行mysql_query,这时必然会成功,因为已经重新建立了连接
 4、如果mysql_query返回成功,那么连接是有效的,这是一次正常的调用
 
@@ -66699,7 +66908,6 @@ MySQL短连接反而不会出现此问题,因为短连接在使用完后就释�
 连接池是可以有效降低MySQL-Server负载的。原理是连接池使用一个共享资源的模式,如并发100个请求,实际上并不是每个请求的所有时间都在执行SQL查询。这样100个请求共享20个MySQL连接就可以满足需求了。当一个请求操作完数据库后,开始进入模板渲染等流程,这时就会释放数据库连接给其他的请求使用。
 
 连接池仅在超大型应用中才有价值。普通的应用采用MySQL长连接方案,每个php-fpm创建一个MySQL连接,每台机器开启100个php-fpm进程。如果有10台机器,每台机器并发的请求为100。实际上只需要创建1000个MySQL连接就能满足需求,数据库的压力并不大。即使有100台机器,硬件配置好的存储服务器依然可以承受。
-
 达到数百或者数千台应用服务器时,MySQL服务器就需要维持十万级的连接。这时数据库的压力就会非常大了。连接池技术就可以派上用场了,可以大大降低数据库连接数。
 
 基于swoole的AsyncTask模块实现的连接池是完美方案,编程简单,没有数据同步和锁的问题,甚至可以多个服务共享连接池。
@@ -66715,25 +66923,16 @@ function swoole_mysql->connect(array $serverConfig,callable $callback);
 异步连接到MySQL服务器。
 
 $serverConfig为MySQL服务器的配置,必须为关联索引数组
-$callback连接完成后回调此函数
-
-服务器配置
 $server = array(
-  'host' => '192.168.56.102',
-  'user' => 'test',
-  'password' => 'test',
-  'database' => 'test',
-  'charset' => 'utf8',
+  'host' => '192.168.56.102',  // MySQL服务器的主机地址,支持IPv6(::1)和UnixSocket(unix:/tmp/mysql.sock)
+  'port' => 3306,              // MySQL服务器监听的端口,选填,默认为3306
+  'user' => 'test',            // 用户名,必填
+  'password' => 'test',        // 密码,必填
+  'database' => 'test',        // 连接的数据库,必填
+  'charset' => 'utf8',         // 设置客户端字符集,选填,默认使用Server返回的字符集,如果字符串不存在底层会抛出Swoole\MySQL\Exception异常
 );
 
-host       MySQL服务器的主机地址,支持IPv6(::1)和UnixSocket(unix:/tmp/mysql.sock)
-port       MySQL服务器监听的端口,选填,默认为3306
-user       用户名,必填
-password   密码,必填
-database   连接的数据库,必填
-charset 设置客户端字符集,选填,默认使用Server返回的字符集,如果字符串不存在底层会抛出Swoole\MySQL\Exception异常
-
-回调函数
+$callback连接完成后回调此函数
 function onConnect(swoole_mysql $db,bool $result);
 $db为swoole_mysql对象
 $result连接是否成功,只有为true时才可以执行query查询
@@ -66741,7 +66940,7 @@ $result为false可以通过connect_errno和connect_error得到失败的错误码
 
 </pre>
 
-<h3>SwooleredisServer</h3><pre>
+<h4>Swoole redis Server</h4><pre>
 Swoole-1.8.14版本增加一个兼容Redis服务器端协议的Server框架,可基于此框架实现Redis协议的服务器程序。
 Swoole\Redis\Server继承自Swoole\Server,可调用父类提供的所有方法。
 
@@ -70047,6 +70246,49 @@ pop方法无需传入任何参数
 function Channel->stats() : array;
 获取通道的状态,返回一个数组,包括2项信息:queue_num表示通道中的元素数量,queue_bytes表示通道当前占用的内存字节数
 array( "queue_num" => 10, "queue_bytes" => 161 );
+
+</pre>
+</div>
+
+<div id="swoole_easy-swoole">
+<h3>easy-swoole</h3><pre>
+EasySwoole是一款基于Swoole Server开发的常驻内存型的分布式PHP框架，专为API而生，摆脱传统PHP运行模式在进程唤起和文件加载上带来的性能损失。 EasySwoole高度封装了Swoole Server而依旧维持Swoole Server原有特性，支持同时混合监听HTTP、自定义TCP、UDP协议，让开发者以最低的学习成本和精力编写出多进程，可异步，高可用的应用服务。在开发上准备了以下常用组件：
+http 服务服务器
+协程ORM(类似Tp Orm)
+图片验证码
+validate验证器
+协程模板渲染引擎
+jwt组件
+协程TCP、UDP、WEB_SOCKET 服务端
+协程redis连接池
+协程mysql 连接池
+协程Memcached客户端
+协程通用链接池
+协程kafka客户端
+NSQ协程客户端
+分布式跨平台RPC组件
+协程consul客户端
+协程apollo配置中心
+协程Actor
+协程Smtp客户端
+协程微信公众号与小程序SDK
+协程协程版微信、支付宝支付SDK
+协程elasticsearch客户端
+协程HTTP客户端组件
+协程上下文管理
+IOC、协程上下文管理器
+snowflake Id生成器
+crontab 秒级任务
+自定义进程
+自定义消息队列
+Tracker链路跟踪
+Atomic限流器
+fast-cache组件
+policy权限组件
+
+docker hub上的环境为php7.2 + swoole4.4.17+easyswoole 3.3.x
+docker run -ti -p 9501:9501 easyswoole/easyswoole3
+默认工作目录为: /easyswoole ，以上命令启动的时候自动进入工作目录，执行php easyswoole start ，浏览器访问 http://127.0.0.1:9501/ 即可看到easyswoole欢迎页
 
 </pre>
 </div>

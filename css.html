@@ -90,7 +90,16 @@ PPI全称为Pixel Per Inch,译为每英寸像素取值,更确切的说法应该�
 
 一般来说,当然希望PPI值越高越好,因为更高的PPI意味着在同一实际尺寸的物理屏幕上能容纳更多的像素,能够展现更多的画面细节,也就意味着更平滑的画面
 
-【 css3自适应布局单位vw,vh 】
+</pre>消除默认内边距,但通配符占用内存资源<pre class="css">
+*{margin:0;padding:0;font-size:14px;box-sizing:border-box;}
+
+h1,h2,h3,h4,h5,h6,p,div,ul,li,ol,dl,dt,dd,table,tr,td,th,header,nav,main,section,aside,srticle,footer{
+  margin:0;padding:0;box-sizing:border-box;
+}
+  
+</pre>
+
+<h4>css3自适应布局单位vw,vh</h4><pre>
 视口单位(Viewport units)
 桌面端视口指浏览器的可视区域;而移动端涉及3个视口：Layout Viewport(布局视口),Visual Viewport(视觉视口),Ideal Viewport(理想视口)
 
@@ -106,42 +115,36 @@ vh and vw：相对于视口的高度和宽度,而不是父元素的(CSS百分比
 vmax相对于视口的宽度或高度中较大的那个,其中最大的那个被均分为100单位的vmax。
 vmin相对于视口的宽度或高度中较小的那个,其中最小的那个被均分为100单位的vmin。
 
-视口单位基于页面的根元素，而百分比则基于它们所在的容器
+视口单位基于页面的根元素,而百分比则基于它们所在的容器
 
-CSS视口单位非常适合响应式排版
+以占据视口高度的100％即全屏部分
+.section { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+
+【 粘性页脚 】
+在大屏幕上网站内容很短,并且页脚没有停留在底部
+为了解决这个问题,需要使主要内容的高度等于viewport height - (header + footer)。动态地进行操作很棘手,但使用CSS视口单元非常容易实现
+
+1.第一个解决方案：计算和视口单位
+如果页眉和页脚的高度固定,则可以将CSS calc() 函数与视口单位结合使用。方法如下：
+header, footer { height: 70px; }
+main { height: calc(100vh - 70px - 70px); }
+不能保证此解决方案始终有效,尤其是对于页脚没有使用固定高度的页脚,因为在例如不同的屏幕尺寸下,此页脚是不可行的。
+
+2.第二种解决方案：Flexbox和视口单元(推荐)
+通过将100vh添加为body元素的高度,然后可以使用flexbox来使main元素占用剩余空间。
+body { min-height: 100vh; display: flex; flex-direction: column; }
+main { flex-grow: 1; }
+
+【 CSS视口单位非常适合响应式排版 】
 .title { font-size: 5vw; }
 标题的font-size将根据视口宽度增加或缩小,就像提供的字体大小是视口宽度的5％一样
-但字体大小在移动大小中变得很小，这对可访问性和用户体验不利。移动设备上的最小字体大小不应该超过14px,在GIF中字体大小低于10px
-要解决该问题，需要为标题提供最小字体大小，使其不能低于该大小
+但字体大小在移动大小中变得很小,这对可访问性和用户体验不利。移动设备上的最小字体大小不应该超过14px,在GIF中字体大小低于10px
+要解决该问题,需要为标题提供最小字体大小,使其不能低于该大小
 .title { font-size: calc(14px + 2vw); }
-另一重要事项是字体大小在大屏幕（如27英寸iMac）上的行为,字体大小达到95px左右，这是一个巨大的价值。为了避免这种情况，应该在某些断点处使用媒体查询并更改重置font-size大小确保大小不会太大
+注意字体大小在大屏幕(如27英寸iMac)上的行为,字体大小达到95px左右,这是一个巨大的价值。为了避免这种情况,应该在某些断点处使用媒体查询并更改重置font-size大小确保大小不会太大
 @media (min-width: 1800px) {
   .title { font-size: 40px; }
 }
-
-以占据视口高度的100％即全屏部分
-.section {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-粘性页脚
-在大屏幕上网站内容很短，并且页脚没有停留在底部
-为了解决这个问题，需要使主要内容的高度等于viewport height - (header + footer)。动态地进行操作很棘手，但使用CSS视口单元，这非常容易。
-
-1.第一个解决方案：计算和视口单位
-如果页眉和页脚的高度固定，则可以将CSS calc() 函数与视口单位结合使用。方法如下：
-header, footer { height: 70px; }
-main { height: calc(100vh - 70px - 70px); }
-不能保证此解决方案始终有效，尤其是对于页脚没有使用固定高度的页脚，因为在例如不同的屏幕尺寸下，此页脚是不可行的。
-
-2.第二种解决方案：Flexbox和视口单元（推荐）
-通过将100vh添加为body元素的高度，然后可以使用flexbox来使main元素占用剩余空间。
-body { min-height: 100vh; display: flex; flex-direction: column; }
-main { flex-grow: 1; }
 
 移动端用rem布局时候根据不同的屏幕宽度要设置不同的font-size来做到适配,要写一坨JS来设置,能不能不用JS呢？
 例如：以750px设计稿作为基准,根节点设置font-size为100px,只考虑DPR为2的情况,只考虑最简单的情况
@@ -196,8 +199,9 @@ html{font-size: calc(100vw / 7.5)}
   border-radius: 0 0 1vw 1vw;
 }
 
-</pre><pre>
-【 数学表达式calc() 】
+</pre>
+
+<h4>数学表达式calc()</h4><pre>
 calc是calculate计算的缩写,允许使用+、-、*、/四种运算符,可以混合使用%、px、em、rem等单位进行计算
 +和-运算符两边一定要有空白符
 width: calc(100%/3 - 2*1em - 2*1px);
@@ -207,19 +211,9 @@ width: calc(10px - 20px);
 
 </pre>兼容性<pre class="css">
 .elm {
-  /*Firefox*/
-  -moz-calc(expression);
-  /*chrome safari*/
-  -webkit-calc(expression);
-  /*Standard */
-  calc();
-}
-
-</pre>消除默认内边距,但通配符占用内存资源<pre class="css">
-*{margin:0;padding:0;font-size:14px;box-sizing:border-box;}
-
-h1,h2,h3,h4,h5,h6,p,div,ul,li,ol,dl,dt,dd,table,tr,td,th,header,nav,main,section,aside,srticle,footer{
-  margin:0;padding:0;box-sizing:border-box;
+  -moz-calc(expression);   /*Firefox*/
+  -webkit-calc(expression);  /*chrome safari*/
+  calc();  /*Standard */
 }
 
 </pre>
@@ -681,9 +675,9 @@ h3::before{ content:counter(h1) '-' counter(h2) '-' counter(h3); }
 在 CSS3 中包含了四种组合方式:
 分组选择器(以逗号分隔)
 后代选择器(以空格分隔)
-子元素选择器(以大于号分隔）
-相邻兄弟选择器（以加号分隔）
-普通兄弟选择器（以破折号分隔）
+子元素选择器(以大于号分隔)
+相邻兄弟选择器(以加号分隔)
+普通兄弟选择器(以破折号分隔)
 
 【 选择器分组 】
 h1,h2,h3,h4,h5,h6 { color: green; }
@@ -1203,10 +1197,10 @@ li:nth-child(3n+1)    选择第一个以及随后每隔开3个位置的子元素
 li:nth-last-child(n)  同上
 
 :nth-child(3) 表示选择列表中的第三个元素
-:nth-child(2n)表示列表中的偶数标签，即选择第2、第4、第6……标签
-:nth-child(2n-1) 表示选择列表中的奇数标签，即选择第1、第3、第5、第7……标签
-:nth-child(n+3) 表示选择列表中的标签从第3个开始到最后（>=3）
-:nth-child(-n+3) 表示选择列表中的标签从0到3，即小于3的标签(<=3)
+:nth-child(2n)表示列表中的偶数标签,即选择第2、第4、第6……标签
+:nth-child(2n-1) 表示选择列表中的奇数标签,即选择第1、第3、第5、第7……标签
+:nth-child(n+3) 表示选择列表中的标签从第3个开始到最后(>=3)
+:nth-child(-n+3) 表示选择列表中的标签从0到3,即小于3的标签(<=3)
 :nth-last-child(3) 表示选择列表中的倒数第3个标签
 :nth-of-type(n) 匹配属于父元素的特定类型的第N个子元素的每个元素
 
@@ -1603,7 +1597,7 @@ body { background: #fff;  filter: invert(1) hue-rotate(270deg); }
 
 <div id="clip">
 <h3>clip:剪裁绝对定位元素外形,clip设置不得当会导致元素不可见</h3><pre>
-已废弃,该特性已经从Web标准中删除，虽然一些浏览器目前仍然支持它,clip-path属性代替了现在已经弃用的剪切clip属性
+已废弃,该特性已经从Web标准中删除,虽然一些浏览器目前仍然支持它,clip-path属性代替了现在已经弃用的剪切clip属性
 
 clip是一个css属性,用来定义元素的那一部分用来显示,定义了元素的哪一部分是可见的,只适用于position:absolute的元素
 clip裁剪可以用来隐藏web控件,通过label的for指向web控件实现自定义样式。
@@ -1630,10 +1624,10 @@ clip: rect(1px 10em 3rem 2ch);
 
 <h3>clip-path</h3><pre>
 clip-path属性代替了现在已经弃用的剪切clip属性
-clip-path CSS 属性创建一个裁剪区域，该区域设置应显示元素的哪一部分。区域内的部分显示，区域外的隐藏
-剪切区域是被引用内嵌的URL定义的路径或外部svg的路径，或作为一个形状例如circle()
+clip-path CSS 属性创建一个裁剪区域,该区域设置应显示元素的哪一部分。区域内的部分显示,区域外的隐藏
+剪切区域是被引用内嵌的URL定义的路径或外部svg的路径,或作为一个形状例如circle()
 此属性采用以下值之一:circle() | ellipse() | polygon() | path() | url()
-使用最多的是circle和polygon。circle(radius at pair)值有两个参数:圆的半径和圆心的点。polygon(pair, pair, pair ...)值取3个或更多的点，表示一个三角形、一个矩形等
+使用最多的是circle和polygon。circle(radius at pair)值有两个参数:圆的半径和圆心的点。polygon(pair, pair, pair ...)值取3个或更多的点,表示一个三角形、一个矩形等
 
 clip-path: circle(40%)
 clip-path: ellipse(130px 140px at 10% 20%);
@@ -1655,7 +1649,7 @@ clip-path: fill-box;
 clip-path: stroke-box;
 clip-path: view-box;
 
-/* < basic-shape> values,一种形状，其大小和位置由几何盒值定义。如果没有指定几何框，则边框将用作参考框 */
+/* < basic-shape> values,一种形状,其大小和位置由几何盒值定义。如果没有指定几何框,则边框将用作参考框 */
 clip-path: inset(100px 50px);
 clip-path: circle(50px at 0 100px);
 clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
@@ -1670,14 +1664,14 @@ clip-path: initial;
 clip-path: unset;
 
 < geometry-box>
-如果同basic-shape一起声明将为基本形状提供相应的参考框盒。通过自定义，它将利用确定的盒子边缘包括任何形状边角（比如被border-radius定义的剪切路径）。几何框盒可有以下的值中的一个：
+如果同basic-shape一起声明将为基本形状提供相应的参考框盒。通过自定义,它将利用确定的盒子边缘包括任何形状边角(比如被border-radius定义的剪切路径)。几何框盒可有以下的值中的一个：
 margin-box 使用margin box作为引用框。
 border-box 使用border box作为引用框。
 padding-box 使用padding box作为引用框。
 content-box 使用content box作为引用框。
 fill-box 利用对象边界框作为引用框。
-stroke-box 使用笔触边界框（stroke bounding box）作为引用框
-view-box 使用最近的SVG视口（viewport）作为引用框。如果viewBox属性被指定来为元素创建SVG视口，引用框将会被定位在坐标系的原点，引用框位于由viewBox属性建立的坐标系的原点，引用框的尺寸用来设置viewBox属性的宽高值。
+stroke-box 使用笔触边界框(stroke bounding box)作为引用框
+view-box 使用最近的SVG视口(viewport)作为引用框。如果viewBox属性被指定来为元素创建SVG视口,引用框将会被定位在坐标系的原点,引用框位于由viewBox属性建立的坐标系的原点,引用框的尺寸用来设置viewBox属性的宽高值。
 
 CSS clip-path 生成器: https://www.html.cn/tool/css-clip-path/
 
@@ -1685,7 +1679,7 @@ CSS clip-path 生成器: https://www.html.cn/tool/css-clip-path/
   -webkit-clip-path: polygon(50% 0, 0 100%, 100% 100%);
   clip-path: polygon(50% 0, 0 100%, 100% 100%);
 }
-每个点用逗号分开，数值（50%，0）可以理解为坐标（x，y）,三个点形成一个闭合区域，这也是页面���显示出来的区域，形成遮罩的效果,三角形绘制的大概的坐标模型，起点为元素的左上角，所以形成的是一个向下发展的坐标系
+每个点用逗号分开,数值(50%,0)可以理解为坐标(x,y),三个点形成一个闭合区域,这也是页面���显示出来的区域,形成遮罩的效果,三角形绘制的大概的坐标模型,起点为元素的左上角,所以形成的是一个向下发展的坐标系
 
 .clip2{  // 圆形
   -webkit-clip-path: circle(50% at 50% 50%);
@@ -1741,12 +1735,12 @@ CSS clip-path 生成器: https://www.html.cn/tool/css-clip-path/
 clip-path过渡动画
 
 clip-path动画的局限
-clip-path动画虽然美好，但是存在一定的局限性，那就是进行过渡的两个状态，坐标顶点的数量必须一致。
+clip-path动画虽然美好,但是存在一定的局限性,那就是进行过渡的两个状态,坐标顶点的数量必须一致。
 也就是如果希望从三角形过渡到矩形。假设三角形和矩形的 clip-path 分别为：
 三角形：clip-path: polygon(50% 0, 0 100%, 100% 0)
 矩形： clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%)
-进行过渡动画时候，直接从 polygon(50% 0, 0 100%, 100% 0) --> polygon(0 0, 100% 0, 100% 100%, 0 100%) 是不行的，因为是从 3 个坐标点变换到 4 个坐标点。
-因此这里需要这用一个讨巧的办法，在三角形的表示方法中，使用四个坐标点表示，其中两个坐标点进行重合即可。也就是：
+进行过渡动画时候,直接从 polygon(50% 0, 0 100%, 100% 0) --> polygon(0 0, 100% 0, 100% 100%, 0 100%) 是不行的,因为是从 3 个坐标点变换到 4 个坐标点。
+因此这里需要这用一个讨巧的办法,在三角形的表示方法中,使用四个坐标点表示,其中两个坐标点进行重合即可。也就是：
 三角形：clip-path: polygon(50% 0, 0 100%, 100% 0) -> clip-path: polygon(50% 0, 50% 0, 0 100%, 100% 0)
 
 </pre>多边形图形过渡<pre class="css">
@@ -1916,12 +1910,12 @@ background-attachment: fixed改成了position: fixed,因为前面前者滚动实
 }
 
 </pre><pre>
-4、background-position设置背景的位置,可同时设置水平和垂直方向,像素px,长度,百分比,默认左上角0 0 或者 0% 0%
+4、background-position设置背景的位置,可同时设置水平和垂直方向,像素px,长度,百分比,默认左上角0 0或0% 0%
 1.关键字:分别对应x、y方向,top、bottom、left、right 和 center,若只设置一个另一个默认为center
 2.百分比:默认0% 0%,100% 100%右下角重合;50% 50%背景图和元素的中心对齐,百分数同时应用于元素和图像;若只一个则表示x方向,y默认50%
 3.px值:图像偏移xy方向px值
 
-5、background-size:400px 300px;  背景图片尺寸,cover任意大,contain图片最大尺寸
+5、background-size:400px 300px;  背景图片尺寸,cover任意大常用于设置全屏背景图,contain图片最大尺寸
 background-size:63px 100px;     背景图片大小,可用百分比则是相对于父元素的宽度和高度
 
 6、background-clip:content-box  背景被裁剪到内容框,border-box背景被裁剪到边框,padding-box内边距框
@@ -1935,16 +1929,9 @@ background-origin:content-box;
 所有背景属性设置在一个声明里,简写：
 background: #ff0000 url(/i/eg_bg_03.gif) no-repeat fixed center;
 
-background简写的/它和font以及border-radius里简写方式使用的/用法相似。/可以在支持这种写法的浏览器里在background-position后面接着写background-size。
+background简写的它和font及border-radius里简写方式使用的用法相似。可以在支持这种写法的浏览器里在background-position后面接着写background-size。
 此外也可以增加另外两个描述它的属性值： background-origin和 background-clip
-.example {
-  background: aquamarine
-              url(img.png)
-              no-repeat
-              scroll
-              center center / 50%
-              content-box content-box;
-}
+.example { background: aquamarine url(img.png) no-repeat scroll center center / 50% content-box content-box; }
 
 </pre>全屏背景<pre class="css">
 html {
@@ -1953,6 +1940,43 @@ html {
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
+}
+
+</pre><pre>
+三角形的背景图像
+矩形对角线分成两个三角形,当想展示某些完全不同的选择（例如白天和黑夜或冬天和夏天）时这种特效就更加棒。
+思路: 首先创建两个div,然后将两个背景都添加到其中,然后第二个div使用clip-path属性画出三角形。
+
+< section class="wraper">
+  < div class="day">< /div>
+  < div class="night">< /div>
+< /section>
+
+section { margin: 0; padding: 0; }
+div { position: absolute; height: 100vh; width: 100vw; }
+.day { background-image: url("bg.png"); background-size: cover; background-repeat: no-repeat; }
+.night { background-image: url("bg.png"); background-size: cover; background-repeat: no-repeat; clip-path: polygon(100vw 0, 0% 0vh, 100vw 100vh); }
+
+在背景图像上添加叠加渐变
+有时想在背景上添加一些文字,但有的图片太亮,导致字看不清楚,所以这里就需要让背景图叠加一些暗乐来突出文字效果。
+例如,可以通过添加粉红橙色渐变或红色至透明渐变来增强日落图像,这些情况下使用叠加的渐变就很容易做到。
+body {
+  background-image:
+    linear-gradient(4deg, rgba(38,8,31,0.75) 30%, rgba(213,49,127,0.3) 45%, rgba(232,120,12,0.3) 100%),
+    url("bg.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center
+}
+
+将背景图像设置为文本颜色
+使用background-image与background-clip,可以实现背景图像对文字的优美效果。在某些情况下它可能非常有用,尤其是想创建一个较大的文本标题而又不如普通颜色那么枯燥的情况。
+.text{
+  background-image: url("https://images.unsplash.com/photo-1462275646964&auto=format&fit=crop&w=2600&q=80");
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
 }
 
 </pre>
@@ -1968,10 +1992,10 @@ background-color 文本背景颜色
 text-align       对齐方式,left/right/center/justify	实现两端对齐文本效果,;min-width: 100px;text-align: justify;text-align-last: justify;
 
 vertical-align   垂直对齐
-CSS的属性vertical-align用来指定行内元素（inline）或表格单元格（table-cell）元素的垂直对齐方式,不能用它垂直对齐块级元素
+CSS的属性vertical-align用来指定行内元素(inline)或表格单元格(table-cell)元素的垂直对齐方式,不能用它垂直对齐块级元素
 定义行内元素的基线相对于该元素所在行的基线的垂直对齐,允许指定负长度值和百分比值,这会使元素降低而非升高,表单元格中这个属性会设置单元格框中的单元格内容的对齐方式
 对于顺序指示器(st, nd等)、需要的输入星号(*)或没有正确居中的图标特别有用
- - baseline	   默认,使元素的基线与父元素的基线对齐。HTML规范没有详细说明部分可替换元素的基线，如textarea,这意味着这些元素使用此值的表现因浏览器而异
+ - baseline	   默认,使元素的基线与父元素的基线对齐。HTML规范没有详细说明部分可替换元素的基线,如textarea,这意味着这些元素使用此值的表现因浏览器而异
  - sub         垂直对齐文本的下标,使元素的基线与父元素的下标基线对齐
  - super       垂直对齐文本的上标,使元素的基线与父元素的上标基线对齐
  - top         把元素顶端与行中最高元素顶端对齐
@@ -2029,21 +2053,21 @@ p{font-size: 16px}  计算后的line-height 16px * 1.5 = 24px
 font-size: 20px;
 line-height: 2;
 
-行高是指文本行基线间的垂直距离,基线（base line）并不是汉字文字的下端沿，而是英文字母“x”的下端沿
-上行的底线和下一行顶线之间的距离就是行距，而同一行顶线和底线之间的距离是font-size的大小，行距的一半是半行距
+行高是指文本行基线间的垂直距离,基线(base line)并不是汉字文字的下端沿,而是英文字母“x”的下端沿
+上行的底线和下一行顶线之间的距离就是行距,而同一行顶线和底线之间的距离是font-size的大小,行距的一半是半行距
 font-size: 16px; line-height: 20px;则行间距为4px,半行间距为2px
 当font-size等于line-height时行距=line-height-font-size=0；font-size大于line-height时则会出现行距为负值则两行重叠,即上行的底部和下行的顶部重叠
-没有设置div的height属性时，div的高度根据line-height的大小而变化，且文字垂直居中
+没有设置div的height属性时,div的高度根据line-height的大小而变化,且文字垂直居中
 height = line-height时垂直居中,height>line-height时文字处于上部,height < line-height时文字处于下部
 
-移动端line-height不居中问题，在安卓手机会发现文字偏上
+移动端line-height不居中问题,在安卓手机会发现文字偏上
 1、利用flex布局中的垂直居中属性实现垂直居中,父元素设置display:flex; height:1rem; align-items: center;
 子元素transform: scale(0.5); transform-origin: left center;
-2、不直接设置line-height=height，而是设置line-height:normal; padding:10px 0;
+2、不直接设置line-height=height,而是设置line-height:normal; padding:10px 0;
 
 line-height和padding让元素上下居中
-line-height不需要考虑字体大小以及行高，然后计算padding了,只要不换行
-模拟table显示的方式处理，通过设置line-height或者padding的方式在内容过长时都会有文字长度溢出的状况发生
+line-height不需要考虑字体大小以及行高,然后计算padding了,只要不换行
+模拟table显示的方式处理,通过设置line-height或者padding的方式在内容过长时都会有文字长度溢出的状况发生
 外层设置宽度、display: table;
 内层设置 display: table-cell; vertical-align: middle;
 < div style="width: 300px; height:300px; text-align: center; display: table; background-color: #888; color: #FFF;">
@@ -2052,7 +2076,7 @@ line-height不需要考虑字体大小以及行高，然后计算padding了,只�
   < /div>
 < /div>
 
-把box-sizing设置成"border-box"导致height并不总是等于content的高度,所以当lineHeight=height-borderWidth-padding的时line-height的高度才等于content的高度，文字才垂直居中
+把box-sizing设置成"border-box"导致height并不总是等于content的高度,所以当lineHeight=height-borderWidth-padding的时line-height的高度才等于content的高度,文字才垂直居中
 
 word-spacing     字符间隔,单词间隔距离,可用px,其默认值normal与设置值为0是一样的
 letter-spacing   属性字间隔,单个字符间隔,可用px
@@ -4313,7 +4337,7 @@ display：block;
 <div id="hack">
 <h2>CSS sprites ：css精灵和hack</h2><pre>
 许多背景图片放在一张大图里,通过css定位来显示图片的一部分,减少HTTP的请求次数,提高网页显示速度
-列表前的小图片合成到一张大图片中,可以设置成列表的背景图片,在用水平垂直的像素大小正负、或者left right center top bottom来实现
+列表前的小图片合成到一张大图片中,可以设置成列表的背景图片,在用水平垂直的像素大小正负、或left right center top bottom来实现
 background-image:url('3.gif');
 background-repeat:no-repeat;
 background-position:50% 50%;
@@ -4321,10 +4345,10 @@ background-position:50% 50%;
 
 兼容性处理：不同浏览器支持、解析存在差异,针对不同浏览器写不同的code的过程称为css hack
 1.条件注释:可查看hao360.com
- 例：<!—[if  !IE]><!-->
-<style type="text/css">
+ 例：<！—[if  !IE]><！-->
+＜style type="text/css">
 div p{color:red;}
-</style>
+＜/style>
 <！--<![endif]-->
 2.修饰属性
 
@@ -5489,7 +5513,7 @@ background-image：渐变框的大小由background-size决定,默认是padding b
 list-style-image：渐变框的大小由font-size决定,默认是1em
 border-image：渐变框的大小由borer-width决定,safari浏览器始终实现的都是带有fill参数的表现
 
-除了渐变，可以给背景色、透明度、元素大小添加动画。目前不能为渐变添加动画，但下面的代码通过改变背景位置，让它看起来有动画效果
+除了渐变,可以给背景色、透明度、元素大小添加动画。目前不能为渐变添加动画,但下面的代码通过改变背景位置,让它看起来有动画效果
 button {
   background-image: linear-gradient(#5187c4, #1c2f45);
   background-size: 200%;
@@ -5966,12 +5990,86 @@ img的text-align: center没用,这个是针对子元素的,要在外层的块元
 </pre>
 </div>
 
+<div id="auto">
+<h3>auto</h3><pre>
+【 width: auto 】
+display: block;块级元素如div或p的初始宽度是auto,这使得它们占据了包含它们的块的整个水平空间。
+根据CSS规范‘margin-left’ + ‘border-left-width’ + ‘padding-left’ + ‘width’ +‘padding-right’ + ‘border-right-width’ + ‘margin-right’ = 块的宽度
+当一个元素的宽度值为auto时,它包含margin、padding和border,不会变得比它的父元素大,其中content的宽度将是content本身减去margin、padding和border。
+将元素item的宽度更改为100％而不是auto时,该元素将占用其父项的100％,加上左侧和右侧的边距
+
+【 height: auto 】
+元素的高度等于默认值为auto的内容
+要使.wrapper .item获得其容器的全部高度,可以使用以下方法之一:
+1、给.wrapper一个固定的高度,然后为.item元素添加height: 100%
+2、对.wrapper使用flex布局,默认情况下它将拉伸子项.item
+
+【 margin 和 auto 关键字 】
+margin最常见的用例是将已知宽度的元素水平居中
+.element { margin-left: auto; margin-right: auto; }
+如果margin-left和margin-right值均为auto,则它们的使用值相等。这使元素相对于包含块的边缘水平居中
+
+另一个不太常见的将绝对定位元素居中的用例是margin: auto。当有一个元素应该在它的父元素内部水平和垂直居中时,可能会倾向于使用translateX或translateY。
+可以使用下面方法让具有绝对定位元素居中：
+1、设置的宽度和高度。
+2、元素应具有position: absolute
+
+.wrapper { position: relative; }
+.item { width: 200px; height: 100px; position: absolute; left: 0; top: 0; right: 0; bottom: 0; margin: auto; }
+
+在某些情况下,在flexbox中使用自动页边距非常有用。当一个子项目有一个margin是auto 时,它将被推到远的另一边。例如,如果一个flex项目的左边是margin-left: auto,那么它将被推到最右边
+不仅如此,它还可以在水平或垂直方向工作,margin-top: auto;
+如果只有一个子元素,则可以使用margin：auto将其水平和垂直居中
+
+在flexbox中可以使用flex: auto作为子项目,它等价于flex: 1 1 auto
+.item { flex-grow: 1; flex-shrink: 1; flex-basis: auto; }
+具有flex：auto的项目将根据其宽度和高度来调整大小,但它可以根据可用的额外空间来增大或缩小
+
+【 CSS grid和自动设置一个 `auto` 列 】
+在CSS Grid中可以设置一个列为auto,这意味着它的宽度将基于它的内容长度
+wrapper { display: grid; grid-template-columns: auto 1fr 1fr; }
+
+使用CSS网格时可以使用自动页边距实现类似于flexbox的结果。当有一个网格且其中的网格项目具有margin-left: auto时：该项目将被推到右边,其宽度将基于其内容长度
+
+【 position属性和定位属性top,right,bottom和left 】
+.wrapper { position: relative; padding: 16px; }
+.item { position: absolute; width: 100px; height: 100px; }
+有一个有内边距的wrapper元素,还有一个子项。子项目是绝对定位的,但没有任何定位属性
+在CSS中每个属性都有一个初始值/默认值,left的默认值为16px,原因是绝对定位的元素相对于其最接近的父元素具有position：relative。该父项具有padding: 16px,因此子项位于顶部和左侧的16px处
+
+假设子项必须在较小的视口中位于距左侧100像素的位置,对于桌面,它应恢复为默认位置。
+.wrapper { position: relative; }
+.item { position: absolute; left: 100px; width: 100px; height: 100px; }
+如何在较大的视口中重设left？不能使用left:0,因为这会将子元素粘到边缘,子元素在父元素padding区域上
+要以正确的方式重置子项,我们应该使用left: auto。根据 MDN：
+如果元素是静态元素,则将定位在它应该水平定位的位置
+这意味着,它会尊重padding,而不会将子条目粘贴到其父条目的边缘。
+
+.item { position: absolute; left: 100px; width: 100px; height: 100px; }
+@media (min-width: 800px) {
+  .item {
+    left: auto;  /* This is equivalent to left: 16px */
+  }
+}
+top属性也是如此。对于right和bottom属性,其默认计算值分别等于元素的宽度和高度。
+
+提示框需要一个指向箭头,以使其对用户更加清晰。如果正在设计系统上,则应该考虑多个状态,例如提示的箭头指向左侧,另一个箭头指向右侧。
+.tooltip:before { position: absolute; left: -15px; }  /* 箭头代码 */
+/* 这是一个箭头指向右侧的版本*/
+.tooltip.to-right:before { position: absolute; left: auto; right: -15px; }
+
+.tooltip:before { position: absolute; right: 100%; }
+.tooltip.to-right:before { /* Arrow code */ position: absolute; right: auto; left: 100%; }
+通过使用100%,避免了使用硬编码的值(箭头宽度),如果改变箭头的大小,这个值可能会失败。这是一个更经得起时间考验的解决方案
+
+</pre>
+
 <div id="response">
 <h2>响应式设计：移动端优先设计</h2><pre>
-响应式网页设计不仅仅是一种趋势,还更是一个新的设计解决方案！它有助于解决不同的分辨率和设备（台式电脑,笔记本电脑,平板,手机）相关的设计问题。既然是设计的问题,这里就会涉及到很多层面的角色,包括交互设计师,视觉设计师,前端工程师,后台开发工程师
+响应式网页设计不仅仅是一种趋势,还更是一个新的设计解决方案！它有助于解决不同的分辨率和设备(台式电脑,笔记本电脑,平板,手机)相关的设计问题。既然是设计的问题,这里就会涉及到很多层面的角色,包括交互设计师,视觉设计师,前端工程师,后台开发工程师
 交互设计师,要满足各自不通分辨率和设备的页面布局展现方式。而视觉设计师,则要考虑到页面性能和移动端带宽问题,权衡下页面的酷炫效果和视觉色彩的运用。而前端和后台开发工程师,则要完成满足视觉需求和交互功能,更要考虑到页面加载性能和消耗带宽问题,更重要的是移动端安全性能方面
 
-遵循移动优先原则,交互和设计应以移动端为主,PC则作为移动端的一个扩展；一个页面需要兼容不同终端,那么有两个关键点需要去做到响应式的：响应式布局和响应式内容（图片、多媒体）
+遵循移动优先原则,交互和设计应以移动端为主,PC则作为移动端的一个扩展；一个页面需要兼容不同终端,那么有两个关键点需要去做到响应式的：响应式布局和响应式内容(图片、多媒体)
 
 一、响应式布局
 兼容不同屏幕分辨率、清晰度及屏幕定向方式竖屏(portrait)、横屏(landscape),怎样才能做到让一种设计方案满足所有情况？对此布局应该是一种弹性的栅格布局,不同尺寸下弹性适应
@@ -6029,7 +6127,7 @@ device-aspect-ratio比例值,屏幕的纵横比
 }
 
 3、表格(table)的响应式处理
-（1）、隐藏不重要数据列
+(1)、隐藏不重要数据列
 @media only screen and (max-width: 800px) {
   table td:nth-child(2),
   table th:nth-child(2) {display: none;}
@@ -6043,8 +6141,8 @@ device-aspect-ratio比例值,屏幕的纵横比
   th:nth-child(8){display: none;}
 }
 
-（2）、多列横向变2列纵向
-（3）、固定首列,剩余列横向滚动
+(2)、多列横向变2列纵向
+(3)、固定首列,剩余列横向滚动
 
 二、响应式内容
 1、响应式图片
@@ -6053,9 +6151,9 @@ device-aspect-ratio比例值,屏幕的纵横比
 处理原理：浏览器获取用户终端的屏幕尺寸、分辨率逻辑处理后输出适应的图片,如屏幕分辨率320*480,那么匹配给它的是宽度应小于320px的图片。如果终端屏幕的DPI(device pixels)DPI详解值很高,也就是高清屏,那么就得输出2倍分辨率的图形(宽:640px)；以保证在高清屏下图形的清晰度。各种移动终端的屏幕参数可通过
 
 2、高分辨率(DPI)下的响应式处理
-（1）、SVG：优点可承载色彩丰富、设计复杂图形,且渲染不会出现边缘不顺滑；缺点是IE的支持不完美
-（2）、Icon fonts：支持多浏览器,图形颜色大小的修改成本低,易于维护；图形表现单一,不支持色彩丰富且复杂的图形,IE6渲染有毛边
-（3）、-webkit-image-set:只支持单个图形的适配,不利于图形合并,兼容不完美（Safari 6+, Chrome 21+）
+(1)、SVG：优点可承载色彩丰富、设计复杂图形,且渲染不会出现边缘不顺滑；缺点是IE的支持不完美
+(2)、Icon fonts：支持多浏览器,图形颜色大小的修改成本低,易于维护；图形表现单一,不支持色彩丰富且复杂的图形,IE6渲染有毛边
+(3)、-webkit-image-set:只支持单个图形的适配,不利于图形合并,兼容不完美(Safari 6+, Chrome 21+)
 JS检测：var retina = window.devicePixelRatio > 1;
 
 3、高分辨率下的1px border
@@ -6730,7 +6828,7 @@ module: {
   ]
 }
 
-</pre>Class的组合: 在CSS Modules中一个选择器可以继承另一个选择器的规则,这称为"组合"（"composition"）<pre class="css">
+</pre>Class的组合: 在CSS Modules中一个选择器可以继承另一个选择器的规则,这称为"组合"("composition")<pre class="css">
 // 在App.css中,让.title继承.className
 .className {
   background-color: blue;

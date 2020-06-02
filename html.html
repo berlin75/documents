@@ -4190,7 +4190,7 @@ fileInput.onchange = () => {
   }
 }
 
-</pre>还可以使用object URL来显示PDF,使用相同的crateObjectURL方法，但将其设置为iframe的URL而不是img元素<pre class="js">
+</pre>还可以使用object URL来显示PDF,使用相同的crateObjectURL方法,但将其设置为iframe的URL而不是img元素<pre class="js">
 < input type="file" >
 < iframe>
 
@@ -4242,7 +4242,7 @@ fileInput.onchange = async () => {
   const file = fileInput.files[0];
   const objUrl = URL.createObjectURL(file);
   video.src = objUrl;
-  await video.play();  // play方法返回一个Promise，因此必须添加一个await等待该Promise的解决
+  await video.play();  // play方法返回一个Promise,因此必须添加一个await等待该Promise的解决
   URL.revokeObjectURL(objUrl);
 }
 

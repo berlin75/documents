@@ -63,8 +63,8 @@ $(document).ready(function(){
   /* 侧边导航与内容联动 */
   function related(){
     //获取main元素内所有含有id属性的元素集合
-    //遍历集合中所有元素，选取所有在可视区内部的元素
-    //选取离窗口最近的元素的id属性，映射侧边导航栏中对应的链接
+    //遍历集合中所有元素,选取所有在可视区内部的元素
+    //选取离窗口最近的元素的id属性,映射侧边导航栏中对应的链接
     $('ol>li>ul').css('max-height', '0px');
     var ids = [];
     for(var ele of $('main div[id]')){
@@ -164,7 +164,7 @@ code {
 </style>
 </head>
 <body>
-<!-- 设置id为oriContent，如果想实现实时更新，使用onkeyup方法 -->
+<!-- 设置id为oriContent,如果想实现实时更新,使用onkeyup方法 -->
 <textarea id="oriContent" style="height:0px;width:0px;" onkeyup="convert()">
 
 ## react

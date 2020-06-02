@@ -10,6 +10,9 @@
 
 <main>
 <pre>
+Web、iOS、Android、小程序
+微信原生开发、wepy、mpvue、taro、uni-app等框架开发
+
 项目描述
 1) 此项目为一个前后台分离的招聘的SPA,包括前端应用和后端应用
 2) 包括用户注册/登录,大神/老板列表,实时聊天等模块
@@ -193,11 +196,11 @@ async save(url) {
   try {
     await Taro.authorize({ scope: "scope.writePhotosAlbum" })
     const { tempFilePath } = await Taro.downloadFile({ url })
-    await Taro.saveImageToPhotosAlbum({filePath: tempFilePath}) // 二维码图片文件路径，可以是临时文件路径或永久文件路径 (本地路径) ，不支持网络路径
+    await Taro.saveImageToPhotosAlbum({filePath: tempFilePath}) // 二维码图片文件路径,可以是临时文件路径或永久文件路径 (本地路径) ,不支持网络路径
     await Taro.showModal({ title: '系统提示', content: '图片保存成功', showCancel: false, })
   } catch (error) {
     if(error.errMsg == 'authorize:fail auth deny'){
-      let result = await Taro.showModal({ title: '授权失败', content: '请先授权，再保存此图片。' })
+      let result = await Taro.showModal({ title: '授权失败', content: '请先授权,再保存此图片。' })
       console.log(result)
       if(result.confirm){
         let res = await Taro.openSetting()  //进入小程序授权设置页面
@@ -9280,8 +9283,8 @@ window.customElements.define('user-card', UserCard);
 
 <div id="ts">
 <h3>typescript online: https://www.typescriptlang.org/play/</h3><pre>
-TypeScript是由微软开发的开源的编程语言，它是JS的一个超集，遵循了最新的ES6、ES5规范,扩展了JS的语法。TypeScript通过类型注解提供编译时的静态类型检查，可处理已有的JS代码，并只对其中的TypeScript代码进行编译，另外TypeScript可以在任何浏览器、任何计算机和任何操作系统上运行。
-TypeScript的设计目的应该是解决JavaScript的“痛点”：弱类型和没有命名空间，导致很难模块化，不适合开发大型程序。另外它还提供了一些语法糖来帮助大家更方便地实践面向对象的编程
+TypeScript是由微软开发的开源的编程语言,它是JS的一个超集,遵循了最新的ES6、ES5规范,扩展了JS的语法。TypeScript通过类型注解提供编译时的静态类型检查,可处理已有的JS代码,并只对其中的TypeScript代码进行编译,另外TypeScript可以在任何浏览器、任何计算机和任何操作系统上运行。
+TypeScript的设计目的应该是解决JavaScript的“痛点”：弱类型和没有命名空间,导致很难模块化,不适合开发大型程序。另外它还提供了一些语法糖来帮助大家更方便地实践面向对象的编程
 ts作用：类型检查、直接编译到原生js、引入新的语法糖
 
 安装TypeScript有两种主要的方式来获取TypeScript工具：
@@ -9963,14 +9966,14 @@ let s = e!.name; // 断言e是非空并访问name属性
 <div id="rn">
 <h3>移动端 react native</h3><pre>
 ReactNative可以基于目前大热的开源JavaScript库React.js来开发iOS和Android原生App。而且React Native已经用于生产环境——Facebook Groups iOS 应用就是基于它开发的
-React Native的原理是在JavaScript中用React抽象操作系统原生的UI组件，代替DOM元素来渲染，比如以View取代div，以Image替代img等。
-在幕后，React Native在主线程之外，在另一个背景线程里运行JavaScript引擎，两个线程之间通过一批量化的async消息协议来通信(有一个专门的React插件)。
-UI方面React Native提供跨平台的类似Flexbox的布局系统，还支持CSS子集。可以用JSX或普通JS语言，还有CoffeeScript和TypeScript来开发
-更好的是，由于基于Web技术，开发起来可以像在浏览器里那样随时在仿真程序中查看应用运行情况，刷新一下就行，无需编译，爽吧。
+React Native的原理是在JavaScript中用React抽象操作系统原生的UI组件,代替DOM元素来渲染,比如以View取代div,以Image替代img等。
+在幕后,React Native在主线程之外,在另一个背景线程里运行JavaScript引擎,两个线程之间通过一批量化的async消息协议来通信(有一个专门的React插件)。
+UI方面React Native提供跨平台的类似Flexbox的布局系统,还支持CSS子集。可以用JSX或普通JS语言,还有CoffeeScript和TypeScript来开发
+更好的是,由于基于Web技术,开发起来可以像在浏览器里那样随时在仿真程序中查看应用运行情况,刷新一下就行,无需编译,爽吧。
   
 React Native比起标准Web开发或原生开发能够带来的三大好处：
 手势识别：基于Web技术(HTML5/JavaScript)构建的移动应用经常被抱怨缺乏及时响应。而基于原生UI的React Native能避免这些问题从而实现实时响应。
-原生组件：使用HTML5/JavaScript实现的组件比起原生组件总是让人感觉差一截，而React Native由于采用了原生UI组件自然没有此问题。
+原生组件：使用HTML5/JavaScript实现的组件比起原生组件总是让人感觉差一截,而React Native由于采用了原生UI组件自然没有此问题。
 样式和布局：iOS、Android和基于Web的应用各自有不同的样式和布局机制。React Native通过一个基于FlexBox的布局引擎在所有移动平台上实现了一致的跨平台样式和布局方案。
 
 安卓模拟器调出 Dev Setting: adb shell input keyevent 82
@@ -10077,30 +10080,30 @@ ProjectName(新建项目)
 ├──temp
 └──project.json
 
-assets	与资源管理器的内容同步，游戏的核心目录(每个文件都有相应.meta文件)
+assets	与资源管理器的内容同步,游戏的核心目录(每个文件都有相应.meta文件)
 library	这里文件的结构和资源的格式将被处理成最终游戏发布时需要的形式
 local	编辑器使用习惯记录(如：窗体布局)
 settings	项目设置
-project.json	版本控制，必须与assets共同存在
-build	打包导出目录，构建项目时，自动生成
-PS：.meta文件——记录某资源在项目中的唯一标识，以及其配置信息，只有在编辑器中对资源做修改，.meta文件才会实时变化。因此，不要在编辑器外，对资源的内容进行操作
+project.json	版本控制,必须与assets共同存在
+build	打包导出目录,构建项目时,自动生成
+PS：.meta文件——记录某资源在项目中的唯一标识,以及其配置信息,只有在编辑器中对资源做修改,.meta文件才会实时变化。因此,不要在编辑器外,对资源的内容进行操作
 
 【 资源分类 】
 1、场景(scene)
-自动释放资源：切换场景后，上一个场景中的资源，从内存中释放。
-延迟加载资源：意味着不用等待所有资源加载完毕，才显示场景。(快速切换场景，资源陆续在画面显示)
+自动释放资源：切换场景后,上一个场景中的资源,从内存中释放。
+延迟加载资源：意味着不用等待所有资源加载完毕,才显示场景。(快速切换场景,资源陆续在画面显示)
 
 2、贴图(texture)
-普通图，子层为一张spriteFrame。
+普通图,子层为一张spriteFrame。
 
 3、预制(prefab)
-创建方式：拖拽场景节点，到资源管理器。
+创建方式：拖拽场景节点,到资源管理器。
 
 4、图集(atlas)
-精灵图，子层为多张spriteFrame。(精灵图合成软件：TexturePacker、Zwoptex)
+精灵图,子层为多张spriteFrame。(精灵图合成软件：TexturePacker、Zwoptex)
 
 5、自动图集(auto-atlas)
-打包时，将所在目录中的所有碎图，合成为图集。
+打包时,将所在目录中的所有碎图,合成为图集。
 
 6、艺术数字(label-atlas)
 数字为内容的图集。
@@ -10133,13 +10136,13 @@ PS：.meta文件——记录某资源在项目中的唯一标识，以及其配�
 
 1、跨项目导入导出资源
 操作流程：
-(1)导出：文件 => 资源导出，选择 .fire场景文件，输出assets目录的 .zip压缩包。
-(2)导入：文件 => 资源导入，选择压缩包源路径、解压路径，输出assets目录内容。
+(1)导出：文件 => 资源导出,选择 .fire场景文件,输出assets目录的 .zip压缩包。
+(2)导入：文件 => 资源导入,选择压缩包源路径、解压路径,输出assets目录内容。
 
 2、图像资源自动剪裁
-基于size mode，尽量去除spriteFrame无像素的部分，减小图片尺寸。
+基于size mode,尽量去除spriteFrame无像素的部分,减小图片尺寸。
 
-场景中的元素，即是节点，可内嵌组件
+场景中的元素,即是节点,可内嵌组件
 
 cocos坐标系(世界、本地坐标系)	x右、y上、z外
 设备屏幕坐标系	x右、y下
@@ -10156,18 +10159,18 @@ cocos坐标系(世界、本地坐标系)	x右、y上、z外
 
 3、动画系统
 (1)创建动画的基本流程
-(2)时间曲线(双击动画线，进入编辑窗口)
+(2)时间曲线(双击动画线,进入编辑窗口)
 (3)事件管理(双击游标、加减按钮控制参数个数)
 (4)脚本控制
 
 4、物理系统
 碰撞组件(普通碰撞)
 (1)editing——是否为编辑模式
-(2)regenerate points——计算图形边界，自定生成控制点，数值为控制点的生成密度 / 准确度
+(2)regenerate points——计算图形边界,自定生成控制点,数值为控制点的生成密度 / 准确度
 (3)ctrl + 点击——删除控制点
 (4)组件类型：矩形、圆形、多边形
 (5)设置碰撞组(项目 => 项目设置 => 分组设置)：
-制定分组 => 匹配分组 => 碰撞组件所在节点上，设置所属分组
+制定分组 => 匹配分组 => 碰撞组件所在节点上,设置所属分组
 (6)脚本控制
 
 Box2D物理引擎(高级碰撞)
@@ -10226,7 +10229,7 @@ var Rect = cc.Class({
 (7)父构造函数
 var Shape = cc.Class({
   ctor: function () {
-    cc.log("Shape");    // 实例化时，父构造函数会自动调用，
+    cc.log("Shape");    // 实例化时,父构造函数会自动调用,
   }
 });
 
@@ -10247,7 +10250,7 @@ var square = new Square();
 
 //简单类型声明
 properties: {
-  score: {  //这几个参数分别指定了score的默认值为0，在属性检查器里，其属性名将显示为：“Score (player)”，并且当鼠标移到参数上时，显示对应的Tooltip。
+  score: {  //这几个参数分别指定了score的默认值为0,在属性检查器里,其属性名将显示为：“Score (player)”,并且当鼠标移到参数上时,显示对应的Tooltip。
     default: 0,
     displayName: "Score (player)",
     tooltip: "The score of player",
@@ -10262,7 +10265,7 @@ properties: {
   },
   enemies: {
     default: [],
-    type: [cc.Node]     // type同样写成数组，提高代码可读性
+    type: [cc.Node]     // type同样写成数组,提高代码可读性
   },
 }
 
@@ -10281,31 +10284,31 @@ properties: {
 properties常用参数的作用
 default	默认值
 type	限定属性的数据类型
-visible	若为false，则不在属性检查器面板中显示该属性
-serializable	若为false，则不序列化(保存)该属性
-displayName	在属性检查器面板中，显示成指定名字
-tooltip	在属性检查器面板中，添加属性的Tooltip
+visible	若为false,则不在属性检查器面板中显示该属性
+serializable	若为false,则不序列化(保存)该属性
+displayName	在属性检查器面板中,显示成指定名字
+tooltip	在属性检查器面板中,添加属性的Tooltip
 
 【 常用节点和组件接口 】
-cc.Component 是所有组件的基类，任何组件都包括如下的常见接口：
+cc.Component 是所有组件的基类,任何组件都包括如下的常见接口：
 this.node	该组件所属的节点实例
-this.enabled	是否每帧执行该组件的update方法，同时也用来控制渲染组件是否显示
+this.enabled	是否每帧执行该组件的update方法,同时也用来控制渲染组件是否显示
 
 生命周期
-onLoad() 在节点首次激活时触发，或者所在节点被激活的情况下触发,组件所在节点进行初始化时(节点添加到节点树时)执行
-start()	在组件首次激活前,在该组件第一次update之前执行，通常用于需要在所有组件的onLoad初始化完毕后执行的逻辑
-update(dt)	动画更新前,作为组件的成员方法，在组件的enabled属性为true时其中的代码会每帧执行
+onLoad() 在节点首次激活时触发,或者所在节点被激活的情况下触发,组件所在节点进行初始化时(节点添加到节点树时)执行
+start()	在组件首次激活前,在该组件第一次update之前执行,通常用于需要在所有组件的onLoad初始化完毕后执行的逻辑
+update(dt)	动画更新前,作为组件的成员方法,在组件的enabled属性为true时其中的代码会每帧执行
 lateUpdate	动画更新后
-onEnable	当组件的enabled属性从false变为true时，或者所在节点的active属性从false变为true时(倘若节点首次被创建且enabled为true，则会在onLoad之后start之前被调用)
-onDisable	当组件的enabled属性从true变为false时，或者所在节点的active属性从true变为false时
+onEnable	当组件的enabled属性从false变为true时,或者所在节点的active属性从false变为true时(倘若节点首次被创建且enabled为true,则会在onLoad之后start之前被调用)
+onDisable	当组件的enabled属性从true变为false时,或者所在节点的active属性从true变为false时
 onDestroy	当组件或者所在节点调用了destroy()时
 
 【 访问节点和组件 】
 this.node  获得组件所在的节点
 this.getComponent(组件名)  获得其它组件
 node.getComponent(cc.Label).string = 'abc';//获取节点上的组件值
-var a = cc.find("Canvas/bg").getComponent(cc.Sprite);//通过访问路径来获取节点，及获取该节点的指定组件
-this.node.getChildByName('节点名称').getComponent(cc.Label)//通过节点名获取子节点，获取该节点指定组件
+var a = cc.find("Canvas/bg").getComponent(cc.Sprite);//通过访问路径来获取节点,及获取该节点的指定组件
+this.node.getChildByName('节点名称').getComponent(cc.Label)//通过节点名获取子节点,获取该节点指定组件
 
 获得其它节点及其组件
 // Player.js
@@ -10319,13 +10322,13 @@ cc.Class({
   }
 });
 
-//如果将属性的type声明为Player组件，当拖动节点"Player Node"到属性检查器，player属性就会被设置为这个节点里面的Player组件
+//如果将属性的type声明为Player组件,当拖动节点"Player Node"到属性检查器,player属性就会被设置为这个节点里面的Player组件
 // Cannon.js
 var Player = require("Player");
 cc.Class({
   extends: cc.Component,
   properties: {
-    player: {  // 声明player属性，这次直接是组件类型
+    player: {  // 声明player属性,这次直接是组件类型
       default: null,
       type: Player
     }
@@ -10424,7 +10427,7 @@ cc.Class({
       type: cc.SpriteFrame,
     },
   },
-  start: function () {  //动态创建节点，并将它加入到场景中
+  start: function () {  //动态创建节点,并将它加入到场景中
     var node = new cc.Node('Sprite');
     var sp = node.addComponent(cc.Sprite);
     sp.spriteFrame = this.sprite;
@@ -10472,7 +10475,7 @@ cc.Class({
   properties: {
     target: cc.Node,
   },
-  start: function () {  // 5秒后销毁目标节点,销毁节点并不会立刻被移除，而是在当前帧逻辑更新结束后，统一执行
+  start: function () {  // 5秒后销毁目标节点,销毁节点并不会立刻被移除,而是在当前帧逻辑更新结束后,统一执行
     setTimeout(function () {
       this.target.destroy();
     }.bind(this), 5000);
@@ -10485,21 +10488,21 @@ cc.Class({
 });
 
 PS：不要使用removeFromParent去销毁节点。
-原因：调用一个节点的 removeFromParent 后，它不一定就能完全从内存中释放，因为有可能由于一些逻辑上的问题，导致程序中仍然引用到了这个对象。
+原因：调用一个节点的 removeFromParent 后,它不一定就能完全从内存中释放,因为有可能由于一些逻辑上的问题,导致程序中仍然引用到了这个对象。
 
 【 加载和切换场景 】
-cc.director.getScene(); //获取当前场景，获取场景主节点
+cc.director.getScene(); //获取当前场景,获取场景主节点
 
 cc.director.loadScene("MyScene");  //从当前场景切换到MyScene场景
 cc.director.loadScene("MyScene", fn);   // 场景加载回调, fn：加载MyScene场景时触发
 
 预加载场景
 cc.director.preloadScene("MyScene", fn);  //后台预加载场景
-cc.director.loadScene("MyScene", fn);    //有需要时，手动加载该场景
+cc.director.loadScene("MyScene", fn);    //有需要时,手动加载该场景
 
-通过常驻节点进行场景资源管理和参数传递, 常驻节点：不随场景切换而自动销毁，为所有场景提供持久性信息
+通过常驻节点进行场景资源管理和参数传递, 常驻节点：不随场景切换而自动销毁,为所有场景提供持久性信息
 cc.game.addPersistRootNode(myNode);   //设置常驻节点(全局变量)
-cc.game.removePersistRootNode(myNode);  //取消常驻节点，还原为一般场景节点
+cc.game.removePersistRootNode(myNode);  //取消常驻节点,还原为一般场景节点
 
 【 获取和加载资源 】
 (1)资源属性的声明
@@ -10507,7 +10510,7 @@ cc.game.removePersistRootNode(myNode);  //取消常驻节点，还原为一般�
 cc.Class({
   extends: cc.Component,
   properties: {
-    //所有继承自cc.Asset的类型都统称资源，如cc.Texture2D, cc.SpriteFrame, cc.AnimationClip, cc.Prefab等
+    //所有继承自cc.Asset的类型都统称资源,如cc.Texture2D, cc.SpriteFrame, cc.AnimationClip, cc.Prefab等
     texture: {
       default: null,
       type: cc.Texture2D
@@ -10521,13 +10524,13 @@ cc.Class({
 
 (2)静态加载(在属性检查器里设置资源)
 // NewScript.js
-onLoad: function () { //拖拽资源管理器的资源，到属性检查器的脚本组件中，即可在脚本里拿到设置好的资源
+onLoad: function () { //拖拽资源管理器的资源,到属性检查器的脚本组件中,即可在脚本里拿到设置好的资源
   var spriteFrame = this.spriteFrame;
   var texture = this.texture;
   spriteFrame.setTexture(texture);
 }
 
-(3)动态加载,动态加载的资源，需要存放于assets的子目录resources中
+(3)动态加载,动态加载的资源,需要存放于assets的子目录resources中
 //加载单个资源
 //cc.loader.loadRes(resources的相对路径, 类型(可选), 回调函数)
 //加载Prefab资源
@@ -10545,7 +10548,7 @@ cc.loader.loadRes("test assets/image", cc.SpriteFrame, function (err, spriteFram
 //cc.loader.loadResDir(resources的相对路径, 类型(可选), 回调函数)
 //加载test assets目录下所有资源
 cc.loader.loadResDir("test assets", function (err, assets) { });
-//加载test assets目录下所有SpriteFrame，并且获取它们的路径
+//加载test assets目录下所有SpriteFrame,并且获取它们的路径
 cc.loader.loadResDir("test assets", cc.SpriteFrame, function (err, assets, urls) { });
 
 // 资源浅释放
@@ -10555,26 +10558,26 @@ cc.loader.releaseRes("test assets/anim");
 //cc.loader.releaseAsset(组件名)
 cc.loader.releaseAsset(spriteFrame);
 
-// 资源深释放，释放一个资源以及所有它依赖的资源
+// 资源深释放,释放一个资源以及所有它依赖的资源
 var deps = cc.loader.getDependsRecursively('prefabs/sample');
 
 (4)加载远程资源和设备资源
 var remoteUrl = "http://unknown.org/someres.png";
 cc.loader.load(remoteUrl, function (err, texture) { });
 
-//远程url不带图片后缀名，此时必须指定远程图片文件的类型
+//远程url不带图片后缀名,此时必须指定远程图片文件的类型
 remoteUrl = "http://unknown.org/emoji?id=124982374";
 cc.loader.load({url: remoteUrl, type: 'png'}, function () { });
 
 //加载设备资源
-//用绝对路径加载设备存储内的资源，比如相册
+//用绝对路径加载设备存储内的资源,比如相册
 var absolutePath = "/dara/data/some/path/to/image.png"
 cc.loader.load(absolutePath, function () { });
 
 加载限制：
 1、原生平台远程加载不支持图片文件以外类型的资源。
-2、这种加载方式只支持图片、声音、文本等原生资源类型，不支持SpriteFrame、SpriteAtlas、Tilemap等资源的直接加载和解析。(需要后续版本中的AssetBundle支持)
-3、Web端的远程加载受到浏览器的CORS跨域策略限制，如果对方服务器禁止跨域访问，那么会加载失败，而且由于WebGL安全策略的限制，即便对方服务器允许http请求成功之后也无法渲染。
+2、这种加载方式只支持图片、声音、文本等原生资源类型,不支持SpriteFrame、SpriteAtlas、Tilemap等资源的直接加载和解析。(需要后续版本中的AssetBundle支持)
+3、Web端的远程加载受到浏览器的CORS跨域策略限制,如果对方服务器禁止跨域访问,那么会加载失败,而且由于WebGL安全策略的限制,即便对方服务器允许http请求成功之后也无法渲染。
 
 (5)资源的依赖和释放
 // 直接释放某个贴图
@@ -10584,7 +10587,7 @@ cc.loader.release(texture);
 var deps = cc.loader.getDependsRecursively('prefabs/sample');
 cc.loader.release(deps);
 
-// 如果在这个 prefab 中有一些和场景其他部分共享的资源，不希望它们被释放，可以将这个资源从依赖列表中删除
+// 如果在这个 prefab 中有一些和场景其他部分共享的资源,不希望它们被释放,可以将这个资源从依赖列表中删除
 var deps = cc.loader.getDependsRecursively('prefabs/sample');
 var index = deps.indexOf(texture2d._uuid);
 if (index !== -1) deps.splice(index, 1);
@@ -10598,13 +10601,13 @@ this.node.on(event, fn, target, boolean);  //target可选参数用于绑定响�
 this.node.off(event, fn, target, boolean);
 
 发射事件
-this.node.emit(event, arg1, arg2, arg3);  //为事件函数，提供参数，最多5个
+this.node.emit(event, arg1, arg2, arg3);  //为事件函数,提供参数,最多5个
 
 派送事件
-//grandson.js, 升级版的on，冒泡到的节点，全部注册事件
+//grandson.js, 升级版的on,冒泡到的节点,全部注册事件
 this.node.dispatchEvent( new cc.Event.EventCustom('foobar', true) );
 
-//father.js, 在指定的上级节点中，注册相同的事件，阻止事件冒泡，手动停止派送
+//father.js, 在指定的上级节点中,注册相同的事件,阻止事件冒泡,手动停止派送
 this.node.on('foobar', function (event) {
   event.stopPropagation();
 });
@@ -10612,16 +10615,16 @@ this.node.on('foobar', function (event) {
 事件对象(回调参数的event对象)
 type	String	事件的类型(事件名)
 target	cc.Node	接收到事件的原始对象
-currentTarget	cc.Node	接收到事件的当前对象，事件在冒泡阶段当前对象可能与原始对象不同
+currentTarget	cc.Node	接收到事件的当前对象,事件在冒泡阶段当前对象可能与原始对象不同
 getType	Function	获取事件的类型
-stopPropagation	Function	停止冒泡阶段，事件将不会继续向父节点传递，当前节点的剩余监听器仍然会接收到事件
-stopPropagationImmediate	Function	立即停止事件的传递，事件将不会传给父节点以及当前节点的剩余监听器
+stopPropagation	Function	停止冒泡阶段,事件将不会继续向父节点传递,当前节点的剩余监听器仍然会接收到事件
+stopPropagationImmediate	Function	立即停止事件的传递,事件将不会传给父节点以及当前节点的剩余监听器
 getCurrentTarget	Function	获取当前接收到事件的目标节点
 detail	Function	自定义事件的信息(属于 cc.Event.EventCustom)
 setUserData	Function	设置自定义事件的信息(属于 cc.Event.EventCustom)
 getUserData	Function	获取自定义事件的信息(属于 cc.Event.EventCustom)
 
-(开始：'touchstart'，移动：'touchmove'，结束：'touchend'，取消：'touchcancel')
+(开始：'touchstart',移动：'touchmove',结束：'touchend',取消：'touchcancel')
 node.on('touchstart',function(event){
 this.doSomething();
 },this);
@@ -10642,8 +10645,8 @@ var y = event.getLocationY();//获取触摸点的Y坐标
 var a = event.getID();//获取触点的ID
 
 鼠标监听：鼠标按下'mousedown',移入节点'mouseenter',节点中移动'mousemove',移出节点'mouseleave,'松开鼠标'mouseup'
-var a = event.getScrollY();//获取滚轮滚动的 Y 轴距离，只有滚动时才有效
-var a = event.getLocation();//获取鼠标位置对象，对象包含 x 和 y 属性
+var a = event.getScrollY();//获取滚轮滚动的 Y 轴距离,只有滚动时才有效
+var a = event.getLocation();//获取鼠标位置对象,对象包含 x 和 y 属性
 
 输入框监听：获得焦点'editing-did-began',文字变化'text-changed',失去焦点'editing-did-ended',按下回车'editing-return'
 属性变化监听：位置'position-changed',宽高 'size-changed',旋转'rotation-changed',缩放'scale-changed'
@@ -10663,19 +10666,19 @@ cc.eventManager.removeListener((listener);//移除事件
 (1)鼠标事件类型和事件对象
 枚举对象定义	对应的事件名	事件触发的时机
 cc.Node.EventType.MOUSE_DOWN	mousedown	当鼠标在目标节点区域按下时触发一次
-cc.Node.EventType.MOUSE_ENTER	mouseenter	当鼠标移入目标节点区域时，不论是否按下
-cc.Node.EventType.MOUSE_MOVE	mousemove	当鼠标在目标节点在目标节点区域中移动时，不论是否按下
-cc.Node.EventType.MOUSE_LEAVE	mouseleave	当鼠标移出目标节点区域时，不论是否按下
+cc.Node.EventType.MOUSE_ENTER	mouseenter	当鼠标移入目标节点区域时,不论是否按下
+cc.Node.EventType.MOUSE_MOVE	mousemove	当鼠标在目标节点在目标节点区域中移动时,不论是否按下
+cc.Node.EventType.MOUSE_LEAVE	mouseleave	当鼠标移出目标节点区域时,不论是否按下
 cc.Node.EventType.MOUSE_UP	mouseup	当鼠标从按下状态松开时触发一次
 cc.Node.EventType.MOUSE_WHEEL	mousewheel	当鼠标滚轮滚动时
 
 函数名	返回值类型	意义
-getScrollY	Number	获取滚轮滚动的 Y 轴距离，只有滚动时才有效
-getLocation	Object	获取鼠标位置对象，对象包含 x 和 y 属性
+getScrollY	Number	获取滚轮滚动的 Y 轴距离,只有滚动时才有效
+getLocation	Object	获取鼠标位置对象,对象包含 x 和 y 属性
 getLocationX	Number	获取鼠标的 X 轴位置
 getLocationY	Number	获取鼠标的 Y 轴位置
-getPreviousLocation	Object	获取鼠标事件上次触发时的位置对象，对象包含 x 和 y 属性
-getDelta	Object	获取鼠标距离上一次事件移动的距离对象，对象包含 x 和 y 属性
+getPreviousLocation	Object	获取鼠标事件上次触发时的位置对象,对象包含 x 和 y 属性
+getDelta	Object	获取鼠标距离上一次事件移动的距离对象,对象包含 x 和 y 属性
 getButton	Number	cc.Event.EventMouse.BUTTON_LEFT或cc.Event.EventMouse.BUTTON_RIGHT或cc.Event.EventMouse.BUTTON_MIDDLE
 
 (2)触摸事件类型和事件对象
@@ -10687,13 +10690,13 @@ cc.Node.EventType.TOUCH_CANCEL	touchcancel	当手指在目标节点区域外离�
 
 API 名	类型	意义
 touch	cc.Touch	与当前事件关联的触点对象
-getID	Number	获取触点的 ID，用于多点触摸的逻辑判断
-getLocation	Object	获取触点位置对象，对象包含 x 和 y 属性
+getID	Number	获取触点的 ID,用于多点触摸的逻辑判断
+getLocation	Object	获取触点位置对象,对象包含 x 和 y 属性
 getLocationX	Number	获取触点的 X 轴位置
 getLocationY	Number	获取触点的 Y 轴位置
-getPreviousLocation	Object	获取触点上一次触发事件时的位置对象，对象包含 x 和 y 属性
-getStartLocation	Object	获取触点初始时的位置对象，对象包含 x 和 y 属性
-getDelta	Object	获取触点距离上一次事件移动的距离对象，对象包含 x 和 y 属性
+getPreviousLocation	Object	获取触点上一次触发事件时的位置对象,对象包含 x 和 y 属性
+getStartLocation	Object	获取触点初始时的位置对象,对象包含 x 和 y 属性
+getDelta	Object	获取触点距离上一次事件移动的距离对象,对象包含 x 和 y 属性
 
 (3)其它事件
 枚举对象定义	对应的事件名	事件触发的时机
@@ -10702,7 +10705,7 @@ getDelta	Object	获取触点距离上一次事件移动的距离对象，对象�
 无	scale-changed	当缩放属性修改时
 无	size-changed	当宽高属性修改时
 无	anchor-changed	当锚点属性修改时
-PS：枚举对象定义、事件名等价，在回调参数中，作用相同。
+PS：枚举对象定义、事件名等价,在回调参数中,作用相同。
 
 10、全局系统事件
 //全局系统事件的类型
@@ -10721,14 +10724,14 @@ cc.toggleVisibility()//显隐切换
 cc.fadeIn(1)//渐显效果
 cc.fadeOut(1)//渐隐效果
 cc.delayTime(1)//等待1秒
-node.runAction(cc.moveTo(1,0,0)); //移动到当前节点(时间(s)，X轴坐标，Y 轴坐标)
-node.runAction(cc.scaleTo(1,0.7,0.8));//缩放到当前倍数节点(时间(s)，X轴倍数，Y 轴倍数)
-node.runAction(cc.rotateTo(1,160,160));//旋转到指定角度(时间(s)，X轴角度，Y 轴角度)
-node.runAction(cc.skewTo(1,5,-5));//变化节点倾斜度(时间(s)，X轴倾斜度，Y 轴倾斜度)
+node.runAction(cc.moveTo(1,0,0)); //移动到当前节点(时间(s),X轴坐标,Y 轴坐标)
+node.runAction(cc.scaleTo(1,0.7,0.8));//缩放到当前倍数节点(时间(s),X轴倍数,Y 轴倍数)
+node.runAction(cc.rotateTo(1,160,160));//旋转到指定角度(时间(s),X轴角度,Y 轴角度)
+node.runAction(cc.skewTo(1,5,-5));//变化节点倾斜度(时间(s),X轴倾斜度,Y 轴倾斜度)
 
-node.runAction(cc.fadeTo(2,0));//变化当前节点的透明度(时间(s)，透明度)
+node.runAction(cc.fadeTo(2,0));//变化当前节点的透明度(时间(s),透明度)
 
-node.runAction(cc.tintTo(2,255,255,0));//变化当前节点颜色(时间，R,G,B)
+node.runAction(cc.tintTo(2,255,255,0));//变化当前节点颜色(时间,R,G,B)
 node.stopAllActions();//停止所有动作
 
 //自定义动作
@@ -10736,8 +10739,8 @@ var action = cc.moveTo(2, 100, 100);// 创建一个移动动作
 node.runAction(action);// 执行动作
 node.stopAction(action);// 停止一个动作
 
-cc.sequence(action1,action2); //按顺序连续执行，先action1，后action2
-cc.spawn(action1，action2); //同时执行，action1和action2一起执行
+cc.sequence(action1,action2); //按顺序连续执行,先action1,后action2
+cc.spawn(action1,action2); //同时执行,action1和action2一起执行
 cc.repeatForever(cc.sequence(action1,action2)); //一直重复括号里的动作
 
 (1)动作控制
@@ -10753,9 +10756,9 @@ node.stopActionByTag(ACTION_TAG);  // 通过tag停止一个动作
 (2)容器动作
 cc.sequence(action1, action2, ...);  //顺序执行
 cc.spawn(action1, action2, ...);     //并发执行
-cc.repeat(action, times)             //指定次数，重复执行
-cc.repeatForever(action)             //无限次数，重复执行
-cc.speed(action, rate)               //改变动作速度倍率，再执行
+cc.repeat(action, times)             //指定次数,重复执行
+cc.repeatForever(action)             //无限次数,重复执行
+cc.speed(action, rate)               //改变动作速度倍率,再执行
 
 (3)即时动作
 cc.show()    //立即显示
@@ -10769,9 +10772,9 @@ cc.scaleTo()    //将节点大小缩放到指定的倍数
 (5)动作回调
 var finished = cc.callFunc(fn, target, arg);
 
-(6)缓动动作,可以使用缓动系统，代替动作系统。(缓动系统的API更简约)
+(6)缓动动作,可以使用缓动系统,代替动作系统。(缓动系统的API更简约)
 var action = cc.scaleTo(0.5, 2, 2);
-action.easing(cc.easeIn(3.0));  //使用easeIn曲线，丰富动作表现
+action.easing(cc.easeIn(3.0));  //使用easeIn曲线,丰富动作表现
 
 【 计时器 】
 //interval：以秒为单位的时间间隔, repeat：重复次数, delay：开始延时
@@ -10785,9 +10788,9 @@ this.scheduleOnce(function(){ },2);
 //每隔5秒执行1次
 this.schedule(function(){ },5);
 
-//计算多次的计时器(1秒后，以0.1秒的执行间隔，执行10次)
+//计算多次的计时器(1秒后,以0.1秒的执行间隔,执行10次)
 this.schedule(function(){ },0.1,10,1);
-//(function(){},间隔时间，次数，多久后开始)
+//(function(){},间隔时间,次数,多久后开始)
 
 this.unscheduleAllCallbacks(this);//停止某组件的所有计时器
 
@@ -10798,8 +10801,8 @@ this.unschedule(cb);//取消定时器
 
 【 脚本执行顺序 】
 editor: {
-  //executionOrder越小，该组件相对其它组件就会越先执行(默认为0)
-  //executionOrde只对onLoad, onEnable, start, update和lateUpdate有效，对onDisable和onDestroy无效
+  //executionOrder越小,该组件相对其它组件就会越先执行(默认为0)
+  //executionOrde只对onLoad, onEnable, start, update和lateUpdate有效,对onDisable和onDestroy无效
   executionOrder: 1
 }
 
@@ -10827,7 +10830,7 @@ config: 123
 }
 
 访问已有变量里的值(通过模块访问)
-//专门开设一个中介模块，导出接口；在其他模块进行节点、组件、属性的操作
+//专门开设一个中介模块,导出接口；在其他模块进行节点、组件、属性的操作
 // Global.js
 module.exports = {
   backNode: null,
@@ -10872,7 +10875,7 @@ cc.audioEngine.AllEffects();//停止所有音效
 cc.audioEngine.setMusicVolume(参数); //设置背景音乐的音量(该参数范围是0到1)
 cc.audioEngine.setEffectsVolume(参数); //设置音效的音量(该参数范围是0到1)
 
-AudioEngine与AudioSource都能播放音频，它们的区别在于AudioSource是组件，可以添加到场景中，由编辑器设置。而AudioEngine是引擎提供的纯API，只能在脚本中进行调用
+AudioEngine与AudioSource都能播放音频,它们的区别在于AudioSource是组件,可以添加到场景中,由编辑器设置。而AudioEngine是引擎提供的纯API,只能在脚本中进行调用
 
 // AudioSourceControl.js
 cc.Class({
@@ -10935,7 +10938,7 @@ cc.sys.OS_WINDOWS //是否是windows系统
 cc.sys.openURL('Http://www.baidu.com'); //打开网页
 
 【 对象池 】
-在同一场景中需要多次进行节点的生成、消失时，直接创建、销毁的操作就会很浪费性能。因此，使用对象池，存储需要消失的节点，释放需要生成的节点，达到节点回收利用的目的。
+在同一场景中需要多次进行节点的生成、消失时,直接创建、销毁的操作就会很浪费性能。因此,使用对象池,存储需要消失的节点,释放需要生成的节点,达到节点回收利用的目的。
 
 工作流程
 (1)初始化对象池
@@ -10956,7 +10959,7 @@ createEnemy: function (parentNode) {
   let enemy = null;
   if (this.enemyPool.size() > 0) { // 通过 size 接口判断对象池中是否有空闲的对象
     enemy = this.enemyPool.get();
-  } else { // 如果没有空闲对象，也就是对象池中备用对象不够时，我们就用 cc.instantiate 重新创建
+  } else { // 如果没有空闲对象,也就是对象池中备用对象不够时,我们就用 cc.instantiate 重新创建
     enemy = cc.instantiate(this.enemyPrefab);
   }
   enemy.parent = parentNode; // 将生成的敌人加入节点树
@@ -10966,11 +10969,11 @@ createEnemy: function (parentNode) {
 (3)将对象返回对象池
 onEnemyKilled: function (enemy) {
   // enemy 应该是一个 cc.Node
-  this.enemyPool.put(enemy); // 和初始化时的方法一样，将节点放进对象池，这个方法会同时调用节点的 removeFromParent
+  this.enemyPool.put(enemy); // 和初始化时的方法一样,将节点放进对象池,这个方法会同时调用节点的 removeFromParent
 }
 
 清除对象池
-myPool.clear();  //手动清空对象池，销毁其中缓存的所有节点
+myPool.clear();  //手动清空对象池,销毁其中缓存的所有节点
 
 </pre>
 </div>
