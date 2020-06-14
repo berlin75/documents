@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>laravel doc</title>
+<title>laravel</title>
 <link rel="stylesheet" href="vendors/public.css">
 </head>
 <body>
@@ -1445,7 +1445,7 @@ class UserController extends Controller {
     $input = $request->all();                   // 以数组形式获取到所有输入数据
     $name = $request->input('name');            // 获取指定输入值,无论是什么样的HTTP动作input方法都可以被用来获取用户输入数据
     $name = $request->input('name', 'Sally');   // 指定默认值
-    $name = $request->input('user.name');       // 点语法获取JSON输入信息JSON数组,只要请求的Content-Type标头设置为application/json就可通过Input方法访问JSON数据
+    $name = $request->input('user.name');       // 点语法获取JSON输入信息JSON数组,只要请求的Content-Type设置为application/json就可通过Input方法访问JSON数据
     $name = $request->input('products.0.name'); // 传输表单数据中包含数组形式的数据可以使用点语法来获取数组
     $names = $request->input('products.*.name');
 

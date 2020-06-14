@@ -32,7 +32,7 @@
 单页应用的首屏时间慢,首屏时需要请求一次html,同时还要发送一次js请求,两次请求回来了,首屏才会展示出来。相对于多页应用,首屏时间慢。
 SEO效果差,因为搜索引擎只认识html里的内容,不认识js的内容,而单页应用的内容都是靠js渲染生成出来的,搜索引擎不识别这部分内容,也就不会给一个好的排名,导致单页应用做出来的网页在百度和谷歌上的排名差
 
-Vue还提供了一些其它的技术来解决这些缺点,比如说服务器端渲染技术SSR,通过这些技术可以完美解决这些缺点,解决完这些问题,实际上单页面应用对于前端来说是非常完美的页面开发解决方案
+Vue还提供了一些其它的技术来解决这些缺点,比如服务器端渲染技术SSR,通过这些技术可以完美解决这些缺点,解决完这些问题,实际上单页面应用对于前端来说是非常完美的页面开发解决方案
 
 多页面应用(MultiPage Application,MPA)
 每一次页面跳转时后台服务器都会给返回一个新的html文档,这种类型的网站也就是多页网站或多页应用
@@ -83,7 +83,7 @@ Vue还提供了一些其它的技术来解决这些缺点,比如说服务器端�
 <tr>
 <td>页面间传递数据</td>
 <td>依赖URL传参、cookie或localstorage,实现麻烦</td>
-<td>因为在一个页面内,页面间传递数据很容易实现(这里是我补充,父子之间传值,或vuex或storage之类)</td>
+<td>因为在一个页面内,页面间传递数据很容易实现(父子之间传值,或vuex或storage之类)</td>
 </tr>
 <tr>
 <td>搜索引擎优化(SEO)</td>
@@ -94,11 +94,6 @@ Vue还提供了一些其它的技术来解决这些缺点,比如说服务器端�
 <td>特别适用的范围</td>
 <td>需要对搜索引擎友好的网站</td>
 <td>对体验要求高的应用,特别是移动应用</td>
-</tr>
-<tr>
-<td>搜索引擎优化(SEO)</td>
-<td>可以直接做</td>
-<td>需要单独方案做,有点麻烦</td>
 </tr>
 <tr>
 <td>开发难度</td>
@@ -524,8 +519,8 @@ var data = { a: 1 }
 var vm = new Vue({    // 直接创建一个实例
   data: data
 })
-vm.a                  // -> 1
-vm.$data === data     // -> true
+vm.a                  // 1
+vm.$data === data     // true
 
 这样数据就绑定在HTML中,Vue框架监视data的数据变化,自动更新HTML内容
 
@@ -1313,14 +1308,14 @@ new Vue({
 <div id="app">
   <input v-model="message" placeholder="编辑我……">
   <p>消息是: {{ message }}</p>
-	
-	在文本区域插值(< textarea>{{text}}< /textarea>)并不会生效,应用v-model来代替
+  
+  在文本区域插值(< textarea>{{text}}< /textarea>)并不会生效,应用v-model来代替
   < textarea v-model="message2" placeholder="Multiline 多行文本输入……">< /textarea>
-	<p style="white-space: pre">{{ message2 }}</p>
-	
-	多行文本
-	<p style="white-space: pre-line;">{{ message }}</p><br>
-	< textarea v-model="message" placeholder="add multiple lines">< /textarea>
+  <p style="white-space: pre">{{ message2 }}</p>
+  
+  多行文本
+  <p style="white-space: pre-line;">{{ message }}</p><br>
+  < textarea v-model="message" placeholder="add multiple lines">< /textarea>
 
   <p>单个复选框,绑定到布尔值</p>
   <input type="checkbox" id="checkbox" v-model="checked">
@@ -1829,7 +1824,7 @@ v-for="(value, key, index) in obj"
 v-for="(item, index) of arr"               // 可以使用of代替
 v-for="(value, key, index) of obj"
 
-遍历对象是按Object.keys()的结果遍历,但是不能保证它的结果在不同的JS引擎下是一致的
+遍历对象是按Object.keys()的结���遍历,但是不能保证它的结果在不同的JS引擎下是一致的
 
 在组件上总是必须用key配合v-for,以便维护内部组件及其子树的状态。甚至在元素上维护可预测的行为,比如动画中的对象固化(object constancy),也是一种好的做法
 < li v-for="todo in todos" :key="todo.id" > {{ todo.text }} < /li>
@@ -2443,40 +2438,40 @@ Vue.component('my-checkbox', {
 </textarea>使用v-model实现弹窗组件 父子组件之间的通信交互<textarea>
 // 父组件
 < template>
-	<div id="demo">
-		<text-model v-model="show"></text-model>
-	</div>
+  <div id="demo">
+    <text-model v-model="show"></text-model>
+  </div>
 < /template>
 
 < script>
 import testModel from '@/components/testModel'
 export default {
-	data () {
-		return {show: false}
-	}
-	components: {testModel}
+  data () {
+    return {show: false}
+  }
+  components: {testModel}
 }
 < /script>
 
 // 子组件
 < template>
-	<div v-if="value">
-		<button @click="changeShow"></button>
-	</div>
+  <div v-if="value">
+    <button @click="changeShow"></button>
+  </div>
 < /template>
 
 < script>
 export default {
-	data () {
-		return {}
-	}
-	props: ['value'],
-	model: {prop: 'value', event: 'balabala'}  // 用balabala来替换掉了原本的input事件,所以在$emit的时候里面的事件名应为balabala,否则默认为input
-	methods: {
-		changeShow () {
-			this.$emit('balabala', false)
-		}
-	}
+  data () {
+    return {}
+  }
+  props: ['value'],
+  model: {prop: 'value', event: 'balabala'}  // 用balabala来替换掉了原本的input事件,所以在$emit的时候里面的事件名应为balabala,否则默认为input
+  methods: {
+    changeShow () {
+      this.$emit('balabala', false)
+    }
+  }
 }
 < /script>
 
@@ -2918,7 +2913,7 @@ template: '<div><stack-overflow></stack-overflow></div>'
 
 </textarea><pre>
 在渲染树上这两个组件同时为对方的父节点和子节点,这是矛盾,当使用Vue.component将这两个组件注册为全局组件时框架会自动解决这个矛盾
-然而如果使用诸如webpack或Browserify之类的模块化管理工具来require/import组件就会报错：Failed to mount component: template or render function not defined.
+然而如果使用如webpack或Browserify之类的模块化管理工具require/import组件就会报错：Failed to mount component: template or render function not defined.
 简单的将上面两个组件称为A和B,模块系统看到它需要A,但首先A需要B,但B需要A,而A需要B,循环往复,因为不知道到底应该先解析哪个,所以将会陷入无限循环。
 要解决这个问题,需要在其中一个组件中告诉模块化管理系统："A虽然最后会用到B,但不需要优先导入B"。
 可以选择让tree-folder组件中来做这件事,引起矛盾的子组件是tree-folder-contents,所以要等到beforeCreate生命周期钩子才去注册它就可以了
@@ -3015,10 +3010,10 @@ new Vue({
 
 </pre><textarea>
 <template>
-	<div class="hello">
-		<input type="txet" placeholder="请输入文字" v-model="msg" @keypress.enter="enter">
-		<p>{{upper}}</p>
-	</div>
+  <div class="hello">
+    <input type="txet" placeholder="请输入文字" v-model="msg" @keypress.enter="enter">
+    <p>{{upper}}</p>
+  </div>
 </template>
 
 < script>
@@ -3151,9 +3146,9 @@ props属性是和data, methods属性并列的,属同一级别。props属性里�
 
 < script>
 module.exports = {
-	data(){
-		return {greeting: 'hello'}
-	}
+  data(){
+    return {greeting: 'hello'}
+  }
 }
 < /script>
 
@@ -3164,26 +3159,26 @@ module.exports = {
 </textarea>使用预处理器来构建简洁和功能更丰富的组件,比如Pug、Babel(with ES2015 modules)和Stylus<textarea>
 < template lang="jade">
 div
-	p {{greeting}} world!
-	other-componet
+  p {{greeting}} world!
+  other-componet
 < /template>
 
 < script>
 import OtherComponent from './OtherComponent.vue'
 export default{
-	data(){
-		return {greeting: 'hello'}
-	},
-	component: {
-		OtherComponent
-	}
+  data(){
+    return {greeting: 'hello'}
+  },
+  component: {
+    OtherComponent
+  }
 }
 < /script>
 
 < style lang="stylus" scoped>
 p
-	font-size 2em
-	text-align center
+  font-size 2em
+  text-align center
 < /style>
 
 </textarea>
@@ -3192,7 +3187,7 @@ p
 <div id="vue-router">
 <h3>Vuejs路由</h3><pre>
 Vuejs路由允许通过不同的URL访问不同的内容。
-通过Vuejs可以实现多视图的单页Web应用(single page web application,SPA),Vue.js+vue-router可以很简单的实现单页应用,使用Vue.js已经可以通过组合组件来组成应用程序,当要把vue-router添加进来,需要做的是将组件(components)映射到路由(routes),然后告诉vue-router在哪里渲染它们
+通过Vuejs可以实现多视图的单页Web应用SPA,Vue.js+vue-router可以很简单的实现单页应用,使用Vue.js已经可以通过组合组件来组成应用程序,当要把vue-router添加进来,需要做的是将组件(components)映射到路由(routes),然后告诉vue-router在哪里渲染它们
 
 </pre><textarea>
 const NotFound = { template: '<p>Page not found</p>' }
@@ -3222,9 +3217,7 @@ new Vue({
 </textarea><pre>
 Vue.js路由需要载入vue-router库
 npm install vue-router
-
-直接下载/CDN
-https://unpkg.com/vue-router/dist/vue-router.js
+直接下载/CDN: https://unpkg.com/vue-router/dist/vue-router.js
 
 this.$router和router使用起来完全一样,使用this.$router的原因是并不想在每个独立需要封装路由的组件中都导入路由
 
@@ -3607,7 +3600,7 @@ router.push({ name: 'user', params: { userId: 123 }})
 </textarea><pre>
 【 命名视图 】
 有时候想同时同级展示多个视图,而不是嵌套展示,例如创建一个有sidebar和main两个视图的布局,这个时候命名视图就派上用场了
-可以在界面中通过定义name属性值拥有多个单独命名的视图,而不是只有一个单独的出口。如果router-view没有设置名字则默认default
+可以在界面中通过定��name属性值拥有多个单独命名的视图,而不是只有一个单独的出口。如果router-view没有设置名字则默认default
 
 一个视图使用一个组件渲染,因此对于同个路由多个视图就需要多个组件,确保正确使用components配置
 
@@ -3765,14 +3758,14 @@ const app = new Vue({ router }).$mount('#app')
 </textarea>
 
 <h4>路由切换组件不变</h4><pre>
-在使用vue 开发中,最常碰到的一个问题就是,当页面切换到同一个路由但是不同参数的地址时,组件的生命钩子不会触发
-因为vue-router 会识别两个路由使用的是一个组件从而进行复用,并不会重新创建组件,因此组件的生命周期钩子也不会触发.
+在使用vue开发中,最常碰到的一个问题就是,当页面切换到同一个路由但是不同参数的地址时,组件的生命钩子不会触发
+因为vue-router会识别两个路由使用的是一个组件从而进行复用,并不会重新创建组件,因此组件的生命周期钩子也不会触发
 
 方案一 :路由导航守卫
-可以使用路由提供的beforeRouteUpdate守卫触发,只需要将需要执行的逻辑放到守卫中即可. 如在守卫中发送请求,更新状态并重新渲染页面.
+可以使用路由提供的beforeRouteUpdate守卫触发,只需要将需要执行的逻辑放到守卫中即可. 如在守卫中发送请求,更新状态并重新渲染页面
 
 方案二 : 观察$route对象的变化
-通过watch 可以监听到路由对象的变化,从而对路由变化做出响应
+通过watch可以监听到路由对象的变化,从而对路由变化做出响应
 
 const User = {
     template:'...',
@@ -3796,7 +3789,7 @@ ajax带来了提高用户体验、减少http请求数等好处的同时,也显�
 
 2、带hash(#)型这种类型的优点就是刷新页面,页面也不会丢。window.addEventListener(‘hashchange‘,function(){self.urlChange()})只要#location.hash改变了即可触发,这也是很多单页面网站的url都带#的原因。
 
-3、无hash(#)型这种类型是通过html5的最新history api来实现的,能正常的回退前进。url是这样的www.ff.ff/jjkj/fdfd/fdf/fd和普通的url一样,但是也有缺点,就是一刷新页面页面就会丢,因为只要刷新这个url(www.ff.ff/jjkj/fdfd/fdf/fd)就会请求服务器,然而服务器上根本没有这个资源,所以就会报404,解决方案就配置一下服务器端重写路由规则使所有请求全部重写到index.html
+3、无hash(#)型这种类型是通过html5的最新history api来实现的,能正常的回退前进。url是这样的www.ff.ff/jjkj/fdfd/fdf/fd和普通的url一样,但也有缺点,就是一刷新页面页面就会丢,因为只要刷新这个url(www.ff.ff/jjkj/fdfd/fdf/fd)就会请求服务器,然而服务器上根本没有这个资源,所以就会报404,解决方案就配置一下服务器端重写路由规则使所有请求全部重写到index.html
 
 vue-router有两种模式:hash模式和history模式,默认hash模式,使用URL的hash来模拟一个完整的URL,于是当URL改变时页面不会重新加载。
 单页应用使得页面可以在无刷新的条件下重新渲染,通过hash或html5 Bom对象中的history可以做到改变url,但是不刷新页面
@@ -3873,7 +3866,7 @@ pushState是压入浏览器的会话历史栈中,会使得History.length加1,而
 通过改变hash值或history的repalceState和pushState都可以实现无刷新的改变url,那么如何监听url的改变
 因为不仅要无刷新的改变url,还要监听到这个url改变的行为,根据该行为去重新渲染视图
 
-通过hash改变了url,会触发hashchange事件,只要监听hashchange事件就能捕获到通过hash改变url的行为。
+通过hash改变了url会触发hashchange事件,只要监听hashchange事件就能捕获到通过hash改变url的行为。
 
 window.onhashchange = event => console.log(event)
 window.addEventListener('hashchange', event => console.log(event))
@@ -4254,18 +4247,17 @@ beforeRouteLeave(to, from , next) {
 
 <div id="vuex">
 <h3>vuex状态管理 - npm install vuex --save</h3><pre>
-在开发Vuejs单文件项目中经常需要使用到全局变量,相当于Session,官方推荐Vuex工具管理这些全局变量,从官方的说法这叫"状态管理模式",实现组件状态的集中管理,组件状态改变遵循统一的原则
+在开发Vuejs单文件项目中经常需要使用到全局变量,相当于Session,官方推荐Vuex工具管理这些全局变量,实现组件状态的集中管理,组件状态改变遵循统一的原则
 
 多个视图依赖于同一状态,如菜单导航点击一个tab其他tab状态的变化
 来自不同视图的行为需要变更同一状态,如评论之后新增一条弹幕
 
-使用的最多的场景：管理全局的用户登录信息,毕竟在整个系统中通过API接口获取到用户信息时不可能通过Session来进行长期存储的,所以有个H5提供的很便捷的前端数据存储方式localstorage,但是通常涉及到需要经过处理的数据存储时又不太可能在每个读写的地方都进行一系列复杂的数据处理,毕竟一旦使用场景多了之后这会是个非常繁琐的工作。那么就需要通过Vuex来统一管理这些全局的数据,包括他们的状态变更和读写前的数据处理
+使用的最多的场景：管理全局的用户登录信息,毕竟在整个系统中通过API接口获取到用户信息时不可能通过Session来进行长期存储的,所以有个H5提供的很便捷的前端数据存储方式localstorage,但通常涉及到需要经过处理的数据存储时又不太可能在每个读写的地方都进行一系列复杂的数据处理,毕竟一旦使用场景多了之后这会是个非常繁琐的工作。那么就需要通过Vuex来统一管理这些全局的数据,包括他们的状态变更和读写前的数据处理
 
-vuex是一个专门为vue.js设计的集中式状态管理架构,是全局单例模式管理。在data中的属性需要共享给其他vue组件使用的部分就叫做状态,简单的说就是data中需要共用的属性,用于组件和组件之间的交互中
-
+vuex是一个专门为vue.js设计的集中式状态管理架构,是全局单例模式管理。在data中的属性需要共享给其他vue组件使用的部分就叫做状态,即data中需要共用的属性,用于组件之间的交互中
 将数据使用Vuex管理的主要原因之一是解决组件间的数据共享,共享指的是同一份数据被多处组件使用,并且要保持一定程度的同步
 
-Vuex并不限制代码结构,但是它规定了一些需要遵守的规则：
+Vuex并不限制代码结构,但它规定了一些需要遵守的规则：
 1、应用层级的状态应该集中到单个store对象中。
 2、提交mutation是更改状态的唯一方法,并且这个过程是同步的。
 3、异步逻辑都应该封装到action里面。
@@ -4273,6 +4265,7 @@ Vuex并不限制代码结构,但是它规定了一些需要遵守的规则：
 如果store文件太大,只需将action、mutation和getter分割到单独的文件。
 对于大型应用会希望把Vuex相关代码分割到模块中,下面是项目结构示例
 
+</pre><textarea>
 ├─ index.html
 ├─ main.js
 ├─ api
@@ -4288,6 +4281,7 @@ Vuex并不限制代码结构,但是它规定了一些需要遵守的规则：
       ├─ cart.js       # 购物车模块
       └─ products.js   # 产品模块
 
+</textarea><pre>    
 因为vuex的数据是存储在内存里的,所以当页面进行url刷新之后,vuex的数据又会回到初始化的状态,如果需要长期存储数据的话,关注一下vuex里面数据的持久化,比如说通过localstorage来托管数据
 
 </pre>info组件传递一个状态到about组件<textarea>
@@ -4410,12 +4404,11 @@ modules
 
 数据流都是单向的
 组件能够调用action
-action用来派发Mutation
+action用来派发mutation
 只有mutation可以改变状态
 store是响应式的,无论state什么时候更新,组件都将同步更新
 
-每一个Vuex应用的核心就是store(仓库),包含应用中大部分的状态(state)
-Vuex和单纯的全局对象有以下两点不同：
+每一个Vuex应用的核心就是store,包含应用中大部分的状态(state),Vuex和单纯的全局对象有以下两点不同：
 1、Vuex的状态存储是响应式的,当Vue组件从store中读取状态的时候,若store中的状态发生变化,相应的组件也会相应地得到高效更新
 2、不能直接改变store中的状态,改变store中的状态的唯一途径就是显式地提交(commit) mutation,这样可以方便地跟踪每一个状态的变化,从而能够实现一些工具帮助更好地了解应用
 
@@ -4515,8 +4508,7 @@ const Counter = {
 </textarea>
 
 <h4>state</h4><pre>
-把所有的状态从各个组件抽出来,放入了state中
-state里面就是存放项目中需要多组件共享的状态,定义了应用状态的数据结构,同样可以在这里设置默认的初始状态
+把所有的状态从各个组件抽出来,放入了state中,state里面就是存放项目中需要多组件共享的状态,定义了应用状态的数据结构,同样可以在这里设置默认的初始状态
 
 将state看成项目中使用的数据的集合,然后Vuex使得组件本地状态(component local state)和应用层级状态(application state) 有了一定的差异。
 component local state：该状态表示仅仅在组件内部使用的状态,有点类似通过配置选项传入Vue组件内部的意思。
@@ -4926,8 +4918,8 @@ const store = new Vuex.Store({
   }
 })
 
-store.state.a   // -> moduleA 的状态
-store.state.b   // -> moduleB 的状态
+store.state.a   // moduleA 的状态
+store.state.b   // moduleB 的状态
 
 </textarea>模块的局部状态<textarea>
 // 对于模块内部的mutation和getter,接收的第一个参数是模块的局部状态对象。
@@ -4980,13 +4972,13 @@ const store = new Vuex.Store({
       // 模块内容(module assets)
       state: { ... },             // 模块内的状态已经是嵌套的了,使用 `namespaced` 属性不会对其产生影响
       getters: {
-        isAdmin() { ... }        // -> getters['account/isAdmin']
+        isAdmin() { ... }        // getters['account/isAdmin']
       },
       actions: {
-        login() { ... }          // -> dispatch('account/login')
+        login() { ... }          // dispatch('account/login')
       },
       mutations: {
-        login() { ... }          // -> commit('account/login')
+        login() { ... }          // commit('account/login')
       },
 
       // 嵌套模块,继承父模块的命名空间
@@ -4994,7 +4986,7 @@ const store = new Vuex.Store({
         myPage: {
           state: { ... },
           getters: {
-            profile() { ... }     // -> getters['account/profile']
+            profile() { ... }     // getters['account/profile']
           }
         },
         // 进一步嵌套命名空间
@@ -5002,7 +4994,7 @@ const store = new Vuex.Store({
           namespaced: true,
           state: { ... },
           getters: {
-            popular() { ... }     // -> getters['account/posts/popular']
+            popular() { ... }     // getters['account/posts/popular']
           }
         }
       }
@@ -5027,8 +5019,8 @@ modules: {
     getters: {
       // 在这个模块的getter中,`getters` 被局部化了,可以使用getter的第四个参数来调用 `rootGetters`
       someGetter(state, getters, rootState, rootGetters) {
-        getters.someOtherGetter                          // -> 'foo/someOtherGetter'
-        rootGetters.someOtherGetter                      // -> 'someOtherGetter'
+        getters.someOtherGetter                          // 'foo/someOtherGetter'
+        rootGetters.someOtherGetter                      // 'someOtherGetter'
       },
       someOtherGetter: state => { ... }
     },
@@ -5036,14 +5028,14 @@ modules: {
     actions: {
       // 在这个模块中dispatch和commit也被局部化了,他们可以接受`root`属性以访问根dispatch或commit
       someAction({ dispatch, commit, getters, rootGetters }) {
-        getters.someGetter                                // -> 'foo/someGetter'
-        rootGetters.someGetter                            // -> 'someGetter'
+        getters.someGetter                                // 'foo/someGetter'
+        rootGetters.someGetter                            // 'someGetter'
 
-        dispatch('someOtherAction')                       // -> 'foo/someOtherAction'
-        dispatch('someOtherAction', null, { root: true }) // -> 'someOtherAction'
+        dispatch('someOtherAction')                       // 'foo/someOtherAction'
+        dispatch('someOtherAction', null, { root: true }) // 'someOtherAction'
 
-        commit('someMutation')                            // -> 'foo/someMutation'
-        commit('someMutation', null, { root: true })      // -> 'someMutation'
+        commit('someMutation')                            // 'foo/someMutation'
+        commit('someMutation', null, { root: true })      // 'someMutation'
       },
       someOtherAction(ctx, payload) { ... }
     }
@@ -5068,7 +5060,7 @@ modules: {
       actions: {
         someAction: {
           root: true,
-          handler(namespacedContext, payload) { ... } // -> 'someAction'
+          handler(namespacedContext, payload) { ... } // 'someAction'
         }
       }
     }
@@ -5299,7 +5291,7 @@ export default {
 </textarea>
 
 <h4>plugins - Vue.js单文件项目中使用Vuex：数据持久化</h4><pre>
-vuex就是一个"提升变量"的一个工具,它是将state当做全局变量存储。F5刷新页面之后自然随着页面的刷新重新初始化state。
+vuex是提升变量的一个工具,将state当做全局变量存储。F5刷新页面之后自然随着页面的刷新重新初始化state。
 目前想让浏览器记住数据,一般都会采用cookie或localStorage等方法
 
 vuex-persistedstate插件
@@ -5592,10 +5584,10 @@ Automatic transforms for JSON data
 Client side support for protecting against XSRF
 
 Installing
-Using npm: npm install axios
-Using cdn: < script src="https://unpkg.com/axios/dist/axios.min.js"></ script>
+npm install axios
+script src="https://unpkg.com/axios/dist/axios.min.js"
 
-</pre>Example<textarea>
+</pre><textarea>
 // Make a GET request for a user with a given ID
 axios.get('/user?ID=12345')
   .then(response => console.log(response))
@@ -5638,11 +5630,11 @@ axios.all([getUserAccount(), getUserPermissions()])
 
 <div id="server-render">
 <h3>服务端渲染SSR</h3><pre>
-Vue.js是构建客户端应用程序的框架,默认可以在浏览器中输出Vue组件生成DOM和操作DOM。然而也可以将同一个组件渲染为服务器端的HTML字符串,将它们直接发送到浏览器,最后将静态标记"混合"为客户端上完全交互的应用程序。
+Vue.js是构建客户端应用程序的框架,默认可以在浏览器中输出Vue组件生成DOM和操作DOM,然而也可以将同一个组件渲染为服务器端的HTML字符串,将它们直接发送到浏览器,最后将静态标记"混合"为客户端上完全交互的应用程序。
 
 服务器渲染的Vue.js应用程序也可以被认为是"同构"或"通用",因为应用程序的大部分代码都可以在服务器和客户端上运行
 
-与传统SPA(Single-Page Application - 单页应用程序)相比,服务器端渲染(SSR)的优势主要在于：
+与传统SPA相比,服务器端渲染(SSR)的优势主要在于：
 1、更好的SEO,由于搜索引擎爬虫抓取工具可以直接查看完全渲染的页面。
 Google和Bing可以很好对同步JS应用程序进行索引,如果应用程序初始展示loading再通过Ajax获取内容,抓取工具并不会等待异步完成后再行抓取页面内容。如果SEO对站点至关重要,而页面又是异步获取内容,则可能需要服务器端渲染(SSR)解决此问题。
 
@@ -5907,22 +5899,22 @@ $broadcast() 广播事件,向下
 </div>
 
 </main>
-    <ol>
-        <li><a href="#vue">top</a></li>
-        <li><a href="#instance">Vue实例</a></li>
-        <li><a href="#lifeCycle">lifeCycle</a></li>
-        <li><a href="#hook">钩子</a></li>
-        <li><a href="#v-">模板指令</a></li>
-        <li><a href="#component">component</a></li>
-        <li><a href="#vue-file">vue-file</a></li>
-        <li><a href="#vue-router">vue-router</a></li>
-        <li><a href="#vuex">vuex</a></li>
-        <li><a href="#vuejs-network">network</a></li>
-        <li><a href="#server-render">服务端渲染</a></li>
-        <li><a href="#vue-cli">vue-cli</a></li>
-    </ol>
+<ol>
+	<li><a href="#vue">top</a></li>
+	<li><a href="#instance">Vue实例</a></li>
+	<li><a href="#lifeCycle">lifeCycle</a></li>
+	<li><a href="#hook">钩子</a></li>
+	<li><a href="#v-">模板指令</a></li>
+	<li><a href="#component">component</a></li>
+	<li><a href="#vue-file">vue-file</a></li>
+	<li><a href="#vue-router">vue-router</a></li>
+	<li><a href="#vuex">vuex</a></li>
+	<li><a href="#vuejs-network">network</a></li>
+	<li><a href="#server-render">服务端渲染</a></li>
+	<li><a href="#vue-cli">vue-cli</a></li>
+</ol>
 
-    <script src="vendors/public.js"></script>
+<script src="vendors/public.js"></script>
 </body>
 
 </html>
