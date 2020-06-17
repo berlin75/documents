@@ -14428,11 +14428,8 @@ console.info(str);          // 控制台输出  {"hello":"world","welcome":"chin
 
 </textarea>用JSON来序列化与反序列化<textarea>
 var person = {name :'Saad',age : 26,department : {ID : 15,name : "R&D"} };
-var stringFromPerson = JSON.stringify(person);
-/* stringFromPerson 结果为 "{"name":"Saad","age":26,"department":{"ID":15,"name":"R&D"}}" */
-
-var personFromString = JSON.parse(stringFromPerson);
-/* personFromString 的值与person对象相同 */
+var stringFromPerson = JSON.stringify(person);  // "{"name":"Saad","age":26,"department":{"ID":15,"name":"R&D"}}"
+var personFromString = JSON.parse(stringFromPerson);  // personFromString 的值与person对象相同
 
 </textarea><pre>
 json格式化
@@ -14523,185 +14520,6 @@ window.onload=function() {
 }
 
 </textarea>
-
-<h3>php json</h3><pre>
-1.json_decode()对json格式的字符串进行编码,返回数组或对象
-json_decode($jsonstring [,true/false]
-接受一个json格式的字符串并把它转换成PHP变量,参数为true时返回array而非obj
-
-2.json_encode()对变量进行json编码,返回一个除resource类型外的值的json格式的js对象,只能用于utf8编码的数据
-
-$arr = array();
-$jsonstr = json_encode($arr);      //返回字符串,进行json编码
-$obj = json_decode($jsonstr);      //返回对象,进行json解码
-$arr = json_decode($jsonstr,true); //返回数组
-$original = json_decode($jsonstr);
-
-</pre><pre class="php">
-//将数组json化,必须utf8,使用gb2312编码则需要将包含中文的内容使用iconv或mb系列函数转化为utf-8后再json_encode
-//输出的数据是json格式的js对象,因为没有带引号,所以在前台页面可以直接将其当做json对象使用
-//关联数组是按照javascript对象来构造的
-
-//php代码
-$arr = array(
-  'name' => '魏艳辉',
-  'nick' => '为梦翱翔,
-  'contact' => array(
-    'email' => 'zhuoweida@163.com',
-    'website' => 'http://zhuoweida.blog.tianya.cn',
-  )
-);
-echo json_encode($arr);  //json格式的字符串
-
-//输出
-{
-  "name":"\u9648\u6bc5\u946b",
-  "nick":"\u6df1\u7a7a",
-  "contact":
-    {
-     　"email":"shenkong at qq dot com",
-     　"website":"http:\/\/www.chinaz.com"
-    }
-}
-
-</pre><pre class="php">
-//索引数组的json化
-//纯数字索引数组的json字符串是按照javascript能够识别的数组来存储的,而不是按照javascript能够识别的对象来存储的
-
-$arr1 = array(1,'heiyeluren','男');
-echo json_encode($arr1);
-
-//输出
-[
-  1,
-  "heiyeluren",
-  "\u7537"
-]
-
-</pre><pre class="php">
-//对多维索引数组的进行json化
-
-$arr3 = array(array(1,'heiyeluren','男'),array(1,'heiyeluren','男'));
-echo json_encode($arr3);
-
-//输出
-[
-  [1,"heiyeluren","\u7537"],
-  [1,"heiyeluren","\u7537"]
-]
-
-</pre><pre class="php">
-//对多维关联数组的进行json化
-//多维关联索引数组是按照外围是JavaScript数组,中间的索引数组是对象
-
-$arr4 = array(
-  array("id"=>1,"name"=>'heiyeluren',"gender"=>'男'),
-  array("id"=>1,"name"=>'heiyeluren',"gender"=>'男')
-);
-echo json_encode($arr4);
-
-//输出
-[
-  {"id":1,"name":"heiyeluren","gender":"\u7537"},
-  {"id":1,"name":"heiyeluren","gender":"\u7537"}
-]
-
-</pre><pre class="php">
-//PHP对象的json化
-
-class JsonTest{
-  $id = 1;
-  $name = 'heiyeluren';
-  $gender = '男';
-}
-$obj = new JsonTest;
-echo json_encode($obj);
-
-//输出
-{
-  "id":1,
-  "name":"heiyeluren",
-  "gender":"\u7537"
-}
-
-</pre><textarea>
-//json跨域的数据调用
-//当index.html调用profile.php,json字符串生成,并作为参数传入getProfile,然后将昵称插入到div中 ,这样一次跨域数据交互就完成了
-
-//主调文件index.html
-＜script＞
-  function getProfile(str) {
-      var arr = str;
-      document.getElementById('nick').innerHTML = arr.nick;
-  }
-＜/script＞
-＜div id="nick"＞＜/div＞
-＜script src="http://localhost/demo/profile.php"＞＜/script＞
-
-//被调文件profile.php
-$arr = array(
-　'name' => '微微',
-  'nick' => '为梦翱翔',
-  'contact' => array(
-    'email' => 'zhuoweida@163.com',
-    'website' => 'http://zhuoweida.blog.tianya.cn',
-  )
-);
-$json_string = json_encode($arr);
-echo "getProfile($json_string)";
-
-</textarea><pre>
-//判断数据不是json格式
-function is_not_json($string){
-  return is_null(json_decode($string));
-}
-
-//判断数据是合法json数据 phpversion > 5.3
-function is_json($string) {
-  json_decode($string);                           //json编解码所操作字符串必须是UTF8的
-  return(json_last_error() == JSON_ERROR_NONE);  //返回数据编解码过程中发生的错误
-}
-
-</pre>
-
-<h3>php json 中文字符会转为unicode编码</h3><pre class="php">
-$testJSON = array('name'=>'中文字符串','value'=>'test');
-echo json_encode($testJSON);               //输出{"name":"\u4e2d\u6587\u5b57\u7b26\u4e32","value":"test"}
-
-$testJSON = array('name'=>'中文字符串','value'=>'www.111cn.net');
-foreach( $testJSON as $key => $value ) {
-  $testJSON[$key] = urlencode( $value );
-}
-echo urldecode( json_encode( $testJSON ) );
-//输出{"name":"中文字符串","value":"www.111cn.net"}
-
-// php5.4以后json_encode增加了JSON_UNESCAPED_UNICODE,JSON_PRETTY_PRINT 等几个常量参数,使显示中文与格式化更方便
-$arr = array(
-  'status' => true,
-  'errMsg' => '',
-  'member' =>array(
-    array( 'name' => '李逍遥','gender' => '男'),
-    array( 'name' => '赵灵儿','gender' => '女')
-  )
-);
-echo json_encode($arr,JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
-
-//输出
-{
-  "status": true,
-  "errMsg": "",
-  "member": [
-    {
-      "name": "李逍遥",
-      "gender": "男"
-    },
-    {
-      "name": "赵灵儿",
-      "gender": "女"
-    }
-  ]
-}
-</pre>
 </div>
 
 <!--------------------ajax-------------------------------------------------------------->
@@ -14986,9 +14804,9 @@ function sendAjax() {
       }
     }
   }
-  xhr.ontimeout = function(e) { ... };
-  xhr.onerror = function(e) { ... };
-  xhr.upload.onprogress = function(e) { ... };
+  xhr.ontimeout = function(e) {};
+  xhr.onerror = function(e) {};
+  xhr.upload.onprogress = function(e) {};
   var formData = new FormData();     // 构造表单数据
   formData.append('username', 'johndoe');
   formData.append('id', 123456);
@@ -15038,7 +14856,7 @@ function ajax(obj, method, url, data){
 
 </textarea>【 ajax封装函数 】<textarea>
 window.ajax = async function(params, success, error) {
-  let {url, method, data} = params;
+  let {url, method, data = {}} = params;
   let body = new FormData();
   for(let key in data) {
     if(data.hasOwnProperty(key)) body.append(key, data[key]);
@@ -15051,7 +14869,7 @@ window.ajax = async function(params, success, error) {
       if(xhr.status === 200) {
         success && typeof success === "function" ? success(xhr.response) : console.log(xhr.response);
       } else {
-        error && typeof error === "function" ? error(xhr.statusText) : throw new Error(xhr.statusText);
+        error && typeof error === "function" ? error(xhr.statusText) : console.error(xhr.statusText);
       }
     }
   });
@@ -15059,14 +14877,13 @@ window.ajax = async function(params, success, error) {
 };
 
 ajax({
-    url: "http://apis.juhe.cn/ip/ip2addr",
-    method: "GET",
-    data: { key: "80701ec21437ca36ca466af27bb8e8d3", ip: "220.181.57.216" }
-  }, function(resp) {
-    var json = JSON.parse(resp);
-    console.log(json);
-  }
-)
+  url: "http://apis.juhe.cn/ip/ip2addr",
+  method: "GET",
+  data: { key: "80701ec21437ca36ca466af27bb8e8d3", ip: "220.181.57.216" }
+}, function(resp) {
+  var json = JSON.parse(resp);
+  console.log(json);
+})
 
 </textarea>
 
@@ -15211,12 +15028,8 @@ xhr.loadend事件触发的时候。
 var xhr = new XMLHttpRequest();
 xhr.open('GET','/server',true);
 xhr.timeout = 2000;
-xhr.onload = function() {
-  .....
-};
-xhr.ontimeout = function(e) {
-  ....
-};
+xhr.onload = function() {};
+xhr.ontimeout = function(e) {};
 xhr.send(null);
 
 </textarea>XMLHttpRequest设置超时参数<textarea>
@@ -15440,7 +15253,6 @@ void send(FormDataData);
 
 在JS中DOMString就是String,规范中DOMString指UTF-16字符串,而JS正是使用了这种编码的字符串,因此在Ajax中DOMString就等同于JS中的普通字符串
 Document类型实际上是XHR中数据返回属性之responseXML,也就是可以解析为XML的数据。因此这里的Document数据可以近似看成XML数据类型
-
 
 GET/HEAD请求send()方法一般不传参或传null,即使传入了参数也最终会被置为null被忽略
 
@@ -15732,7 +15544,7 @@ $.ajax({
 </textarea>
 
 <h4>xhr demo</h4>
-ajax原生方法返回text数据<textarea>
+ajax原生方法返回text数据 ajax后台程序后台代码<textarea>
 document.getElementById("search").onclick = function(){  //发送ajax查询请求并处理
   var request = new XMLHttpRequest();
   request.open("GET","server.php?number=" + document.getElementById("keyword").value);

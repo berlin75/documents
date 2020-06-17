@@ -12112,11 +12112,11 @@ array (
   4 => ['< /b>', '< /div>']
 )
 
-</textarea></b></pre><pre>
+</textarea><pre>
 如果正则表达式包含了带名称的子组,$matches额外包含了带名称子组的键。
 如果正则表达式里子组名称重名了,则仅最右侧的自组储存在$matches[NAME]中
 
-</pre><pre><code class="language-javascript">
+</pre><textarea>
 preg_match_all('/(?J)(?＜match>foo)|(?＜match>bar)/','foo bar',$matches,PREG_PATTERN_ORDER);
 var_dump($matches['match']);
 
@@ -12125,7 +12125,7 @@ array (size=2)
   0 => string '' (length=0)
   1 => string 'bar' (length=3)
 
-</code></pre><pre>
+</textarea><pre>
 PREG_SET_ORDER
 结果排序为$matches[0]包含第一次匹配得到的所有匹配(包含子组),$matches[1]是包含第二次匹配到的所有匹配(包含子组)的数组,以此类推
 
@@ -12707,36 +12707,118 @@ $original=unserialize(gzcompress(base64_encode($s)));
 <h3>PHP编码和解码JSON对象</h3><pre>
 json比serialize快,格式可读,返回数据更小,是开放可以移植的
 
-【 json_decode() 】
-mixed json_decode ($json_string [,$assoc = false [,$depth = 512 [,$options = 0 ]]])
-对json格式的字符串进行编码,转换为php变量
-json_string: 待解码的JSON字符串,必须是UTF-8编码数据
-assoc: 当该参数为true时将返回数组,false时返回对象,默认false
-depth: 整数类型的参数,指定递归深度
-options: 二进制掩码,目前只支持JSON_BIGINT_AS_STRING
-Returns the value encoded in json in appropriate PHP type. Values true,false and null are returned as TRUE,FALSE and NULL respectively. NULL is returned if the json cannot be decoded or if the encoded data is deeper than the recursion limit
-
-$obj = json_decode($jsonstring);
-$arr = json_decode($jsonstring,true);
-var_dump(json_decode("Hello World")); //null
-
 【 json_encode() 】
 string json_encode ($value [,$options = 0 ])
-对变量进行json编码,返回一个除resource类型外的值的json形式,只能用于utf8编码的数据
-value: 要编码的值
+进行json编码,对变量进行json编码,返回一个除resource类型外的值的json字符串格式的对象,只能用于utf8编码的数据,使用gb2312编码则需要将包含中文的内容使用iconv或mb系列函数转化为utf-8后再json_encode
+value:要编码的值
 options:由以下常量组成的二进制掩码JSON_HEX_QUOT,JSON_HEX_TAG,JSON_HEX_AMP,JSON_HEX_APOS,JSON_NUMERIC_CHECK,JSON_PRETTY_PRINT,JSON_UNESCAPED_SLASHES,JSON_FORCE_OBJECT
 
-json_last_error()函数返回数据编解码过程中发生的错误
+【 json_decode() 】
+mixed json_decode ($json_string [,$assoc = false [,$depth = 512 [,$options = 0 ]]])
+json解码,对json格式的字符串进行解码转换成PHP变量,返回数组或对象
+Returns the value encoded in json in appropriate PHP type. Values true,false and null are returned as TRUE,FALSE and NULL respectively. NULL is returned if the json cannot be decoded or if the encoded data is deeper than the recursion limit
+
+json_string: 待解码的JSON字符串,必须是UTF-8编码数据
+assoc: 当该参数为true时将返回数组,默认false返回对象
+depth: 整数类型的参数,指定递归深度
+options: 二进制掩码,目前只支持JSON_BIGINT_AS_STRING
+
+【 json_last_error() 】
+返回数据编解码过程中发生的错误
 
 </pre><textarea>
-$arr = array('a' => 1,'b' => 2,'c' => 3,'d' => 4,'e' => 5);
-$s = json_encode($arr);  
-echo gettype($s);             // string
-echo $s;                      // {"a":1,"b":2,"c":3,"d":4,"e":5}
-$original = json_decode($s);
-var_dump($original);
+// 判断数据不是json格式
+function is_not_json($string){
+  return is_null(json_decode($string));
+}
+
+// 判断数据是合法json数据 php5.3+
+function is_json($string) {
+  json_decode($string);                           // json编解码所操作字符串必须是UTF8的
+  return(json_last_error() == JSON_ERROR_NONE);   // 返回数据编解码过程中发生的错误
+}
+
+// 解析json串
+function analyJson($json_str) {
+  $json_str = str_replace('\\', '', $json_str);
+  $out_arr = [];
+  preg_match('/{.*}/', $json_str, $out_arr);
+  if (!empty($out_arr)) {
+    return json_decode($out_arr[0], true);
+  } else {
+    return false;
+  }
+}
+
+// json对象转化为数组
+function object_to_array($obj){
+  if(is_array($obj)){
+    return $obj;
+  }
+  $_arr = is_object($obj) ? get_object_vars($obj) : $obj;
+  foreach ($_arr as $key => $val){
+    $val = (is_array($val)) || is_object($val) ? object_to_array($val) :$val;
+    $arr[$key] = $val;
+  }
+  return $arr;
+}
 
 </textarea><textarea>
+var_dump(json_decode("Hello World")); // NULL
+
+$arr = array();
+$s = json_encode($arr);  
+var_dump($s);            // string(2) "[]"
+$original = json_decode($s);
+var_dump($original);     // array(0) { }
+$original = json_decode($s, true);
+var_dump($original);     // array(0) { }
+
+$arr = array('a' => 1,'b' => 2,'c' => 3,'d' => 4,'e' => 5);
+$s = json_encode($arr);  
+var_dump($s);                 // string(31) "{"a":1,"b":2,"c":3,"d":4,"e":5}"
+$original = json_decode($s);
+var_dump($original);          // object(stdClass)#1 (5) { ["a"]=> int(1) ["b"]=> int(2) ["c"]=> int(3) ["d"]=> int(4) ["e"]=> int(5) }
+$original = json_decode($s, true);
+var_dump($original);          // array(5) { ["a"]=> int(1) ["b"]=> int(2) ["c"]=> int(3) ["d"]=> int(4) ["e"]=> int(5) }
+
+</textarea><pre>
+关联数组和索引数组
+由于js不支持关联数组,所以json_encode()只将索引数组(indexed array)转为数组格式,而将关联数组(associative array)转为对象格式。
+
+将"索引数组"强制转化成"对象"
+json_encode( (object)$arr );
+json_encode( $arr,JSON_FORCE_OBJECT );
+
+</pre><textarea>
+// 索引数组的json化:纯数字索引数组的json字符串是按照javascript能够识别的数组来存储的,而不是按照javascript能够识别的对象来存储的
+$arr1 = array(1,'heiyeluren','男');
+var_dump(json_encode($arr1));  // string(25) "[1,"heiyeluren","\u7537"]"
+
+// 对多维索引数组的进行json化
+$arr3 = array(array(1,'heiyeluren','男'),array(1,'heiyeluren','男'));
+var_dump(json_encode($arr3));  // string(53) "[[1,"heiyeluren","\u7537"],[1,"heiyeluren","\u7537"]]"
+
+// 关联数组是按照js对象来构造的
+$arr = array(
+  'name' => '魏艳辉',
+  'nick' => '为梦翱翔',
+  'contact' => array(
+    'email' => 'zhuoweida@163.com',
+    'website' => 'http://zhuoweida.blog.tianya.cn',
+  )
+);
+var_dump(json_encode($arr));
+// string(149) "{"name":"\u9b4f\u8273\u8f89","nick":"\u4e3a\u68a6\u7ff1\u7fd4","contact":{"email":"zhuoweida@163.com","website":"http:\/\/zhuoweida.blog.tianya.cn"}}"
+
+// 对多维关联数组的进行json化:多维关联索引数组是按照外围是JavaScript数组,中间的索引数组是对象
+$arr4 = array(
+  array("id"=>1,"name"=>'heiyeluren',"gender"=>'男'),
+  array("id"=>1,"name"=>'heiyeluren',"gender"=>'男')
+);
+var_dump(json_encode($arr4));  // string(95) "[{"id":1,"name":"heiyeluren","gender":"\u7537"},{"id":1,"name":"heiyeluren","gender":"\u7537"}]"
+
+</textarea>PHP对象的json化<textarea>
 class Emp {
   public $name = "";
   public $hobbies  = "";
@@ -12745,143 +12827,53 @@ class Emp {
 $e = new Emp();
 $e->name = "sachin";
 $e->hobbies  = "sports";
-$e->birthdate = date('m/d/Y h:i:s a',"8/5/1974 12:20:03 p");
-$e->birthdate = date('m/d/Y h:i:s a',strtotime("8/5/1974 12:20:03"));
-echo json_encode($e);  // {"name":"sachin","hobbies":"sports","birthdate":"08\/05\/1974 12:20:03 pm"}
+$e->birthday = date('m/d/Y h:i:s a', strtotime("8/5/1974 12:20:03"));
+echo json_encode($e);  // {"name":"sachin","hobbies":"sports","birthdate":"","birthday":"08\/05\/1974 12:20:03 pm"}
 
-</textarea><textarea>
-$json = '{"a":1,"b":2,"c":3,"d":4,"e":5}';
-var_dump(json_decode($json));
-var_dump(json_decode($json, true));
-
-//输出
-object(stdClass)#1 (5) {
-  ["a"] => int(1)
-  ["b"] => int(2)
-  ["c"] => int(3)
-  ["d"] => int(4)
-  ["e"] => int(5)
-}
-
-array(5) {
-  ["a"] => int(1)
-  ["b"] => int(2)
-  ["c"] => int(3)
-  ["d"] => int(4)
-  ["e"] => int(5)
-}
-
-</textarea><textarea>
-// 判断数据不是JSON格式:
-function is_not_json($string){
-  return is_null(json_decode($string));
-}
-
-// 判断数据是合法的json数据:
-function is_json($string) {
-   json_decode($string);
-   return (json_last_error() == JSON_ERROR_NONE);
-}
-
-//  解析json串
-function analyJson($json_str) {
-  $json_str = str_replace('\\','',$json_str);
-  $out_arr = [];
-  preg_match('/{.*}/',$json_str,$out_arr);
-  if (!empty($out_arr)) {
-    $result = json_decode($out_arr[0],true);
-  } else {
-    return false;
+</textarea>json跨域的数据调用:当index.html调用profile.php,json字符串生成,并作为参数传入getProfile,然后将昵称插入到div中,这样一次跨域数据交互就完成了<textarea>
+//主调文件index.html
+＜script＞
+  function getProfile(str) {
+      var arr = str;
+      document.getElementById('nick').innerHTML = arr.nick;
   }
-  return $result;
+＜/script＞
+＜div id="nick"＞＜/div＞
+＜script src="http://localhost/demo/profile.php"＞＜/script＞
+
+//被调文件profile.php
+$arr = array(
+　'name' => '微微',
+  'nick' => '为梦翱翔',
+  'contact' => array(
+    'email' => 'zhuoweida@163.com',
+    'website' => 'http://zhuoweida.blog.tianya.cn',
+  )
+);
+$json_string = json_encode($arr);
+echo "getProfile($json_string)";
+
+</textarea>json中文字符会转为unicode编码<textarea>
+$testJSON = array('name'=>'中文字符串','value'=>'test');
+var_dump(json_encode($testJSON));  // string(56) "{"name":"\u4e2d\u6587\u5b57\u7b26\u4e32","value":"test"}"
+
+$testJSON = array('name'=>'中文字符串','value'=>'www.111cn.net');
+foreach( $testJSON as $key => $value ) {
+  $testJSON[$key] = urlencode( $value );
 }
+var_dump(urldecode( json_encode( $testJSON ) ));  // string(50) "{"name":"中文字符串","value":"www.111cn.net"}"
 
-</textarea>json对象转化为数组<textarea>
-function object_to_array($obj){
-  if(is_array($obj)){
-    return $obj;
-  }
-  $_arr = is_object($obj) ? get_object_vars($obj) :$obj;
-  foreach ($_arr as $key => $val){
-    $val = (is_array($val)) || is_object($val) ? object_to_array($val) :$val;
-    $arr[$key] = $val;
-  }
-  return $arr;
-}
-
-</textarea><pre>
-由于js不支持关联数组,所以json_encode()只将索引数组(indexed array)转为数组格式,而将关联数组(associative array)转为对象格式。
-
-$arr = Array('one','two','three');    // 索引数组
-echo json_encode($arr);               // ["one","two","three"]
-
-$arr = Array('1'=>'one','2'=>'two','3'=>'three');  // 关联数组
-echo json_encode($arr);               // {"1":"one","2":"two","3":"three"}
-
-将"索引数组"强制转化成"对象"
-json_encode( (object)$arr );
-json_encode( $arr,JSON_FORCE_OBJECT );
-
-var_export()函数把变量作为字符串输出
-eval() 函数把字符串当作代码执行
-
-</pre>php文件中插入html代码的写法<textarea>
-< table class="table table-hover">
-  <?php
-      foreach ($cart->getProducts() as $key => $product):
-  ?>
-  < tr>
-    < td class="col-sm-8 col-md-6">
-        < div class="media">
-            < div class="media-body">
-                < h4 class="media-heading">< a href="#"><?= $product['name'] ?>< /a>< /h4>
-            < /div>
-        < /div>
-    < /td>
-    < td class="col-sm-1 col-md-1">
-      <?php if ($key !== Cart::FREIGHT_KEY): ?>
-          < input type="text" name="quantity[<?= $key ?>]" class="form-control" value="<?= $product['quantity'] ?>">
-      <?php else: ?>
-          < input type="hidden" name="quantity[<?= $key ?>]" value="0">
-      <?php endif; ?>
-    < /td>
-    < td class="col-sm-1 col-md-1 text-right">
-      < strong>$<?= number_format($product['price']) ?>< /strong>
-    < /td>
-    < td class="col-sm-1 col-md-1 text-right">
-      < strong>$<?= number_format($product['subtotal']) ?>< /strong>
-    < /td>
-  < /tr>
-  <?php endforeach; ?>
-< /table>
-
-</textarea>【 安装步骤 】<textarea>
-< form id='form1'action='index.php'>
-  <?php if(!isset($_GET['step'])){ ?>
-  < input type='button' value='start' onclick='location.href=location.pathname+"?step=0"'/>
-  <?php
-    }else{
-      $step = (int)$_GET['step'];
-      if($step==0){
-  ?>
-    >>>>>step0<<<<<< < br/>< br/>
-    < input type='button' value='goto step 1' onclick='location.href=location.pathname+"?step=1"'/>
-  <?php
-   }else if($step==1){
-  ?>
-      >>>>>step1<<<<<< < br/>< br/>
-      < input type='button' value='goto step 2' onclick='location.href=location.pathname+"?step=2"'/>
-  <?php
-   }else if($step==2){
-  ?>
-      >>>>>step2<<<<<< < br/>< br/>
-      < input type='button' value='goback step 1' onclick='location.href=location.pathname+"?step=1"'/>
-      < input type='button' value='goback step 0' onclick='location.href=location.pathname+"?step=0"'/>
-  <?php
-          }
-      }
-    ?>
-< /form>
+// php5.4+ json_encode增加了JSON_UNESCAPED_UNICODE,JSON_PRETTY_PRINT等几个常量参数,使显示中文与格式化更方便
+$arr = array(
+  'status' => true,
+  'errMsg' => '',
+  'member' =>array(
+    array( 'name' => '李逍遥','gender' => '男'),
+    array( 'name' => '赵灵儿','gender' => '女')
+  )
+);
+var_dump(json_encode($arr,JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT)); 
+// string(226) "{ "status": true, "errMsg": "", "member": [ { "name": "李逍遥", "gender": "男" }, { "name": "赵灵儿", "gender": "女" } ] }"
 
 </textarea>
 </div>
@@ -52209,7 +52201,7 @@ class Http {
       curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
       if ($ssl) {
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // 信任任何证书
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 1); // 检查证书中是否设置域名
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2); // 检查证书中是否设置域名
       }
       curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
       curl_setopt($ch, CURLOPT_HTTPHEADER, is_array($header) ? $header : array($header));//模拟的header头
@@ -52564,15 +52556,14 @@ echo request_by_curl('http://localhost/study/php/login/login.php',"username=张�
 
 </textarea>
 
-<h3>xpath解析html、xml</h3><textarea>
+<h3>xpath解析html、xml devtool RC</h3><textarea>
 # 使用DOMDocument读取内容
 $doc = new DOMDocument();
 $doc->load('book.xml');
 $nodes = $doc->getElementsByTagName('para');
 
 foreach ($nodes as $node){
-  echo $node->nodeValue;
-  echo "<br>";
+  echo $node->nodeValue.'\r\n';
 }
 
 $nodes = $doc->getElementsByTagName('prod');
@@ -52591,15 +52582,13 @@ $data = $xpath->query('//*[@id="main"]/div[1]/div/ul/li/a'); #获取所有的a�
 foreach ($data as $val) {
     $item = $val->childNodes;
     foreach ($item as $v) {
-        $str = trim($v -> textContent);
-        echo $str . '<br/>';
+        echo trim($v -> textContent) . '\r\n';
     }
 }
 //取值方式二
 for ($i = 0; $i < $data->length; $i++) {
     $items = $data->item($i);
-    $text = $items->nodeValue;
-    echo $text . '<br/>';
+    echo $items->nodeValue . '\r\n';
 }
 
 $url = 'http://www.baidu.com';
@@ -52794,12 +52783,13 @@ curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
 CURLOPT_HEADER  bool
 启用时会将头文件的信息作为数据流输出
 curl_setopt($ch,CURLOPT_HEADER,false);
-curl_setopt($ch,CURLOPT_HEADER,true);          // 开启header才能够抓取到重定向到的新URL,用于分析header
+curl_setopt($ch,CURLOPT_HEADER,true);  // 开启header才能够抓取到重定向到的新URL,用于分析header
 
 CURLOPT_HTTPHEADER  array
 一个用来设置HTTP头字段的数组
-curl_setopt($ch,CURLOPT_HTTPHEADER,array('Content-type: text/plain','Content-length: 100'));
-curl_setopt($ch,CURLOPT_HTTPHEADER,["application/x-www-form-urlencoded; charset=utf-8","Content-Length: ".strlen($data]);
+curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: text/plain','Content-length: 100'));
+curl_setopt($ch, CURLOPT_HTTPHEADER, ["application/x-www-form-urlencoded; charset=utf-8","Content-Length: ".strlen($data]);
+curl_setopt($ch, CURLOPT_HTTPHEADER, Array("Content-Type: text/xml"));
 
 CURLINFO_HEADER_OUT	 bool
 启用时追踪句柄的请求字符串,CURLINFO_前缀是故意的(intentional)
@@ -54351,7 +54341,152 @@ $headers = array (
 $result=upload_file02($url,$params,$file['tmp_name'],$headers);
 echo $result;
 
-</textarea>
+</textarea>php爬虫爬取5118关键词<textarea>
+<input type="text" id="keyword" value="天猫精灵">
+<button>查询</button>
+<div id="show" style="margin-top: 2rem;"></div>
+
+// https://ci.5118.com/5707ebc7b2379295/ detail.js解码文件
+function n(t) {
+  for (var e = [], i = 0; i < t.length; i++)
+    e[i] = ("00" + t.charCodeAt(i).toString(16)).slice(-4);
+  return "\\u" + e.join("\\u")
+}
+
+String.prototype.encodeUnicode = function() {
+  return n(this).replace(/\\u00/g, "l").replace(/\\u/g, "").split("").reverse().join("")
+}
+
+window.ajax = async function(params, success, error) {
+  let {url, method, data} = params;
+  let body = new FormData();
+  for(let key in data) {
+    if(data.hasOwnProperty(key)) body.append(key, data[key]);
+  }
+  let xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+  xhr.timeout = 3000;
+  xhr.open(method, url, true);
+  xhr.addEventListener("readystatechange", evt => {
+    if(xhr.readyState === 4) {
+      if(xhr.status === 200) {
+        success && typeof success === "function" ? success(xhr.response) : console.log(xhr.response);
+      } else {
+        error && typeof error === "function" ? error(xhr.statusText) : console.error(xhr.statusText);
+      }
+    }
+  });
+  xhr.send(body);
+};
+
+document.querySelector('button').onclick = function(){
+  document.querySelector('#show').innerHTML = '';
+  // let keyword = document.getElementById('keyword').value.encodeUnicode();  // js解码
+  let keyword = document.getElementById('keyword').value;                     // php解码
+  let url = `furen.php?keyword=${keyword}`;
+  ajax({
+    url,
+    method: "GET",
+  }, function(resp) {
+    let data = JSON.parse(resp);
+    let html = '';
+    for (let index = 0; index < data.length; index++) {
+      html += data[index] + '<br/>';
+    }
+    document.querySelector('#show').innerHTML = html;
+  })
+}
+
+// php代码
+header("Content-Type:application/json;charset=utf-8");
+
+// 方法一：按照js转换
+/*
+get_bianma(substr($enc_str, $i, 1))
+等同于js代码
+enc_str.charCodeAt(i)
+*/
+function get_bianma($str){  //等同于js的charCodeAt()
+    $result = array();  
+    for($i = 0, $l = mb_strlen($str, 'utf-8');$i < $l;++$i){  
+        $result[] = uniord(mb_substr($str, $i, 1, 'utf-8'));  
+    }  
+    return join(",", $result);
+}  
+function uniord($str, $from_encoding = false){  
+    $from_encoding = $from_encoding ? $from_encoding : 'UTF-8';  
+    if (strlen($str) == 1) return ord($str);  
+    $str = mb_convert_encoding($str, 'UCS-4BE', $from_encoding);  
+    $tmp = unpack('N', $str);  
+    return $tmp[1];  
+}  
+
+function n($keyword){
+  $e = [];
+  $keyword = preg_split('/(?<!^)(?!$)/u', $keyword );
+  for ($i=0; $i < count($keyword); $i++) { 
+    $e[] = "00" . substr(base_convert(get_bianma($keyword[$i]),10,16), -4);
+  }
+  return "\\u" . implode("\\u" , $e);
+}
+
+function encodeUnicode($str){
+  $s1 = n($str);
+  $s3 = str_replace('\u00', "", $s1);
+  $a1 = str_split($s3);
+  $a2 = array_reverse($a1);
+  return implode($a2);
+}
+
+// 方法二：利用json_encode中文字符转为unicode编码
+function encodeUnicode1($keyword){
+  $e = [];
+  $keyword = preg_split('/(?<!^)(?!$)/u', $keyword );
+  for ($i=0; $i < count($keyword); $i++) { 
+    $e[] = strrev(str_replace("\\u", "", str_replace("\"", "", json_encode($keyword[$i]))));
+  }
+  $a = array_reverse($e);
+  return implode($a);
+}
+
+function curlGet(string $url, int $timeout = 5, array $header = []): string {
+  $ssl = substr($url, 0, 8) == "https://";
+  $ch = curl_init();
+  curl_setopt($ch, CURLOPT_URL, $url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+  if ($ssl) {
+      curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // 信任任何证书
+      curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2); // 检查证书中是否设置域名
+  }
+  curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+  curl_setopt($ch, CURLOPT_HTTPHEADER, $header);//模拟的header头
+  $result = curl_exec($ch);
+  curl_close($ch);
+  return $result;
+}
+$url = 'https://ci.5118.com/'. encodeUnicode1($_GET['keyword']) .'/';  // 天猫精灵 -> 5707ebc7b2379295
+
+$header[] = "User-Agent:Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-CN; rv:1.9.2.12) Gecko/20101026 Firefox/3.6.12";
+$header[] = "Accept:text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
+$header[] = "Accept-language: zh-cn,zh;q=0.5";
+$header[] = "Accept-Charset: GB2312,utf-8;q=0.7,*;q=0.7";
+$header[] = "Cookie: ASP.NET_SessionId=kfmziej01viawegutkbexq1w; Hm_lvt_f3b3086e3d9a7a0a65c711de523251a6=1592358482,1592359396; Sign=0a519c59-f871-4178-aea8-048882daa7ba; .AspNet.ApplicationCookie=Nrqj_3UkYeljT2pdb-gAM0OfXSjONjSV9_DAm3zb2cWo0cUx2n4fvFI9VcVNRb1gDGuEs39M2YppatUmBAowejdgGmvP_ZOqJ4BNy5gaN8PivqKwljCDDScui2taXc07v5mPrJ-eM2r__7zmgyDHhJ8-BYEjYzGpvGqAevyC0d5SReXZEaBdJ8KMbrgpVj5V3u47yrAPtkDrpsOj3Nmz3hLFyW8VofMZAiG0WMnfcpqsI-cpmwMGnR6zKbChFEadDCIYftAnBDwVB1foscHfiEJT-UZbfpIta5RG0E3aZBQMWKjMYevA_cRJKaf9nXvFZQlnbfvUDy8dmXdfC-wSkPCivXbFUl7jgrbWty1_kFQ98qIVD41pYU2BCgaeTSAdJSR7iAyrXYElZ9Epvjarex-YWuI5K5RZDuHSTzUH_XM; Hm_lpvt_f3b3086e3d9a7a0a65c711de523251a6=1592363661";
+
+$outPageTxt = curlGet($url, 5, $header);
+$dom = new DOMDocument();
+@$dom->loadHTML($outPageTxt);
+$dom->normalize();
+$xpath = new DOMXPath($dom);
+$data = $xpath->query('//*[@id="waci-wrap"]/div[4]/table/tbody/tr/td[1]/a');
+$res = [];
+for ($i = 0; $i < $data->length; $i++) {
+    $items = $data->item($i);
+    $text = $items->nodeValue;
+    $res[] = $text;
+}
+echo json_encode($res);
+
+</textarea>  
 </div>
 
 <div id="mvc">
@@ -71951,6 +72086,66 @@ if($_GET["act"]){
 
 <div id="module">
 <h2>功能模块</h2>
+【 php文件中插入html代码的写法 】<textarea>
+< table class="table table-hover">
+  <?php
+      foreach ($cart->getProducts() as $key => $product):
+  ?>
+  < tr>
+    < td class="col-sm-8 col-md-6">
+        < div class="media">
+            < div class="media-body">
+                < h4 class="media-heading">< a href="#"><?= $product['name'] ?>< /a>< /h4>
+            < /div>
+        < /div>
+    < /td>
+    < td class="col-sm-1 col-md-1">
+      <?php if ($key !== Cart::FREIGHT_KEY): ?>
+          < input type="text" name="quantity[<?= $key ?>]" class="form-control" value="<?= $product['quantity'] ?>">
+      <?php else: ?>
+          < input type="hidden" name="quantity[<?= $key ?>]" value="0">
+      <?php endif; ?>
+    < /td>
+    < td class="col-sm-1 col-md-1 text-right">
+      < strong>$<?= number_format($product['price']) ?>< /strong>
+    < /td>
+    < td class="col-sm-1 col-md-1 text-right">
+      < strong>$<?= number_format($product['subtotal']) ?>< /strong>
+    < /td>
+  < /tr>
+  <?php endforeach; ?>
+< /table>
+
+</textarea>安装步骤<textarea>
+< form id='form1'action='index.php'>
+  <?php if(!isset($_GET['step'])){ ?>
+  < input type='button' value='start' onclick='location.href=location.pathname+"?step=0"'/>
+  <?php
+    }else{
+      $step = (int)$_GET['step'];
+      if($step==0){
+  ?>
+    >>>>>step0<<<<<< < br/>< br/>
+    < input type='button' value='goto step 1' onclick='location.href=location.pathname+"?step=1"'/>
+  <?php
+    }else if($step==1){
+  ?>
+      >>>>>step1<<<<<< < br/>< br/>
+      < input type='button' value='goto step 2' onclick='location.href=location.pathname+"?step=2"'/>
+  <?php
+    }else if($step==2){
+  ?>
+      >>>>>step2<<<<<< < br/>< br/>
+      < input type='button' value='goback step 1' onclick='location.href=location.pathname+"?step=1"'/>
+      < input type='button' value='goback step 0' onclick='location.href=location.pathname+"?step=0"'/>
+  <?php
+          }
+      }
+    ?>
+< /form>
+
+</textarea>
+
 <h3>PHP测试与优化-- Apache自带的压力测试工具ab(apache bench)</h3><pre>
 ab是apache自带的网站压力测试工具,能够测试网站在一定时间内的发生高并发时的反应,一般已经安装了Apache就不需要安装ab
 

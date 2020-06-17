@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>dedecms tag</title>
+</head>
+<body>
+
+<h2>empirecms</h2><pre>
+empirecms
+
+</pre>
+
+<h2>dedecms</h2><pre>
+dedecms标签：就像html标签，不过是织梦自定义的，由标签名，属性和InnerText构成,InnerText又称为底层模板
+[field:XX]这个代表记录中的某个属性值
+不用全部标签都学，学会global、field、php、arclist、list、pagelist和memberlist即可。其他需要再查
+
+代码样式有如下几种形式：
+{dede:标记名称 属性='值'/}
+{dede:标记名称 属性='值'}{/dede:标记名称}
+{dede:标记名称 属性='值'}自定义样式模板(InnerText){/dede:标记名称}
+{dede:标记名称commet="这是调用xxx变量标签" 属性='值'/}
+
+织梦的模板标签类似于XML格式，所有的模板都含有定界符，默认情况下是{dede:*}和{/dede:*}，“*”代表模板标记名称。
+一般情况下{dede:*}和{/dede:*}是成对出现的，例如：
+例1-1：
+{dede:arclist flag='h' limit='0,1'}
+[field:title/]
+[field:description/]...[查看全文]
+{/dede:arclist}
+上面的{dede:arclist}和{/dede:arclist}成对出现在模板文件中，并且在两个标签当中包含了底层模板(innertext)。
+底层模板（Innertext）实际上就是对于有多条记录的模板输出，用户手工去指定单个记录的样式。
+标签还有一类出现形式是{dede:*/}，通常以这种形式出现都是输出变量、或者不含底层模板的内容。
+例如：1-2
+{dede:global.cfg_webname/}
+{dede:arclist flag='h' limit='0,1'/}
+如果用户没有指定单个记录的样式，系统部分标签都含有默认的底层模板，具体可以查看{cmapath}/templets/system/文件夹下面的文件，这里面都是系统的底层模板文件。
+
+注释
+织梦标签的模板注释非常灵活，可以通过标签后面的commet属性进行赋值。
+例1-3：
+{dede:arclist flag='h' limit='0,1' commet='调用头条的第一篇内容'}
+[field:titlecommet="这是文章标题标签"/]
+[field:description commet="这是摘要标签"/]...[查看全文]
+{/dede:arclist}
+在模板引擎将上述标签解析为html的时候，commet的内容是被忽略掉不去解析的，用户在阅读模板标记的时候可以更好的理解标签的意义。
+
+函数
+每一个织梦的标签都可以使用自定义函数对其进行扩展，使用函数对得到的值进行处理，自定义函数内容主要用于对当前标签输出内容进行处理。
+例1-4：
+{dede:标记名称 function='youfunction("参数一","参数二","@me")'/}
+其中@me用于表示当前标记的值，其它参数由你的函数决定是否存在，例如：
+{dede:field.pubdate function='strftime("%Y-%m-%d %H:%M:%S","@me")'/}
+
+属性
+模板标签的属性，决定了模板标记输出的形式，例如arclist标签主要功能是列出文档列表，但列出什么内容、按照什么方式进行排序等取决于模板标签的属性。
+在织梦的模板标签说明中含有各个模板的标签属性可以详细查阅。
+可以查看例1-1中的flag='h' limit='0,1'，这里flag和limit是标签的相关属性，通过手册可以查阅属性的介绍。
+如果模板标签如果没有列出属性，系统有默认属性值，用户可以参考模板标签说明查看默认属性。
+
+编程
+织梦模板很方便的一个地方就是支持简单的模板编程。
+格式为：
+{dede:tagname runphp='yes'}
+$aaa = @me;
+@me = "123456";
+{/dede:tagname}
+@me表示这个标记本身的值，因此标记内编程是不能使用echo之类的语句的，只能把所有返回值传递给@me。
+此外由于程序代码占用了底层模板InnerText的内容，因此需编程的标记只能使用默认的InnerText。
+
+
+织梦模板引擎内置多个系统标记，系统标记在任何模版中直接使用。
+ (1) global标记
+表示获取一个外部变量，除了数据库密码之外，能调用系统的任何配置参数，形式为：
+{dede:global name='变量名称'}{/dede:global}
+或
+{dede:global name='变量名称'/}
+其中变量名称不能加$符号，如变量$cfg_cmspath，应该写成{dede:global name='cfg_cmspath'/}，可在后台自由增加新变量，前台通过此标记取值
+
+ (2) foreach
+用来输出一个数组，形式为：
+{dede:foreach array='数组名称'}[field:key/] [field:value/]{/dede:foreach}
+
+ (3) include
+引入一个文件，形式为：
+{dede:include file='文件名称' ismake='是否为dede板块模板(yes/no)'/}
+对文件的搜索路径为顺序为：绝对路径、include文件夹，CMS安装目录，CMS主模板目录
+{dede:include filename="head.htm"/}                            头部文件
+{dede:include filename="footer.htm"/}                          脚部文件
+
+******************************************************
+{dede:qrcode/}                                                二维码
+
+＜meta charset={dede:global.cfg_soft_lang/}" />                 编码
+＜meta name="description" content="{dede:global.cfg_description/}" />        站点描述
+＜meta name="keywords" content="{dede:global.cfg_keywords/}" />              站点关键字
+＜meta name="viewport" content="width=device-width,initial-scale=1.0" />     响应式网站
+＜meta http-equiv="mobile-agent" content="format=xhtml;url={dede:global.cfg_mobileurl/}/index.php">   安装目录/m/index.php
+＜base target="_blank">                                         网站链接默认
+＜title>{dede:field.title/}_{dede:global.cfg_webname/}＜/title>  栏目名_网站名
+
+{dede:global.cfg_basehost/}                                    网站根网址
+href="{dede:global.cfg_templets_skin/}/xxx.htm"                默认模板路径,templets/default/xxx.htm
+{dede:global.cfg_cmsurl/}                                      dede安装目录和主页地址，网站根目录
+{dede:global.cfg_cmspath/}                                     同上
+{dede:global.cfg_indexurl/}                                    网页主页链接
+
+[field:global.cfg_basehost/][field:arcurl/]                    文章完整路径
+
+{dede:field name='position'/}                                  当前位置，面包屑
+
+＜ul>{dede:flink row='24'/}＜/ul>                                友情链接
+
+{dede:global.cfg_powerby/}                                     版权信息
+{dede:myad name='myadname'/}                                   调用广告
+
+{dede:field.writer/}      获得责任编辑
+{dede:adminname /}
+
+{dede:pagebreak/}         文档模板分页链接列表
+
+{dede:prenext get='pre'/}  文档模板上一篇pre，下一篇next链接
+
+启用字符串混淆来防采集，请在文档模板需要的字段加上 function='RndString(@me)' 属性，
+如：{dede:field name='body' function='RndString(@me)'/}
+
+[type 调用指定的单个栏目的链接]
+{dede:type typeid=''}
+    ＜a href="[field:typelink /]">[field:typename /]＜/a>
+{/dede:type}
+
+ ★ channel标签属性：适用于封面模板，列表模板，文档列表
+typeid 栏目ID
+reid   上级栏目ID
+row    调用栏目数
+col    分多少列显示
+type   顶级栏目top;下级栏目son/sun，同级栏目self，son和self必须在列表模板中使用
+currentstyle 应用样式
+
+[channel  导航代码]
+＜ul>
+    ＜li>＜a href='{dede:global.cfg_cmsurl/}/'>＜span>主页＜/span>＜/a>＜/li>
+    {dede:channel type='top' row='10' currentstyle="＜li class='hover'>＜a href='~typelink~' ~rel~>＜span>~typename~＜/span>＜/a>＜/li>"}
+        ＜li>＜a href='[field:typeurl/]' [field:rel/]>＜span>[field:typename/]＜/span>＜/a>＜/li>
+    {/dede:channel}
+＜/ul>
+
+[channel   list-article子栏目列表]
+＜dl>
+    ＜dt>＜strong>栏目列表＜/strong>＜/dt>
+    ＜dd>
+         ＜ul>
+              {dede:channel type='son' currentstyle="＜li>＜a href='~typelink~' class='thisclass'>~typename~＜/a>＜/li>"}
+              ＜li>＜a href='[field:typeurl/]'>[field:typename/]＜/a>＜/li>
+              {/dede:channel}
+         ＜/ul>
+    ＜/dd>
+＜/dl>
+
+[channelartlist 获取当前频道的下级栏目的内容列表- 遍历栏目和文章列表--栏目属性为外部链接的栏目除外，频道封面模板]
+*******************************************************************************
+＜div>
+     {dede:channelartlist}
+         ＜dl>
+             ＜dt>
+                 ＜strong>＜a href="{dede:field name='typeurl'/}">{dede:field name='typename'/}＜/a>＜/strong>
+                 ＜span>＜a href="{dede:field name='typeurl'/}">更多...＜/a>＜/span>
+             ＜/dt>
+             ＜dd>
+                 ＜ul>
+                     {dede:arclist titlelen='60' row='8'}
+                     ＜li>
+                        ＜span>[field:pubdate function="MyDate('m-d',@me)"/]＜/span>
+                        ＜a href="[field:arcurl /]">[field:title /]＜/a>
+                     ＜/li>
+                     {/dede:arclist}
+                 ＜/ul>
+             ＜/dd>
+         ＜/dl>
+     {/dede:channelartlist}
+ ＜/div>
+
+ ★ pagelist标签属性：          列表模板
+listitem 分页页码样式，首页index，上页pre，页码pageno，下页next，末页end，下拉跳转option，信息info
+listsize 显示分页项的长度
+
+[list     list-article文章列表]  pagesize：每页结果数
+＜div class="pleft">
+    ＜ul class="e2">
+        {dede:list pagesize='10'}
+        ＜li> [field:array runphp='yes']@me = (empty(@me['litpic']) ? "" : "＜a href='{@me['arcurl']}' class='preview'>＜img src='{@me['litpic']}'/>＜/a>"); [/field:array]
+        [＜b>[field:typelink/]＜/b>] ＜a href="[field:arcurl/]" class="title">[field:title/]＜/a> ＜span class="info"> ＜small>日期：＜/small>[field:pubdate function="GetDateTimeMK(@me)"/] ＜small>点击：＜/small>[field:click/] ＜small>好评：＜/small>[field:scores/] ＜/span>
+        ＜p class="intro"> [field:description/]... ＜/p>
+        ＜/li>
+        {/dede:list}
+    ＜/ul>
+＜/div>
+＜div class="dede_pages">
+    ＜ul class="pagelist">
+        {dede:pagelist listitem="index,pre,pageno,next,end,option,info" listsize="5"/}
+    ＜/ul>
+＜/div>
+
+ ★ arclist标签属性：                适用于封面模板，列表模板，文档列表
+col：分多少列显示，默认为单列
+row：返回列表总数
+limit：表示限定的记录范围
+channelid：频道ID
+typeid：栏目ID，首页中可用，列表、文章模板中不需指定，逗号分隔多个栏目
+aid：文档ID
+listtype：栏目类型，img含缩略图，commend推荐
+titlelen：标题长度
+infolen：简介长度
+orderby：文档排序方式
+keyword：含关键字的文档列表，逗号分隔
+flag：头条h，推荐c，图片p，图文a，幻灯f，滚动s，跳转j，加粗b
+noflag：不包含某些自定义属性
+subday：多少天内的文档
+imgwidth：缩略图宽度
+imgheight：缩略图高度
+
+★ 底层模板字段,支持PHP语法、function扩展等功能
+id
+arcurl==filename
+title
+pubdate
+stime(pubdate 2017-3-4)
+image
+info
+click
+scores
+typelink 栏目网址
+
+[arclist    带内容摘要的头条文章]
+[field:description function='cn_substr(@me,110)'/]  [field:info/]
+*******************************************************************************
+＜div>
+    {dede:arclist flag='h' noflag='c' limit='0,1' infolen='230' orderby='pubdate'}
+        ＜h2>＜a href="[field:arcurl/]">[field:title/]＜/a>＜/h2>
+        ＜p>[field:description function='cn_substr(@me,110)'/]...＜a href="[field:arcurl/]">[查看全文]＜/a>＜/p>
+    {/dede:arclist}
+＜/div>
+
+[文章列表]
+＜ul>
+    {dede:arclist flag='h' limit='1,6' row=6 titlelen=32}
+        ＜li>
+            ＜a href="[field:arcurl/]">[field:title/]＜/a>
+            ＜span>[field:pubdate function="MyDate('Y-m-d',@me)"/]＜/span>
+        ＜/li>
+    {/dede:arclist}
+＜/ul>
+
+[图片文章列表]
+＜ul>
+    {dede:arclist row=10 orderby=pubdate type='image.' imgwidth='143' imgheight='106'}
+        ＜li>＜a href="[field:arcurl/]">[field:image/]＜span>[field:title/]＜/span>＜/a>＜/li>
+    {/dede:arclist}
+＜/ul>
+
+[点击、评论数文章列表]
+＜ul>
+    {dede:arclist orderby='scores' row='8' subday='30' titlelen='42'}
+     ＜li>
+        ＜a href="[field:arcurl/]">[field:title/]＜/a>
+        ＜span>＜small>点击:＜/small>[field:click/]＜/span>
+        ＜span>＜small>评价:＜/small>[field:scores/]＜/span>
+    ＜/li>
+    {/dede:arclist}
+ ＜/ul>
+
+[推荐文章列表]
+＜ul>
+    {dede:arclist flag='c' titlelen=42 row='16' tagid='dedecms' pagesize='8'}
+    ＜li>＜a href="[field:arcurl/]">[field:title/]＜/a>＜/li>
+    {/dede:arclist}
+ ＜/ul>
+
+[热点文章列表]
+＜ul>
+    {dede:arclist sort='hot' subday='30' titlelen=42 row=6}
+    ＜li>＜a href="[field:arcurl/]">[field:title/]＜/a>＜/li>
+    {/dede:arclist}
+ ＜/ul>
+
+[评论文章列表，用于调用最新评论]
+{dede:feedback row='5' titlelen='24' infolen='80'}
+    ＜ul>
+        ＜li>[field:username function="(@me=='guest' ? '游客' : @me)"/] 对 [field:title/] 的评论：＜/li>
+        ＜li> ＜a href="plus/feedback.php?aid=[field:aid/]" class='fbmsg'>[field:msg /]＜/a>＜/li>
+    ＜/ul>
+{/dede:feedback}
+
+[搜索代码]
+＜form  name="formsearch" action="{dede:global.cfg_cmsurl/}/plus/search.php">
+    ＜input type="hidden" name="kwtype" value="0" />
+    ＜input name="q" type="text" class="search-keyword" id="search-keyword" value="在这里搜索..." onfocus="if(this.value=='在这里搜索...'){this.value='';}"  onblur="if(this.value==''){this.value='在这里搜索...';}" />
+    ＜select name="searchtype" class="search-option" id="search-option" style="display:none;">
+        ＜option value="title" selected='1'>检索标题＜/option>
+        ＜option value="titlekeyword">智能模糊＜/option>
+    ＜/select>
+    ＜button type="submit" class="search-submit">搜索＜/button>
+＜/form>
+
+[flink   调用友情链接]
+{dede:flink row='24' titlelen='' linktype='' type='' typeid=''/}
+
+[flinktype   分类友情链接]
+＜dl>
+    ＜dt>
+        ＜strong>友情链接＜/strong>
+        ＜span>
+            {dede:flinktype type="dedecms"}
+                ＜a href="#" _for="flink_[field:id/]">[field:typename/]＜/a>
+            {/dede:flinktype}
+        ＜/span>
+        ＜span>
+            ＜a href="plus/flink.php">所有链接＜/a> | ＜a href="plus/flink_add.php">申请加入＜/a>
+        ＜/span>
+    ＜/dt>
+    {dede:flinktype type="dedecms"}
+    ＜dd id="flink_[field:id/]">
+        ＜ul class="f5">
+            {dede:flink/}
+        ＜/ul>
+    ＜/dd>
+    {/dede:flinktype}
+＜/dl>
+
+[投票查询]
+＜dl>
+    ＜dt>＜strong>投票调查＜/strong>＜/dt>
+    ＜script language="javascript" src="{dede:global.cfg_cmsurl/}/data/vote/vote_1.js">＜/script>
+＜/dl>
+
+[会员登录、注册代码]
+＜form name="userlogin" action="{dede:global.cfg_memberurl/}/index_do.php" method="POST">
+    ＜input type="hidden" name="fmdo" value="login" />
+    ＜input type="hidden" name="dopost" value="login" />
+    ＜input type="hidden" name="keeptime" value="604800" />
+    ＜div class="fb">＜span>用户名:＜/span>
+         ＜input type="text" name="userid" size="20" class="ipt-txt" />
+    ＜/div>
+    ＜div class="fb">＜span>密码:＜/span>
+         ＜input type="password" name="pwd" size="20" class="ipt-txt" />
+    ＜/div>
+    {dede:php}
+        if(preg_match("#2#", $safe_gdopen)) {
+        echo '
+        ＜div class="fb">＜span>验证码:＜/span>
+         ＜input type="text" name="vdcode" size="8" class="ipt-txt" />
+         ＜img id="vdimgck" align="absmiddle" onClick="this.src=this.src+\'?\'" style="cursor:pointer;margin-left:0px;text-transform:uppercase;" alt="看不清？点击更换" src="'.$cfg_cmspath.'/include/vdimgck.php"/>＜/div>
+        ';
+        }
+    {/dede:php}
+    ＜div class="submit">
+         ＜button type="submit" class="btn-1">登录＜/button>
+         ＜a href="{dede:global.cfg_memberurl/}/index_do.php?fmdo=user&dopost=regnew" >注册帐号＜/a>
+         ＜a href="{dede:global.cfg_memberurl/}/resetpassword.php">忘记密码?＜/a>
+    ＜/div>
+＜/form>
+
+[文章页]
+ ＜div>
+    ＜h2>{dede:field.title/}＜/h2>
+    ＜div class="info">
+        ＜small>时间:＜/small>{dede:field.pubdate function="MyDate('Y-m-d H:i',@me)"/}
+        ＜small>来源:＜/small>{dede:field.source/}
+        ＜small>作者:＜/small>{dede:field.writer/}
+        ＜small>点击次数:＜/small>
+        ＜script src="{dede:field name='phpurl'/}/count.php?view=yes&aid={dede:field name='id'/}&mid={dede:field name='mid'/}" type='text/javascript' language="javascript">＜/script>
+    ＜/div>
+    {dede:field.description runphp='yes'}
+        if(@me＜>'' )@me = '＜div class="intro">'.@me.'＜/div>';
+    {/dede:field.description}
+    ＜div class="content">
+        {dede:field.body/}
+        {dede:field.vote/}
+        (责任编辑：{dede:adminname/})
+    ＜/div>
+    ＜ul>
+        {dede:pagebreak/}
+    ＜/ul>
+＜/div>
+＜div class="newdigg" id="newdigg">
+    ＜div class="diggbox digg_good" onmousemove="this.style.backgroundPosition='left bottom';" onmouseout="this.style.backgroundPosition='left top';" onclick="javascript:postDigg('good',{dede:field.id/})">
+        ＜div class="digg_act">顶一下＜/div>
+        ＜div class="digg_num">({dede:field.goodpost/})＜/div>
+        ＜div class="digg_percent">
+            ＜div class="digg_percent_bar">＜span style="width:{dede:field.goodper/}%">＜/span>＜/div>
+            ＜div class="digg_percent_num">{dede:field.goodper/}%＜/div>
+        ＜/div>
+    ＜/div>
+    ＜div class="diggbox digg_bad" onmousemove="this.style.backgroundPosition='right bottom';" onmouseout="this.style.backgroundPosition='right top';" onclick="javascript:postDigg('bad',{dede:field.id/})">
+        ＜div class="digg_act">踩一下＜/div>
+        ＜div class="digg_num">({dede:field.badpost/})＜/div>
+        ＜div class="digg_percent">
+            ＜div class="digg_percent_bar">＜span style="width:{dede:field.badper/}%">＜/span>＜/div>
+            ＜div class="digg_percent_num">{dede:field.badper/}%＜/div>
+        ＜/div>
+    ＜/div>
+＜/div>
+＜script language="javascript" type="text/javascript">getDigg({dede:field.id/});＜/script>
+  ＜!-- //顶踩部份的源码结束 -->
+  ＜!-- //分享代码开始 -->
+  {dede:bshare/}
+  ＜!-- //分享代码结束 -->
+＜div class="boxoff"> ＜strong>------分隔线----------------------------＜/strong> ＜/div>
+＜div class="handle">
+    ＜div class="context">
+        ＜ul>
+            ＜li>{dede:prenext get='pre'/}＜/li>
+            ＜li>{dede:prenext get='next'/}＜/li>
+        ＜/ul>
+    ＜/div>
+   ＜!-- /context -->
+    ＜div class="actbox">
+        ＜ul>
+            ＜li id="act-fav">＜a href="{dede:field name='phpurl'/}/stow.php?aid={dede:field.id/}" target="_blank">收藏＜/a>＜/li>
+            ＜li id="act-err">＜a href="{dede:field name='phpurl'/}/erraddsave.php?aid={dede:field.id/}&title={dede:field.title/}" target="_blank">挑错＜/a>＜/li>
+            ＜li id="act-pus">＜a href="{dede:field name='phpurl'/}/recommend.php?aid={dede:field.id/}" target="_blank">推荐＜/a>＜/li>
+            ＜li id="act-pnt">＜a href="#" onClick="window.print();">打印＜/a>＜/li>
+        ＜/ul>
+    ＜/div>
+   ＜!-- /actbox -->
+＜/div>
+  ＜!-- /handle -->
+ ＜/div>
+ ＜!-- /viewbox -->
+ ＜!-- //AJAX评论区 -->
+ {dede:include file='ajaxfeedback.htm' /} ＜/div>
+＜!-- //左边内容结束 -->
+＜!-- //右边内容开始 -->
+＜div>
+    {dede:memberinfos}
+    ＜div class="infos_userinfo">
+        ＜dl class="tbox light">
+            ＜dt class='light'>＜strong>发布者资料＜/strong>＜/dt>
+            ＜dd class='light'> ＜a href="[field:spaceurl /]" class="userface">＜img src="[field:face/]" width="52" height="52" />＜/a> ＜a href='[field:spaceurl /]' class="username">[field:uname/]＜/a> ＜span class="useract"> ＜a href="[field:spaceurl /]" class="useract-vi">查看详细资料＜/a> ＜a href="[field:spaceurl /]&action=guestbook" class="useract-pm">发送留言＜/a> ＜a href="[field:spaceurl /]&action=newfriend" class="useract-af">加为好友＜/a> ＜/span> ＜span class="userinfo-sp">＜small>用户等级:＜/small>[field:rankname /]＜/span> ＜span class="userinfo-sp">＜small>注册时间:＜/small>[field:jointime function="MyDate('Y-m-d H:m',@me)"/]＜/span> ＜span class="userinfo-sp">＜small>最后登录:＜/small>[field:logintime function="MyDate('Y-m-d H:m',@me)"/]＜/span> ＜/dd>
+        ＜/dl>
+    ＜/div>
+    {/dede:memberinfos}
+ ＜/div>
+
+[文章页js代码]
+＜script>
+function CheckLogin(){
+	  var taget_obj = document.getElementById('_ajax_feedback');
+	  myajax = new DedeAjax(taget_obj,false,false,'','','');
+	  myajax.SendGet2("{dede:global.cfg_cmsurl/}/member/ajax_feedback.php");
+	  DedeXHTTP = null;
+}
+function postBadGood(ftype,fid){
+	var taget_obj = document.getElementById(ftype+fid);
+	var saveid = GetCookie('badgoodid');
+	if(saveid != null) {
+		var saveids = saveid.split(',');
+		var hasid = false;
+		saveid = '';
+		j = 1;
+		for(i=saveids.length-1;i>=0;i--) {
+			if(saveids[i]==fid && hasid) continue;
+			else {
+				if(saveids[i]==fid && !hasid) hasid = true;
+				saveid += (saveid=='' ? saveids[i] : ','+saveids[i]);
+				j++;
+				if(j==10 && hasid) break;
+				if(j==9 && !hasid) break;
+			}
+		}
+		if(hasid) { alert('您刚才已表决过了喔！'); return false;}
+		else saveid += ','+fid;
+		SetCookie('badgoodid',saveid,1);
+	} else {
+		SetCookie('badgoodid',fid,1);
+	}
+	myajax = new DedeAjax(taget_obj,false,false,'','','');
+	myajax.SendGet2("{dede:field name='phpurl'/}/feedback.php?aid="+fid+"&action="+ftype+"&fid="+fid);
+}
+function postDigg(ftype,aid) {
+	var taget_obj = document.getElementById('newdigg');
+	var saveid = GetCookie('diggid');
+	if(saveid != null) {
+		var saveids = saveid.split(',');
+		var hasid = false;
+		saveid = '';
+		j = 1;
+		for(i=saveids.length-1;i>=0;i--) {
+			if(saveids[i]==aid && hasid) continue;
+			else {
+				if(saveids[i]==aid && !hasid) hasid = true;
+				saveid += (saveid=='' ? saveids[i] : ','+saveids[i]);
+				j++;
+				if(j==20 && hasid) break;
+				if(j==19 && !hasid) break;
+			}
+		}
+		if(hasid) { alert("您已经顶过该帖，请不要重复顶帖 ！"); return; }
+		else saveid += ','+aid;
+		SetCookie('diggid',saveid,1);
+	} else {
+		SetCookie('diggid',aid,1);
+	}
+	myajax = new DedeAjax(taget_obj,false,false,'','','');
+	var url = "{dede:global.cfg_phpurl/}/digg_ajax.php?action="+ftype+"&id="+aid;
+	myajax.SendGet2(url);
+}
+function getDigg(aid) {
+	var taget_obj = document.getElementById('newdigg');
+	myajax = new DedeAjax(taget_obj,false,false,'','','');
+	myajax.SendGet2("{dede:global.cfg_phpurl/}/digg_ajax.php?id="+aid);
+	DedeXHTTP = null;
+}
+-->
+＜/script>
+
+[hotwords   获取网站搜索的热门关键字]
+{dede:hotwords num='' subday='' maxlength=''/}
+
+[搜索页面代码]
+＜div class="resultbar">搜索 ＜strong class="fc_03c">{dede:global name='keyword' function='RemoveXSS(@me)'/}＜/strong> 的结果 ＜/div>
+＜div class="result_content">
+    ＜div class="sidebar">
+        ＜h2>相关搜索＜/h2>
+        ＜ul>
+            ＜li>{dede:likewords num='8'/}＜/li>
+        ＜/ul>
+    ＜/div>
+    ＜div class="resultlist">
+        ＜ul>
+            {dede:list perpage='20'}
+            ＜li>
+                ＜h3>＜a href="[field:arcurl/]" target="_blank">[field:title/]＜/a>＜/h3>
+                ＜p>[field:description/]...＜/p>
+                ＜span>
+                    ＜a href="[field:arcurl/]">[field:global.cfg_basehost/][field:arcurl/]＜/a>
+                    ＜small>分类：＜/small>＜a href="[field:typeurl/]" target="_blank">[field:typename/]＜/a>
+                    ＜small>点击：＜/small>[field:click/]
+                    ＜small>日期：＜/small>[field:stime/]
+                ＜/span>
+            ＜/li>
+            {/dede:list}
+        ＜/ul>
+    ＜div class="fl dede_pages">
+    ＜ul class="pagelist">
+        {dede:pagelist listsize='4'/}
+    ＜/ul>
+＜/div>
+
+[单页面之相关页面]
+＜dl class="tbox">
+    ＜dt>＜strong>相关页面＜/strong>＜/dt>
+    ＜dd>
+        ＜ul class="c1 ico2">
+            {dede:likesgpage}
+                 ＜li>＜a href="[field:url /]">[field:title /]＜/a>＜/li>
+            {/dede:likesgpage}
+        ＜/ul>
+    ＜/dd>
+＜/dl>
+
+
+[ask  调用问答标签] qtype:排序类型，推荐commend，已解决ok，高分问题high，最新问题new
+＜dl>
+    ＜dt>＜/dt>
+    {dede:ask row='6' qtype='new' tid='0' titlelen='24'}
+    ＜dd>
+        ＜span class="tclass">[＜a href='[field:typeurl/]'>[field:tidname/]＜/a>]＜/span>
+        ＜span class="tlink">＜a href="[field:url/]">[field:title/]＜/a>＜/span>
+    ＜/dd>
+    {/dede:ask}
+＜/dl>
+
+[sql 获取mysql数据库内容]
+{dede:sql sql='' db='default'}
+    [field:title/]
+{/dede}
+
+[tag 调用tag] sort:排序方式，month，rand，week； getall：获取类型，0位当前内容页的，1位全部
+{dede:tag sort='new' getall='0' row='' }
+    ＜a href='[field:link/]'>[field:tag /]＜/a>
+{/dede:tag}
+
+注意点：
+1.dede的标签不可以嵌套（除了channelartlist里面可以嵌套指定的标签），那么当需要使用{dede:global.cfg_webname/}dede标签的时候需要转换成[field:global.cfg_webname/]
+2.使用范围
+标签如果不特殊说明那就是说这个标签可以在任何的模板页使用,全局使用，所有的模板页面都可以使用
+3.文档页的模板在分类那边修改的，一个分类下面的所有文档的页面应该是一样的！
+首页常用标签：
+1.{dede:global.cfg_soft_lang/}  调用出网站的编码
+2.{dede:global.cfg_webname/}  调用出网站的名称
+3.{dede:global.cfg_description/}  调用出网站的描述信息
+4.{dede:global.cfg_keywords/}  调用出网站的关键字
+5.{dede:global.cfg_templets_skin/}  调用出使用中的模板文件的目录
+6.{dede:global.cfg_cmsurl/}  调用出网站的目录，url地址
+7.{dede:global.cfg_cmspath/}  调用出网站的所在路径
+8.{dede:global.cfg_dataurl/}  调用出网站的data目录
+9.{dede:global.cfg_basehost/}  调用出网站所在的域名
+10.{dede:myad name='sifangku'/}  调用出对应的广告,name后面的值表示广告位标识
+11.{dede:include filename='my_head.htm'/}  引入另外一个模板文件，只要在filename后面写上模板文件的名字就可以了
+
+基本现象：
+双标签：写在双标签之间的内容会被循环的重复输出
+写在双标签之间的字段标签，在被输出的时候转换成了对应的内容
+
+12.channel标签
+{dede:channel type='sun' typeid='7' row='5'}
+＜li>[field:id/]＜a href='[field:typelink/]'>[field:typename/]＜/a>＜/li>
+{/dede:channel}
+
+[field:typename/]	栏目名称
+[field:typelink/]	栏目的url地址（据对路径）
+type	表示需要取出的栏目的类型,顶级栏目（top），子栏目（son，需要配合typeid）
+row表示取出几条栏目
+
+使用在首页：
+调用出网站的顶级栏目
+
+使用在列表页:
+{dede:channel type='son'}
+＜li>＜a href='[field:typeurl/]'>[field:typename/]＜/a>＜/li>
+{/dede:channel}
+表示调用出当前栏目的子栏目的信息
+
+13.arclist标签
+{dede:arclist}
+＜a href='[field:arcurl/]'>[field:title/]＜/a>
+{/dede:arclist}
+[field:title/]	对应的是 文档的标题
+[field:arcurl/] 对应的是文档的url地址
+
+使用在首页：
+调用出网站的文档（可以通过typeid属性来控制到底调用出哪个栏目的，里面可以写多个栏目的id值，中间用,隔开）
+
+使用在列表页:
+调用出当前栏目(以及子栏目)下面的文章
+
+使用在频道封面页：
+调用出当前栏目(以及子栏目)下面的文章
+
+14.channelartlist标签
+{dede:channelartlist row=6}
+＜dl>
+ ＜dt>＜a href='{dede:field name='typeurl'/}'>{dede:field name='typename'/}＜/a>＜/dt>
+ 	＜dd>
+		＜ul>
+			{dede:arclist titlelen='42' row='10'}
+			＜li>＜a href='[field:arcurl /]'>[field:title /]＜/a>＜/li>
+			{/dede:arclist}
+		＜/ul>
+＜/dl>
+{/dede:channelartlist}
+
+用在首页：
+功能：调用出网站的顶级栏目，以及栏目下面的文章。
+arclist标签嵌套在channelartlist里面表示调用出栏目下面的文档。
+特点：
+1）channelartlist下面不可以直接写字段标签，
+[field:typename/]->{dede:field name='typename'/}
+[field:typelink/]->{dede:field name='typeurl'/}
+2）里面可以嵌套dede标签，{dede:arclist}{/dede:arclist}，
+{dede:type}{/dede:type}，{dede:field name='字段名称'/}
+
+用在频道封面页：
+调用出当前栏目的子栏目名称以及子栏目下面的文章调用出来。
+
+15.flink标签
+{dede:flink row='24'/}
+调用出网站的友情链接，一般工作中只用来调用文字连接文字连接
+＜ul>{dede:flink row='24'/}＜/ul>
+
+16.tag标签
+{dede:tag sort='new' getall='0'}
+＜a href='[field:link/]'>[field:tag /]＜/a>
+{/dede:tag}
+[field:tag /] 转化成tag标签的名字
+[field:link/] 对应的tag标签的地址，类似于/dede/tags.php?/tag标签的名字/
+
+传入（属性）参数说明：
+sort：new 表示最新添加的tag标签排在最前面
+ month 表示按月的点击量进行排序
+week 按照周的一个点击量进行排序
+rand 随机排序，每次刷新都不一样
+
+17.{dede:field.title/}
+列表页：
+调用出当前栏目的名称（并且会把当前栏目的祖辈栏目名称也调用出来，用/分隔）
+文档页：
+调用出当前文档的标题
+
+18.{dede:field name='keywords'/}
+列表页：
+调用出栏目的关键字（高级选项里面）
+文档页：
+调用出当前文档的关键字
+添加的时候：直接添加文档的时候就有关键字
+修改的时候：在点修改后，有个高级参数里面
+
+19.{dede:field name='description'/}
+列表页：
+调用出栏目的描述信息(高级选项里面)
+
+20.{dede:field name='position'/}
+列表页：
+调用出当前栏目的位置。
+文档页：
+同上
+
+21.list标签(列表页专用)
+{dede:list pagesize='10'}
+＜li>
+ ＜a href='[field:arcurl/]' class='title'>[field:title/]＜/a>
+ ＜span class='info'> ＜small>日期：＜/small>
+	[field:pubdate function='GetDateTimeMK(@me)'/]
+ ＜small>点击：＜/small>[field:click/]
+ ＜p class='intro'> [field:description/]... ＜/p>
+＜/li>
+{/dede:list}
+
+ 参数：pagesize='10' 表示需要显示的文档数量
+
+22.{dede:pagelist listitem='info,index,end,pre,next,pageno'/}
+调用出栏目的分页信息
+参数：listitem 来设置分页的一个展示信息
+
+23.{dede:field.pubdate function='MyDate('Y-m-d H:i',@me)'/}
+文档页：
+调用出文档的发布时间
+
+23.{dede:field.source/}
+文档页：
+调用出文档的来源
+
+24.{dede:field.description/}
+文档页：
+调用出文档的描述信息，当我们添加文档的时候如果不填写描述信息，他就会把我们的文档的详细内容的前多少个字截取出来作为描述信息！
+
+25.{dede:field.body/}
+文档页:
+调用出文档的详细内容！
+
+26.{dede:adminname/}
+文档页：
+调用出文档的责任编辑（笔名）
+
+27.{dede:prenext get='pre'/}
+文档页：
+调用出当前文档的上一篇文档
+   {dede:prenext get='next'/}
+文档页：
+调用出当前文档的下一篇文档
+
+28.{dede:sql aql=”select count(*) as 别名 from dede_archives”}
+[field:别名]
+{/dede:sql}
+查询文章总数
+
+网站名称：{dede:global.cfg_webname/}
+网站根网址：{dede:global.cfg_basehost/}
+网站根目录：{dede:global.cfg_cmsurl/}
+网页主页链接：{dede:global.cfg_indexurl/}
+网站描述：{dede:global.cfg_description/}
+网站关键字：{dede:global.cfg_keywords/}
+模板路径：{dede:global.cfg_templets_skin/}
+调用页面：{dede:include filename='head.htm'/}
+网站编码：{dede:global.cfg_soft_lang/}
+调用时间：[field:pubdate function=MyDate('y-m-d',@me)/]
+ 
+调用缩略图：
+{dede:arclist row=10 orderby=pubdate type='image.' imgwidth='定义图片宽度' imgheight='高度'}
+[field:image/]
+{/dede:arclist}
+ 
+调用缩略图原图：
+[field:litpic runphp='yes']
+$youjoys = array('-lp', '_lit');
+@me = str_replace ($youjoys, '', @me);
+[/field:litpic]
+ 
+调用单个栏目：
+{dede:type}
+＜a href='[field:typelink /]'>[field:typename /]＜/a>
+{/dede:type}
+
+文章标题：{dede:field.title/}
+文章描述：{dede:field.description function='html2text(@me)'/}
+文章关键词：{dede:field.keywords/}
+当前位置：{dede:field name='position'/}
+文章时间：{dede:field.pubdate function='MyDate('Y-m-d H:i',@me)'/}
+文章来源：{dede:field.source/}
+文章作者：{dede:field.writer/}
+文章内容：{dede:field.body/}
+上一篇：{dede:prenext get='pre'/}
+下一篇：{dede:prenext get='next'/}
+ 
+点击量：＜script src='{dede:field name='phpurl'/}/count.php?view=yes&aid={dede:field name='id'/}&mid={dede:field name='mid'/}' type='text/javascript' language='javascript'>＜/script>
+
+channel|频道标签：
+标签名称：channel
+标记简介：织梦常用标记，通常用于网站顶部以获取站点栏目信息，方便网站会员分类浏览整站信息
+功能说明：用于获取栏目列表
+适用范围：全局使用
+
+基本语法：
+{dede:channel type='top' row='8' currentstyle='＜li>＜a href='~typelink~' class='thisclass'>~typename~＜/a> ＜/li>'}
+ ＜li>＜a href='[field:typelink/]'>[field:typename/]＜/a> ＜/li>
+{/dede:channel}
+ 
+参数说明：
+typeid = '0'  栏目ID
+reid = '0' 上级栏目ID
+row = '100' 调用栏目数
+col = '1' 分多少列显示（默认为单列）
+type = 'son | sun' son表示下级栏目,self表示同级栏目,top顶级栏目
+currentstyle = '' 应用样式
+ 
+底层模板字段：
+ID(同 id),typeid, typelink, typename, typeurl,typedir(仅表示栏目的网址)
+ 
+[field:id/]
+[field:typeid/]
+[field:typelink/] 调用栏目名称，点击直接跳转该栏目列表
+[field:typename/] 调用栏目名称，无链接
+[field:typeurl/]
+[field:typedir/]
+ 
+例：
+{dede:channel type='top'}
+＜a href='[field:typelink /]'>[field:typename/]＜/a>
+{/dede:channel}
+ 
+注：在没有指定typeid的情况下，type标记与模板的环境有关，如，模板生成到栏目一，那么type='son'就表示栏目一的所有子类
+
+arclist|文档列表：
+标签名称：arclist
+标记简介：织梦常用标记，也称为自由列表标记，其中imglist、imginfolist、specart、coolart、autolist都是由该标记所定义的不同属性延伸出来的别名标记。
+功能说明：获取指定文档列表
+适用范围：全局使用
+ 
+基本语法：
+{dede:arclist  flag='h' typeid='' row='' col='' titlelen='' infolen='' imgwidth='' imgheight='' listtype='' orderby='' keyword='' limit='0,1'}
+＜a href='[field:arcurl/]'>[field:title/]＜/a>
+{/dede:arclist}
+ 
+参数说明：
+col='' 分多少列显示（默认为单列），5.3版中本属性可以通过多种方式进行多行显示
+如果col='1'要多列显示的可用div+css实现
+以下为通过div+css实现多列的示例：
+＜style type=text/css>
+div{width:400px;float:left;}
+＜/style>
+{dede:arclist row='10' titlelen='24' orderby='pubdate' idlist='' col='2'}
+?[field:textlink/]([field:pubdate function=MyDate('m-d',@me)/])＜br/>
+{/dede:arclist}
+当col>1将使用原来的table多列方式显示
+row='10' 返回文档列表总数
+typeid='' 栏目ID,在列表模板和档案模板中一般不需要指定，在首页模板中允许用','分开表示多个栏目；
+getall='1' 在没有指定这属性的情况下,在栏目页、文章页模板,不会获取以','分开的多个栏目的下级子类
+titlelen = '30' 标题长度 等同于titlelength
+infolen='160' 表示内容简介长度 等同于infolength
+imgwidth='120' 缩略图宽度
+imgheight='90' 缩略图高度
+listtype='all' 栏目类型 image含有缩略图 commend推荐
+orderby='sortrank' 文档排序方式
+§ orderby='hot' 或 orderby='click' 表示按点击数排列
+§ orderby='sortrank' 或 orderby='pubdate' 按出版时间排列
+§ orderby='near'
+§ orderby=='lastpost' 按最后评论时间
+§ orderby=='scores' 按得分排序
+§ orderby='id' 按文章ID排序
+§ orderby='rand' 随机获得指定条件的文档列表
+keyword='' 含有指定关键字的文档列表，多个关键字用','分
+innertext = '' 单条记录样式
+aid='' 指定文档ID
+idlist ='' 提取特定文档（文档ID）
+channelid 频道ID
+limit='起始ID,记录数'  （起始ID从0开始）表示限定的记录范围（如：limit='1,2'  表示从ID为1的记录开始，取2条记录）
+flag = 'h' 自定义属性值：头条[h]推荐[c]图片[p]幻灯[f]滚动[s]跳转[j]图文[a]加粗[b]
+noflag = '' 同flag，但这里是表示不包含这些属性
+orderway='desc' 值为 desc 或 asc ，指定排序方式是降序还是顺向排序，默认为降序
+subday='天数' 表示在多少天以内的文档
+ 
+用arclist调用于附加表字段的方法：
+要获取附加表内容，必须符合两个条件
+1、指定 channelid 属性
+2、指定要获得的字段 addfields='字段1,字段'
+如：
+{dede:arclist addfields='filetype,language,softtype' row='8' channelid='3'}
+[field:textlink /] - [field:softtype /]＜br />
+{/dede:arclist}
+ 
+底层模板字段：
+ID(同 id),typeid,sortrank,flag,ismake,channel,arcrank,click,money,title,shorttitle,color,writer,
+source,litpic(同picname),pubdate,senddate,mid, lastpost,scores,goodpost,badpost,notpost,
+description(同infos),filename, image, imglink, fulltitle, textlink, typelink,plusurl, memberurl, templeturl,
+stime(pubdate 的'0000-00-00'格式)
+其中：
+textlink = ＜a href='arcurl'>title＜/a>
+typelink = ＜a href='typeurl'>typename＜/a>
+imglink = ＜a href='arcurl'>＜img src='picname' border='0' width='imgwidth' height='imgheight'>＜/a>
+image = ＜img src='picname' border='0' width='imgwidth' height='imgheight' alt=’titile’>
+字段调用方法：[field:varname/]
+如：
+{dede:arclist infolen='100'}
+[field:textlink/]
+＜br>
+[field:infos/]
+＜br>
+{/dede:arclist}
+注：底层模板里的Field实现也是织梦标记的一种形式，因此支持使用PHP语法，Function扩展等功能。
+如： 给当天发布的内容加上 (new) 标志
+[field:senddate runphp='yes']
+$ntime = time();
+$oneday = 3600 * 24;
+if(($ntime - @me)＜$oneday) @me = '＜font color='red'>(new)＜/font>';
+else @me = '';
+[/field:senddate]
+
+</pre>
+</body>
+</html>
