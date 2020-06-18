@@ -14283,16 +14283,13 @@ JSON.stringify(value[, replacer[, space]])
 一个有效的JSON字符串
 
 参数replacer
-用于转换结果的函数或数组或null
-用于控制如何筛选对象的键值,如果只想输出指定的属性可以传入Array
+用于转换结果的函数或数组或null,控制如何筛选对象的键值,如果只想输出指定的属性可以传入Array
 如果replacer是一个数组,则仅转换该数组中具有键值的成员。成员的转换顺序与键在数组中的顺序一样。当value参数也为数组时将忽略replacer数组
 如果replacer为函数则JSON.stringify将调用该函数,并传入每个成员的键和值,使用返回值而不是原始值;如果此函数返回undefined则排除成员,根对象的键是一个空字符串:""
 JSON.stringify不能处理某些值,如Set类型的值就不能正常序列化,但可以通过传入函数的方式将Set类型的值转换为数组类型,从而使得数据能够被正常序列化
 
 参数space
-文本添加缩进、空格和换行符
-space是数字则返回值文本在每个级别缩进指定数目的空格,大于10则文本缩进10个空格
-space也可以使用非数字,如:'\t'或空格" "
+文本添加缩进、空格和换行符,space是数字则返回值文本在每个级别缩进指定数目的空格,大于10则文本缩进10个空格,space也可以使用非数字,如:'\t'或空格" "
 
 </pre><textarea>
 var obj = {"name":"百度", "site":"https://www.baidu.com"}
@@ -14303,7 +14300,7 @@ document.write("< pre>" + str_pretty2 + "< /textarea>" );        //pre用于格�
     "site": "https://www.baidu.com"
 }
 
-</pre><textarea>
+</textarea><textarea>
 var xiaoming = {
   name: '小明',
   age: 14,
@@ -15543,8 +15540,7 @@ $.ajax({
 
 </textarea>
 
-<h4>xhr demo</h4>
-ajax原生方法返回text数据 ajax后台程序后台代码<textarea>
+<h4>ajax原生方法返回text数据 ajax后台程序后台代码</h4><textarea>
 document.getElementById("search").onclick = function(){  //发送ajax查询请求并处理
   var request = new XMLHttpRequest();
   request.open("GET","server.php?number=" + document.getElementById("keyword").value);
@@ -35186,6 +35182,13 @@ function foo(mustBeProvided = throwIfMissing()) {
   return mustBeProvided;
 }
 foo()   // Error: Missing parameter
+
+// Js允许对函数参数设置默认值,通过这个特性可以实现一个小技巧来验证函数参数
+const isRequired = () => { throw new Error('param is required'); };
+const print = (num = isRequired()) => { console.log(`printing ${num}`) };
+print(2); //printing 2
+print(); // error
+print(null); //printing null
 
 </textarea>
 
