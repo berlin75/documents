@@ -63,8 +63,9 @@
       <li><a href="#pdo">PDO</a></li>
       <li><a href="#transaction">transaction</a></li>
       <li><a href="#lock">lock</a></li>
-        <li><a href="#trigger">trigger</a></li>
-        <li><a href="#view">view</a></li>
+      <li><a href="#trigger">trigger</a></li>
+      <li><a href="#view">view</a></li>
+      <li><a href="#dictionary">dictionary</a></li>
       <li><a href="#import">导入导出</a></li>
       <li><a href="#sqlinject">SQL注入</a></li>
       <li><a href="#mysql_excell">mysql_excell</a></li>
@@ -10774,23 +10775,65 @@ const 常量标识符=常量值,常量标识符通常大写,区分大小写,如�
 define("GREETING","欢迎访问");
 echo GREETING;    // "欢迎访问"
 
-const和define()函数
+【 const和define() 】
 const一般用于类成员常量的定义,定义之后不可改,define不用于类成员变量的定义,一般用于定义全局常量
 const不能在条件语句中定义常量
 const采用一个普通常量名称,define可以采用任何表达式
 const只能接受静态的标量,define可以采用任何表达式
 const定义的常量区分大小写,define可以通过第三个布尔值参数指定是否区分
 
-可以把在类中始终保持不变的值定义为常量,在定义和使用常量的时候不需要使用 $ 符号
+可以把在类中始终保持不变的值定义为常量,在定义和使用常量的时候不需要使用$符号
 常量的值必须是一个定值,不能是变量,类属性,数学运算的结果或函数调用
-可以用一个变量来动态调用类。但该变量的值不能为关键字如self,parent或static
+可以用一个变量来动态调用类,但该变量的值不能为关键字如self,parent或static
 
-常量数组
-PHP7通过使用define()函数定义Array类型的常量,PHP5.6只能使用const关键字来定义数组类型的常量。
+PHP5.3+定义一个常量有两种方法,一个是用const关键字,一个是使用define函数
+const FOO = 'BAR';
+define('FOO', 'BAR');
+这两种方式之间的根本区别是const在编译时定义常量,而define在运行时定义常量,这导致了大多数const的缺点
 
-//define a array using define function
+1 - const不能用于有条件地定义常量。要定义全局常量,必须在最外层范围中使用它：
+if(true) const FOO = 'BAR';    // 无效
+if(true) define('FOO', 'BAR'); // 有效
+if(!defined('FOO')) define('FOO', 'BAR');  // 常见的应用是检查常量是否已经定义
+
+2 - const只能接受一个静态标量(数字,字符串或其它常量值true,false,null,__FILE__),而define()可使用任何表达式。
+const BIT_5 = 1 << 5;    // VPHP5.6以下版本均无效
+define('BIT_5', 1 << 5); // 有效
+
+3 - const只能采用简单的常量名称,而define()接受任何表达式作为名称。这样可以执行以下操作：
+for ($i = 0; $i < 32; ++$i) define('BIT_' . $i, 1 << $i);
+
+4 - consts始终区分大小写,而define()允许您通过将其true作为第三个参数传递来定义不区分大小写的常量。
+define('FOO', 'BAR', true);
+echo FOO; // BAR
+echo foo; // BAR
+
+const的优点
+除了上述const的缺点外,一般都会坚持使用const
+
+1 - const使代码更好读。
+它是一种语言构造,而不是函数,并且与在类中定义常量的方式保持一致,const定义类常量对于IDE的自动索引也极为友好
+
+2 - const作为一种语言构造,可以通过自动化工具进行静态分析。
+
+3 - const在当前名称空间中定义一个常量,同时define()必须传递完整的名称空间名称：
+namespace A\B\C;  // 定义常量 A\B\C\FOO:
+const FOO = 'BAR';
+define('A\B\C\FOO', 'BAR');
+
+4 - 常量数组,PHP7通过使用define()函数定义Array类型的常量,PHP5.6只能使用const关键字来定义数组类型的常量。
+const FOO = [1, 2, 3];    // PHP 5.6 及以上有效
+define('FOO', [1, 2, 3]); // PHP 7.0 及以上有效
 define('fruit', [ 'apple', 'orange', 'banana' ]);
 print(fruit[1]);  // orange
+
+5 - const还可以在类或接口内使用它来定义类常量或接口常量。define没这功能。
+class Foo {
+    const BAR = 2; // 完全支持
+}
+class Baz {
+    define('QUX', 2); // 不能这么写
+}
 
 【 php中的常量 】
 所有在核心扩展的常量是PHP默认定义的
@@ -24584,7 +24627,34 @@ extension=php_pdo.dll
 ;extension=php_pdo_pgsql.dll
 ;extension=php_pdo_sqlite.dll
 
-</pre>单例模式封装pdo类<textarea>
+</pre><textarea>
+try {
+    $options = [
+        PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\'',
+        PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC,
+    ];
+    $pdo = new PDO('mysql:host=127.0.0.1;dbname=tp5;port=3306','admin','',$options);
+    $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES,false);  // 返回原数据类型,而非统一字符串
+
+    $res = $pdo->query('select bid, title from blog where bid < 3');
+    // $query->setFetchMode(PDO::FETCH_ASSOC);
+    $rows = $res->fetchAll();
+    var_export($rows);
+
+    $stmt = $pdo->prepare("select bid, title from blog where bid < :bid");
+    $bid = 3;
+    $stmt->bindValue(1, $bid, PDO::PARAM_INT);
+    $res = $stmt->execute();
+    if($res){
+        $rows = $stmt->fetchAll();
+        var_export($rows);
+    }
+} catch (PDOException $e) {
+    echo "错误信息：".$e->getMessage();
+}
+
+</textarea>单例模式封装pdo类<textarea>
 class MyPDO{
   protected static $_instance = null;
   protected $dbName = '';
@@ -25325,8 +25395,7 @@ data = ['a'=>'foo','b'=>'bar'];
 $keys = array_keys($data);
 $fields = '`'.implode('`,`',$keys).'`';                         // 字符串`a`,`b`
 $placeholder = substr(str_repeat('?,',count($keys)),0,-1));  // 字符串?,?
-$pdo->prepare("INSERT INTO `baz`($fields) VALUES($placeholder)")
-    ->execute(array_values($data));
+$pdo->prepare("INSERT INTO `baz`($fields) VALUES($placeholder)")->execute(array_values($data));
 
 </textarea><pre>
 【 PDO->quote(); 防止SQL注入 】
@@ -26622,6 +26691,9 @@ $stmt->execute(array($_GET['name']));
 // 占位符必须被用在整个值的位置
 $stmt = $dbh->prepare("SELECT * FROM REGISTRY where name LIKE ?");
 $stmt->execute(array("%$_GET[name]%"));
+
+报错: Cannot pass parameter 2 by reference
+这个错误的意思是不能按引用传递第2个参数,出现这个错误的原因是bind_param()方法里的除表示数据类型的第一个参数外，均需要用变量，而不能用直接量,因为其它参数都是按引用传递的
 
 </pre><textarea>
 绑定参数方法一
@@ -28667,6 +28739,197 @@ create view v_view3(id,name,sex,age,department,salary,home,marry,hobby) as selec
 drop view if exists 视图名
 
 </pre>
+</div>
+
+<div id="dictionary">
+<h4>数据库字典</h4><pre>
+在开发过程中需要对数据库进行管理，用过一些数据库字典导出软件，但后期数据库做了改动无法同步数据，需要再导出一份新的数据字典，可通过php实现web版数据库数据字典查看功能，
+目的：1.能实时的同步数据；2.方便查看，不必每次都去查阅数据库；3.方便后期开发人员了解数据结构
+
+information_schema数据库下的 COLUMNS表和TABLES表中的字段做下介绍：
+
+1、 COLUMNS表
+TABLE_CATALOG ：表限定符
+TABLE_SCHEMA ：表所属的库
+TABLE_NAME ：表名
+COLUMN_NAME ：表字段名
+ORDINAL_POSITION ：字段标识（字段编号，从1开始往后递增）
+COLUMN_DEFAULT ：字段默认值
+IS_NULLABLE ：字段是否为空
+DATA_TYPE ：数据类型（如：varchar、int、tinyint、decimal）
+CHARACTER_MAXIMUM_LENGTH ： 字段的最大字符数（适于二进制数据、字符数据，或者文本和图像数据。否则，返回 NULL）
+CHARACTER_OCTET_LENGTH ：字段的最大字节数（适于二进制数据、字符数据，或者文本和图像数据。否则，返回 NULL）
+NUMERIC_PRECISION ：数字精度（适于各类数字类型，如int、float。否则，返回NULL）
+NUMERIC_SCALE ：小数位数（适于各类数字类型，如int、float。否则，返回NULL）
+DATETIME_PRECISION ：datetime 及 SQL-92 interval 数据类型的子类型代码。对于其它数据类型，返回 NULL
+CHARACTER_SET_NAME ：字段字符集名称（如：utf8）
+COLLATION_NAME ：字符集排序规则（如：utf8_general_ci）
+COLUMN_TYPE ：字段类型
+COLUMN_KEY ：索引类型
+EXTRA ：其他信息（如：auto_increment）
+PRIVILEGES ：权限（如：select,insert,update,references）
+COLUMN_COMMENT ：字段注释
+
+2、 TABLES表
+TABLE_CATALOG ：表限定符
+TABLE_SCHEMA ：表所属库
+TABLE_NAME ：表名
+TABLE_TYPE ：表类型
+ENGINE ：引擎
+VERSION ：版本
+ROW_FORMAT ：是否压缩
+TABLE_ROWS ：表记录总数
+AVG_ROW_LENGTH ：平均行长度
+DATA_LENGTH ：表的大小
+MAX_DATA_LENGTH ：最大数据长度
+INDEX_LENGTH ：索引的大小
+DATA_FREE ：表的可用空间
+AUTO_INCREMENT ：自增主键
+CREATE_TIME ：建表时间
+UPDATE_TIME ：更新时间
+CHECK_TIME ：查询时间
+TABLE_COLLATION ：表的字符集
+CHECKSUM ：校验和
+CREATE_OPTIONS ：创建选项
+TABLE_COMMENT ：表注释
+
+</pre>tp数据字典<textarea>
+// tp5\application\dictionary\model\Dictionary.php
+namespace app\dictionary\Model;
+use think\Model;
+class Dictionary extends Model{
+  public function getDatabaseStructure(){  // 查询数据库结构
+    $result = \think\Db::table('information_schema.COLUMNS')->alias('C')
+        ->join('information_schema.TABLES T', 'C.TABLE_SCHEMA = T.TABLE_SCHEMA AND C.TABLE_NAME = T.TABLE_NAME')
+        ->field(['C.TABLE_SCHEMA', // 数据库
+            'C.TABLE_NAME', // 数据表
+            'T.TABLE_COMMENT', // 数据表注释
+            'C.COLUMN_NAME', // 数据表字段名
+            'C.COLUMN_TYPE', // 数据表字段类型
+            'C.COLUMN_COMMENT', // 数据表字段注释
+            'C.COLUMN_DEFAULT', // 数据表字段默认值
+            'C.IS_NULLABLE', // 数据表字段是否允许为空
+            'C.EXTRA']) // 数据表字段是否为自增字段
+        ->where('C.TABLE_SCHEMA', 'tp5') // 需要查询的数据库
+        ->select();
+    return $result;
+  }
+}
+
+// tp5\application\dictionary\controller\Dictionary.php
+namespace app\dictionary\controller;
+use think\Controller;
+class Dictionary extends Controller{
+  public function index(){  // 获取数据库字典数据并映射到前端
+    $result = model('Dictionary')->getDatabaseStructure();  // 获取数据库字典数据
+    $dataArr = array();
+    // 数据整理-按表分类
+    foreach ($result as $k => $v) {
+      $v['EXTRA'] = !empty($v['EXTRA']) ? '是' : '';
+      $dataArr[$v['TABLE_NAME'].$v['TABLE_COMMENT']][] = $v;
+    }
+    return $this->fetch('index',['dbname'=>$result[0]['TABLE_SCHEMA'],'data'=>$dataArr]);
+  }
+}
+
+// tp5\application\dictionary\view\dictionary\index.html
+< meta charset="UTF-8">
+< title>{$dbname}_数据字典< /title>
+< link href="http://cdn.bootcss.com/twitter-bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
+< h1 style="text-align:center;">{$dbname} 数据字典< /h1>
+{volist name="data" id="list"}
+< h3>{$key}< /h3>
+< table class="table table-hover table-bordered table-condensed">
+    < thead>
+    < tr> < th>字段名< /th >< th>数据类型< /th> < th>默认值< /th> < th>允许非空< /th> < th>自动递增< /th> < th>备注< /th> < /tr>
+    < /thead>
+    < tbody>
+    {volist name="list" id="item"}
+    < tr>
+        < td>{$item.COLUMN_NAME}< /td>
+        < td>{$item.COLUMN_TYPE}< /td>
+        < td>{$item.COLUMN_DEFAULT}< /td>
+        < td>{$item.IS_NULLABLE}< /td>
+        < td>{$item.EXTRA}< /td>
+        < td>{$item.COLUMN_COMMENT}< /td>
+    < /tr>
+    {/volist}
+    < /tbody>
+< /table>
+{/volist}
+
+</textarea><textarea>
+header('content-type:text/html;charset=utf-8');  
+define('DB_HOST','127.0.0.1');  
+define('DB_USER','admin');  
+define('DB_PASS','');  
+define('DB_NAME','tp5');  
+define('DB_PORT',3306);  
+define('DB_CHAR','utf8');  
+define('APPNAME','数据字典');
+$conn=mysqli_connect(DB_HOST.':'.DB_PORT,DB_USER,DB_PASS);
+mysqli_select_db($conn,DB_NAME);
+mysqli_set_charset($conn,DB_CHAR);
+$sql="SHOW TABLE STATUS FROM " . DB_NAME;  
+$result=mysqli_query($conn,$sql);
+$array=array();  
+while($rows=mysqli_fetch_assoc($result)){
+$array[]=$rows;  
+}  
+$tab_count = count($array);  
+echo '
+< head>
+< meta http-equiv="Content-Type" content="text/html; charset=utf-8" />  
+< title>'.APPNAME.'--数据字典< /title>  
+< style>  
+table caption, table th, table td { padding: 0.1em 0.5em 0.1em 0.5em; margin: 0.1em; vertical-align: top; }  
+th { font-weight: bold; color: black; background: #D3DCE3; }  
+table tr.odd th, .odd { background: #E5E5E5; }  
+table tr.even th, .even { background: #f3f3f3; }  
+.db_table{ border-top:1px solid #333; }  
+.title{font-weight:bold;}  
+< /style>  
+< /head>  
+< body>  
+< div style="text-align:center;background:#D3DCE3;font-size:19px;">< b>'.APPNAME.'--数据字典< /b>< /div>  
+< div style="background:#f3f3f3;text-align:center;">（注：共'.$tab_count.'张表，按ctrl+F查找关键字）< /div>'."\n";  
+for($i=0;$i<$tab_count;$i++){  
+  echo '< ul type="square">'."\n";  
+  echo '  < li class="title">';  
+  echo ($i+1).'、表名：[' . $array[$i]['Name'] . ']      注释：' . $array[$i]['Comment'];  
+  echo '< /li>'."\n";  
+  //查询数据库字段信息  
+  $tab_name = $array[$i]['Name'];  
+  $sql_tab='show full fields from `' . $array[$i]['Name'].'`';  
+  $tab_result=mysqli_query($conn,$sql_tab);
+  $tab_array=array();  
+  while($r=mysqli_fetch_assoc($tab_result)){
+      $tab_array[]=$r;  
+  }  
+  $keys_result=mysqli_query($conn,"show keys from `".$array[$i]['Name'].'`');
+  $arr_keys=mysqli_fetch_array($keys_result);
+  echo '< li style="list-style: none outside none;">< table border="0" class="db_table" >';  
+  echo '< tr class="head"> < th style="width:110px">字段< /th> < th>类型< /th> < th>为空< /th> < th>额外< /th> < th>默认< /th> < th style="width:95px">整理< /th> < th>备注< /th>< /tr>';  
+  for($j=0;$j < count($tab_array);$j++){  
+    $key_name=$arr_keys['Key_name'];  
+    if($key_name="PRIMARY") $key_name='主键（'.$key_name.'）';  
+    $key_field=$arr_keys['Column_name'];  
+    $key_value= $tab_array[$j]['Field']==$key_field ? "PK" : "";  
+    echo '        < tr class="'.($j%2==0?"odd":"even").'">'."\n";  
+    echo '          < td>' . $tab_array[$j]['Field'] . '< /td>'."\n";  
+    echo '          < td>' . $tab_array[$j]['Type'] . '< /td>'."\n";  
+    echo '          < td>' . ($key_value!=''?$key_value:$tab_array[$j]['Null']) . '< /td>'."\n";  
+    echo '          < td>' . $tab_array[$j]['Extra'] . '< /td>'."\n";  
+    echo '          < td>' . $tab_array[$j]['Default'] . '< /td>'."\n";  
+    echo '          < td>' . $tab_array[$j]['Collation'] . '< /td>'."\n";  
+    echo '          < td>' . ($key_value!=''?$key_name:$tab_array[$j]['Comment']) . '< /td>'."\n";  
+    echo '        < /tr>'."\n";  
+  }  
+  echo '  < /table>< /li>'."\n";  
+  echo '< /ul>'."\n";  
+}  
+
+</textarea>  
 </div>
 
 <div id="import">
@@ -51144,7 +51407,7 @@ class check {
 
 <h4>thinkphp + JWT实战</h4><pre>
 thinkphp 5.1+安装think-api扩展工具部署JWT
-扩展下载地址：https://github.com/czewail/think-api ，通过 composer 安装依赖：
+扩展下载地址：https://github.com/czewail/think-api ,通过 composer 安装依赖：
 $ composer require zewail/think-api:1.1.x
 
 </pre><textarea>
@@ -51199,30 +51462,30 @@ class Token {
  * 创建 token
  * @param array $data 必填 自定义参数数组
  * @param integer $exp_time 必填 token过期时间 单位:秒 例子：7200=2小时
- * @param string $scopes 选填 token标识，请求接口的token
+ * @param string $scopes 选填 token标识,请求接口的token
  * @return string
  */
 private $TokenKey = "123456";
 
 public function createToken($data="",$exp_time=0,$scopes=""){
-    //JWT标准规定的声明，但不是必须填写的；
+    //JWT标准规定的声明,但不是必须填写的；
     //iss: jwt签发者
     //sub: jwt所面向的用户
     //aud: 接收jwt的一方
-    //exp: jwt的过期时间，过期时间必须要大于签发时间
-    //nbf: 定义在什么时间之前，某个时间点后才能访问
+    //exp: jwt的过期时间,过期时间必须要大于签发时间
+    //nbf: 定义在什么时间之前,某个时间点后才能访问
     //iat: jwt的签发时间
-    //jti: jwt的唯一身份标识，主要用来作为一次性token。
+    //jti: jwt的唯一身份标识,主要用来作为一次性token。
     //公用信息
     try {
         $key=$this->TokenKey;
         $time = time(); //当前时间
         //$token['iss']=''; //签发者 可选
-        //$token['aud']=''; //接收该JWT的一方，可选
+        //$token['aud']=''; //接收该JWT的一方,可选
         $token['iat']=$time; //签发时间
-        $token['nbf']=$time; //(Not Before)：某个时间点后才能访问，比如设置time+30，表示当前时间30秒后才能使用
+        $token['nbf']=$time; //(Not Before)：某个时间点后才能访问,比如设置time+30,表示当前时间30秒后才能使用
         if($scopes){
-            $token['scopes']=$scopes; //token标识，请求接口的token
+            $token['scopes']=$scopes; //token标识,请求接口的token
         }
         if(!$exp_time){
             $exp_time=7200;//默认=2小时过期
@@ -51261,8 +51524,8 @@ public function checkToken($jwt){
     $key=$this->TokenKey;
 
     try {
-        JWT::$leeway = 60;//当前时间减去60，把时间留点余地
-        $decoded = JWT::decode($jwt, $key, ['HS256']); //HS256方式，这里要和签发的时候对应
+        JWT::$leeway = 60;//当前时间减去60,把时间留点余地
+        $decoded = JWT::decode($jwt, $key, ['HS256']); //HS256方式,这里要和签发的时候对应
         $arr = (array)$decoded;
         $returndata['status']="200";//200=成功
         $returndata['msg']="success";//
@@ -51291,7 +51554,7 @@ public function checkToken($jwt){
         $returndata['data']="";//返回的数据
         sendResponse($returndata,401,'Unauthorized');
     }
-    //Firebase定义了多个 throw new，我们可以捕获多个catch来定义问题，catch加入自己的业务，比如token过期可以用当前Token刷新一个新Token
+    //Firebase定义了多个 throw new,我们可以捕获多个catch来定义问题,catch加入自己的业务,比如token过期可以用当前Token刷新一个新Token
 }
 
 签发
