@@ -2329,6 +2329,8 @@ Vue的事件系统与浏览器的EventTarget API有所不同,尽管它们的运�
 如果想在某个组件的根元素上监听一个原生事件,可以使用.native修饰v-on,例如：
 < my-component v-on:click.native="doTheThing">< /my-component>
 
+$emit传入的事件名称只能使用小写，不能使用大写的驼峰规则命名,否则无法触发事件
+
 </pre><textarea>
 <div id="app">
   <div id="counter-event-example">
@@ -5894,6 +5896,18 @@ $on()        监听事件
 $emit()      触发事件
 $dispatch()  派发事件,向上冒泡
 $broadcast() 广播事件,向下
+
+</pre>
+</div>
+
+<div id="elementUI">
+<h3>ElementUI</h3><pre>
+< script src="https://cdn.staticfile.org/vue/2.4.2/vue.min.js">< /script>
+< script src="https://unpkg.com/axios/dist/axios.min.js">< /script>
+< link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+< script src="https://unpkg.com/element-ui/lib/index.js">< /script>
+
+this.$message.error('账号或密码错误！');//失败，出现错误，返回element-ui弹窗
 
 </pre>
 </div>

@@ -10289,18 +10289,16 @@ prefix参数可选,规定唯一ID的前缀。如果两个脚本恰好在相同�
 more_entropy参数可选,规定位于返回值末尾的更多的熵。这将让结果更具唯一性。当设置为TRUE,返回字符串为23个字符。默认是FALSE,返回字符串为13个字符
 
 echo uniqid();   // 5af56415a5c1e
-
 printf("uniqid(): %s\r\n",uniqid());  // 4b3403665fea6
 
-/* We can also prefix the uniqid,this the same as  doing:
-  * $uniqid = $prefix . uniqid();
-  * $uniqid = uniqid($prefix);
-  */
-printf("uniqid('php_'): %s\r\n",uniqid('php_'));
+$prefix = 'php_';
+$uniqid = $prefix . uniqid();  // php_5eef300b12f5b
+$uniqid = uniqid($prefix);     // 同上
+printf("uniqid('',true): %s\r\n",uniqid('',true));  // 5eef30332721c9.27227183
 
-/* We can also activate the more_entropy parameter,which is required on some systems,like Cygwin. This makes uniqid() produce a value like: 4b340550242239.64159797
-  */
-printf("uniqid('',true): %s\r\n",uniqid('',true));
+function makeToken(){
+  return sha1(md5(uniqid(md5(microtime(true)), true)));
+}
 
 【 highlight_file() 】
 highlight_file(filename,return)
@@ -15024,6 +15022,7 @@ strtotime("10 September 2000")
 strtotime('-1day') // 明天此时的时间戳,输出int 1534256289
 strtotime("now")
 strtotime("tomorrow")
+strtotime("+3 minute")
 strtotime("+1 day")
 strtotime("+1 week")
 strtotime("+1 week 2 days 4 hours 2 seconds")
@@ -43251,11 +43250,11 @@ class Superman {
 $superman = new Superman([ 'Fight' => [9, 100], 'Shot' => [99, 50, 2] ]);
 
 </textarea><pre>
-修改的结果令人满意,现在超人”的创建不再依赖任何一个超能力的类,如若修改了或增加了新的超能力,只需要针对修改SuperModuleFactory即可。扩充超能力的同时不再需要重新编辑超人的类文件
+修改的结果令人满意,现在超人的创建不再依赖任何一个超能力的类,如若修改了或增加了新的超能力,只需要针对修改SuperModuleFactory即可。扩充超能力的同时不再需要重新编辑超人的类文件
 
 再进一步,IoC容器的重要组成 —— 依赖注入
 由超人对超能力的依赖变成超人对超能力模组工厂的依赖后,对付小怪兽们变得更加得心应手。但依赖并未解除,只是由原来对多个外部的依赖变成了对一个工厂的依赖。假如工厂出了点麻烦,问题变得就很棘手。
-其实大多数情况下,工厂模式已经足够了。工厂模式的缺点就是：接口未知(即没有一个很好的契约模型)、产生对象类型单一。总之就是还是不够灵活。虽然如此,工厂模式依旧十分优秀,并且适用于绝大多数情况。不过为了讲解后面的 依赖注入 ,这里就先夸大一下工厂模式的缺陷咯。
+其实大多数情况下,工厂模式已经足够了。工厂模式的缺点就是：接口未知(即没有一个很好的契约模型)、产生对象类型单一,总之就是还是不够灵活。虽然如此,工厂模式依旧十分优秀,并且适用于绝大多数情况。不过为了讲解后面的 依赖注入 ,这里就先夸大一下工厂模式的缺陷咯。
 
 超人依赖的模组,要求有统一的接口,这样才能和超人身上的注入接口对接,最终起到提升超能力的效果。
 事实上,不仅仅只有一堆小怪兽,还有更多的大怪兽,这时候似乎工厂的生产能力显得有些不足 —— 由于工厂模式下,所有的模组都已经在工厂类中安排好了,如果有新的、高级的模组加入,必须修改工厂类
@@ -43283,7 +43282,7 @@ class SuperModuleFactory {
 interface SuperModuleInterface {
     /**
      * 超能力激活方法,任何一个超能力都得有该方法,并拥有一个参数
-     * @param array $target 针对目标,可以是一个或多个,自己或他人
+     * @param array $target 针对目标,可以是一个或多个自己或他人
      */
     public function activate(array $target);
 }
@@ -43291,14 +43290,14 @@ interface SuperModuleInterface {
 // X-超能量
 class XPower implements SuperModuleInterface {
     public function activate(array $target) {
-        // 这只是个例子。。具体自行脑补
+        // ...
     }
 }
 
-// 终极炸弹 (就这么俗)
+// 终极炸弹
 class UltraBomb implements SuperModuleInterface {
     public function activate(array $target) {
-        // 这只是个例子。。具体自行脑补
+        // ...
     }
 }
 
@@ -43347,11 +43346,11 @@ class Container {
 
 // 创建一个容器(后面称作超级工厂)
 $container = new Container;
-// 向该 超级工厂 添加 超人 的生产脚本
+// 向该超级工厂添加超人的生产脚本
 $container->bind('superman', function($container, $moduleName) {
     return new Superman($container->make($moduleName));
 });
-// 向该 超级工厂 添加 超能力模组 的生产脚本
+// 向该 超级工厂添加超能力模组的生产脚本
 $container->bind('xpower', function($container) {
     return new XPower;
 });
@@ -43375,9 +43374,9 @@ Route::get('/', function() { });
 通过打开发现,这个类的这一系列方法,如get,post,any等都不是静态(static)方法
 
 服务提供者
-IoC容器一个类需要绑定、注册至容器中才能被制造,一个类要被容器所能够提取,必须要先注册至这个容器。既然laravel称这个容器叫做服务容器,那么需要某个服务就得先注册、绑定这个服务到容器,那么提供服务并绑定服务至容器的东西就是服务提供者(ServiceProvider)。
+IoC容器一个类需要绑定、注册至容器中才能被制造,一个类要被容器所能够提取,必须要先注册至这个容器。既然laravel称这个容器叫做服务容器,那么需要某个服务就得先注册、绑定这个服务到容器,那么提供服务并绑定服务至容器的东西就是服务提供者(ServiceProvider)
 
-虽然绑定一个类到容器不一定非要通过服务提供者(ServiceProvider) 。
+虽然绑定一个类到容器不一定非要通过服务提供者(ServiceProvider)
 但有时类、模块会有需要其他类和组件的情况,为了保证初始化阶段不会出现所需要的模块和组件没有注册的情况,laravel将注册和初始化行为进行拆分,注册的时候就只能注册,初始化的时候就是初始化。拆分后的产物就是现在的服务提供者。
 服务提供者主要分为两个部分,register(注册)和boot(引导、初始化),register负责进行向容器注册脚本,但要注意注册部分不要有对未知事物的依赖,如果有就要移步至boot部分。
 
@@ -49244,7 +49243,7 @@ if(isset($_COOKIE["tempcookie"])){
 5、使用Redis incr原子性递增来解决高并发的秒杀或分布式序列号生成等场景,鉴于本场景只用来做计数实现间隔时间内只接收一次请求。
 实现逻辑：提交订单之后使用Redis的incr设置一个递增的KEY,根据自己的需要设定但要保证每一个人的唯一,来判断该KEY的数值,如果等于1说明这是第一次请求,发送短信记录日志,并设置有效期,如果不等于的话说明是间隔时间内多次请求,就提示请求频繁,稍后重试。
 
-</pre><pre><code class="language-javascript">
+</pre><textarea>
 var orderNum = memberId+productId;
 long count = redisTemplate.opsForValue().increment(orderNum,1);
 if (count == 1) {
@@ -49256,7 +49255,7 @@ if (count > 1) {
  return resultMap;
 }
 
-</code></pre><pre>
+</textarea><pre>
 6、使用Session设置令牌
 客户端请求页面时,服务器为每次产生的Form表单分配唯一的随机标识号,并且在form的一个隐藏字段中设置这个标识号,同时在当前用户的Session中保存这个标识号。当提交表单时服务器比较hidden和session中的标识号是否相同,相同则继续,处理完后清空Session,否则服务器忽略请求。
 
@@ -49327,6 +49326,76 @@ $sec_name = $_POST['sec_name'];
 // PHP数据处理.....
 
 </textarea>
+
+<h4>tp custom token</h4><textarea>
+// application/token/model/Users.php
+namespace app\token\model;
+class Users extends \think\Model{
+	protected $table = 'token_users';
+}
+
+/*
+drop tables if exists `token_users`;
+CREATE TABLE `token_users` (
+  `uid` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `username` varchar(30) NOT NULL DEFAULT '',
+  `password` char(40) NOT NULL DEFAULT '',
+  `token` char(40) NOT NULL DEFAULT '' comment '存储用户的token',
+  `time_out` int(10) unsigned NOT NULL DEFAULT 0 comment '设置用户token的过期时间',
+  PRIMARY KEY (`uid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+insert into token_users (`username`, `password`, `token`, `time_out`)values("admin", "90b9aa7e25f80cf4f64e990b78a9fc5ebd6cecad", "b93b9a8110248ce046b52bcf2f95896610895195", 1540385822);
+*/
+
+// application/token/controller/Login.php
+namespace app\token\controller;
+use \app\token\model\Users;
+
+class Login{
+    private function makeToken(){
+        return sha1(md5(uniqid(md5(microtime(true)), true))); //生成一个40位不会重复的字符串,加密
+    }
+
+    // curl http://127.0.0.1:8009/token/login/register
+    public function register(){
+        $user = new Users;
+        $res = $user->save(['token' => $this->makeToken(), 'time_out' => strtotime("+3 minute")],['uid' => 1]);
+        return json($res);
+    }
+
+    // curl http://127.0.0.1:8009/token/login/checkToken?token=01b834fb343902f2201f0938e0f782fd4256cbd6
+	public function checkToken(){
+        $token = input('token');
+        if(strlen($token) !== 40) return "token error";        //token错误,验证失败
+        $res = Users::where('token', $token)->value('time_out');
+        if ($res === null ) return "token error";              //token错误,验证失败
+        if (time() > $res)  return "token faild,rellogin";     //token长时间未使用而过期,需重新登陆
+        $res = Users::update(['time_out' => strtotime("+3 minute")], ['token' => $token]);
+        if ($res) return "token success";      //token验证成功，time_out刷新成功，可以获取接口信息
+    }
+
+    // curl -d "username=admin&password=admin" http://127.0.0.1:8009/token/login/userLogin
+    public function userLogin(){
+        if(!request()->isPost()) return "invilid request";
+        $username = input('username');
+        $password = input('password');
+        $user = Users::get(['username' => $username]);
+        if ($user == null) {
+            return json(["user"=>$username,"code"=>"400","msg"=>"用户不存在"]);
+        }
+        if ($user->password !== sha1(md5($password))) {
+            return json(["user"=>$username,"code"=>"401","msg"=>"密码错误"]);
+        }
+        //session('user', $username);
+        $token = $this->makeToken();
+        $res = Users::update(['time_out' => strtotime("+3 minute"), 'token' => $token], ['username' => $username]);
+        if ($res) {
+            return json(["user"=>$username,"toekn"=>$token,"code"=>"0","msg"=>"登录成功"]);
+        }
+    }
+}
+
+<textarea>
 </div>
 
 <div id="oauth">
@@ -51468,50 +51537,34 @@ class Token {
 private $TokenKey = "123456";
 
 public function createToken($data="",$exp_time=0,$scopes=""){
-    //JWT标准规定的声明,但不是必须填写的；
-    //iss: jwt签发者
-    //sub: jwt所面向的用户
-    //aud: 接收jwt的一方
-    //exp: jwt的过期时间,过期时间必须要大于签发时间
-    //nbf: 定义在什么时间之前,某个时间点后才能访问
-    //iat: jwt的签发时间
-    //jti: jwt的唯一身份标识,主要用来作为一次性token。
-    //公用信息
     try {
         $key=$this->TokenKey;
-        $time = time(); //当前时间
-        //$token['iss']=''; //签发者 可选
-        //$token['aud']=''; //接收该JWT的一方,可选
-        $token['iat']=$time; //签发时间
-        $token['nbf']=$time; //(Not Before)：某个时间点后才能访问,比如设置time+30,表示当前时间30秒后才能使用
-        if($scopes){
-            $token['scopes']=$scopes; //token标识,请求接口的token
-        }
-        if(!$exp_time){
-            $exp_time=7200;//默认=2小时过期
-        }
-        $token['exp']=$time+$exp_time; //token过期时间,这里设置2个小时
-        if($data){
-            $token['data']=$data; //自定义参数
-        }
-
+        $time = time();      // 当前时间
+        //$token['iss']='';  // iss: jwt签发者 可选
+        //$token['aud']='';  // aud: 接收jwt的一方,可选
+        $token['iat']=$time; // iat: jwt的签发时间
+        $token['nbf']=$time; // nbf: 定义在什么时间之前,某个时间点后才能访问,(Not Before)：某个时间点后才能访问,比如设置time+30,表示当前时间30秒后才能使用
+        // $token['sub']='';               // sub: jwt所面向的用户
+        // $token['jti']='';               // jti: jwt的唯一身份标识,主要用来作为一次性token
+        if($scopes) $token['scopes']=$scopes; // token标识,请求接口的token
+        if(!$exp_time) $exp_time=7200;  // 默认=2小时过期
+        $token['exp']=$time+$exp_time;  // exp: jwt的过期时间,过期时间必须要大于签发时间, token过期时间,这里设置2个小时
+        if($data) $token['data']=$data; // 自定义参数
         $json = JWT::encode($token,$key);
-
-        $returndata['status']="200";//
+        $returndata['status']="200";    //
         $returndata['msg']='success';
-        $returndata['token']= $json;//返回的数据
-        return $returndata; //返回信息
-
+        $returndata['token']= $json;    //返回的数据
+        return $returndata;             //返回信息
     }catch(\Firebase\JWT\ExpiredException $e){  //签名不正确
-        $returndata['status']="104";//101=签名不正确
+        $returndata['status']="104";  //104=签名不正确
         $returndata['msg']=$e->getMessage();
-        $returndata['data']="";//返回的数据
-        return $returndata; //返回信息
-    }catch(\Exception $e) {  //其他错误
-        $returndata['status']="199";//199=签名不正确
+        $returndata['data']="";       //返回的数据
+        return $returndata;           //返回信息
+    }catch(\Exception $e) {           //其他错误
+        $returndata['status']="199";  //199=签名不正确
         $returndata['msg']=$e->getMessage();
-        $returndata['data']="";//返回的数据
-        return $returndata; //返回信息
+        $returndata['data']="";       //返回的数据
+        return $returndata;           //返回信息
     }
 }
 
@@ -51522,9 +51575,8 @@ public function createToken($data="",$exp_time=0,$scopes=""){
  */
 public function checkToken($jwt){
     $key=$this->TokenKey;
-
     try {
-        JWT::$leeway = 60;//当前时间减去60,把时间留点余地
+        JWT::$leeway = 60;  // 当前时间减去60,把时间留点余地
         $decoded = JWT::decode($jwt, $key, ['HS256']); //HS256方式,这里要和签发的时候对应
         $arr = (array)$decoded;
         $returndata['status']="200";//200=成功
@@ -51618,8 +51670,7 @@ $data = (array)$checkToken['data']['data'];
 let jwt = localStorage.getItem('jwt');
 if(jwt){
   axios.defaults.headers.common['X-token'] = jwt;
-  axios.get('user.php')
-  .then(function (response) {
+  axios.get('user.php').then(function (response) {
     if (response.data.result === 'success') {
       document.querySelector('#showpage').style.display = 'none';
       document.querySelector('#user').style.display = 'block';
@@ -51628,8 +51679,7 @@ if(jwt){
       document.querySelector('#showpage').style.display = 'block';
       console.log(response.data.msg);
     }
-  })
-  .catch(function (error) {
+  }).catch(function (error) {
     console.log(error);
   });
 }else{
@@ -51685,7 +51735,7 @@ define('KEY','1gHuiop975cdashyex9Ud23ldsvm2Xq');
 // header('Access-Control-Allow-Origin:*');
 $res['result'] = 'failed';
 $action = $_GET['action'] ?? '';
-file_put_contents('log','<?php return '.var_export($_SERVER, true).';?>');
+file_put_contents('log','< ?php return '.var_export($_SERVER, true).';?>');
 
 if ($action == 'login') {
   if ($_SERVER['REQUEST_METHOD'] == 'POST') {
