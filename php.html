@@ -39500,7 +39500,7 @@ $redis->expire('user:2000:feed:topic',24*60*60);
 
 </pre>
 
-<h4>文章点赞功能</h4><pre>
+<h4>Redis实现文章点赞功能模块</h4><pre>
 点赞基本的设计思路有大致两种,一种自然是用mysql,数据库直接落地存储,另外一种就是利用点赞的业务特征来扔到redis或memcache中,然后离线刷回mysql等。
 
 直接写入Mysql是最简单的做法,做三个表即可
@@ -39517,17 +39517,13 @@ redis主要特点是快,主要数据都在内存,不选择memcache的主要原�
 
 优点
 性能高
-缓解数据库读写压力,更多的在于缓解写压力,真的读压力,通过mysql主从甚至通过加入redis对热点数据做缓存都可以解决,
-写压力对于前面的方案确实是不大好使。
+缓解数据库读写压力,更多的在于缓解写压力,读压力通过mysql主从甚至通过加入redis对热点数据做缓存都可以解决,写压力对于前面的方案确实是不大好使。
 
 缺点
-开发复杂
-这个比直接写mysql的方案要复杂很多,需要考虑的地方也很多;
+开发复杂,比直接写mysql的方案要复杂很多,需要考虑的地方也很多;
 
 不能保证数据安全性
-redis挂掉的时候会丢失数据,同时不及时同步redis中的数据,可能会在redis内存置换的时候被淘汰掉;
-不过对于点赞而已,稍微丢失一点数据问题不大;
-
+redis挂掉的时候会丢失数据,不及时同步redis中的数据可能会在redis内存置换的时候被淘汰掉,不过对于点赞稍微丢失一点数据问题不大;
 其实上面第二点缺点是可以避免的,这就涉及到redis的一些设计模式
 
 设计功能前知识准备
@@ -39538,8 +39534,9 @@ hash散列主要用来存储数据及索引,这里被用来记录用户对哪个
 list队列数据能不能安全回到mysql就靠它了。
 
 2.关于热度的判断：
+浏览量 点赞数 评论数 -> 热门文章、热评文章、最新文章、随即文章
 文章获得点赞数越高,文章的热度就越高,那么怎么判断呢？不就直接记录点赞数就行啦,但对于最新的文章怎么办？例如有一篇文章一年前发布的,获得50个赞,有篇最新文章获得49个赞,但按照上面所说的一年前的文章热度还比最新的高,这就不合理了,文章都是时效性,谁都想看最新最热的。
-所以要换个方法去处理这个时效性,时间戳随着时间越新,数字越大,直接将时间戳初始化赋值给文章的score,这样最新的文章相比以前的文章就会靠前了。接着是点赞对score的影响,假设一天得到20个赞算是一天最热,一天60*60*24=86400秒,然后得到一个赞就是得到86400/20=4320分,具体数字看业务需求,点hate当然也会减去相应的数字。
+所以要换个方法去处理这个时效性,时间戳随着时间越新数字越大,直接将时间戳初始化赋值给文章的score,这样最新的文章相比以前的文章就会靠前了。接着是点赞对score的影响,假设一天得到20个赞算是一天最热,一天60*60*24=86400秒,然后得到一个赞就是得到86400/20=4320分,具体数字看业务需求,点hate当然也会减去相应的数字。
 
 </pre><textarea>
 class Good{
@@ -39563,12 +39560,9 @@ class Good{
   * @return string json;
   */
   public function click($user_id,$type,$comment_id){
-    // 判断redis是否已经缓存了该文章数据,使用：分隔符对redis管理是友好的
-    if($this->redis->zscore("comment:like",$comment_id)){
-      // 已经存在则判断点的是什么
+    if($this->redis->zscore("comment:like",$comment_id)){  // 判断redis是否已经缓存了该文章数据,使用：分隔符对redis管理是友好的
       if($type==1){
-        // 判断以前是否点过,点的是什么
-        $rel = $this->redis->hget("comment:record",$user_id.":".$comment_id);
+        $rel = $this->redis->hget("comment:record",$user_id.":".$comment_id);  // 判断以前是否点过,点的是什么
         if(!$rel){  // 什么都没点过
           $this->redis->zincrby("comment:like",$this->num,$comment_id);        // 点赞加1
           $this->redis->zincrby("comment:score",$this->score,$comment_id);     // 增加分数
@@ -39607,15 +39601,15 @@ class Good{
       }
     }else{  // 未存在
       if($type==1){
-        $this->redis->zincrby("comment:like",$this->num,$comment_id);    // 点赞加一
-        $this->redis->zincrby("comment:score",$this->score,$comment_id); // 分数增加
-        $data = array( "state" => 7,"status" => 200,"msg" => "like+1",);
+        $this->redis->zincrby("comment:like", $this->num, $comment_id);    // 点赞加一
+        $this->redis->zincrby("comment:score", $this->score, $comment_id); // 分数增加
+        $data = array( "state" => 7, "status" => 200, "msg" => "like+1",);
       }else if($type==2){
-        $this->redis->zincrby("comment:hate",$this->num,$comment_id);       // 点hate加一
-        $this->redis->zincrby("comment:score",-($this->score),$comment_id); // 分数减少
-        $data = array( "state" => 8,"status" => 200,"msg" => "hate+1",);
+        $this->redis->zincrby("comment:hate", $this->num, $comment_id);       // 点hate加一
+        $this->redis->zincrby("comment:score", -($this->score), $comment_id); // 分数减少
+        $data = array( "state" => 8, "status" => 200, "msg" => "hate+1",);
       }
-      $this->redis->hset("comment:record",$user_id.":".$comment_id,$type);  // 记录
+      $this->redis->hset("comment:record", $user_id.":".$comment_id, $type);  // 记录
     }
     $this->ifUploadList($comment_id);  // 判断是否需要更新数据
     return $data;
@@ -39624,12 +39618,10 @@ class Good{
   public function ifUploadList($comment_id){
     date_default_timezone_set("Asia/Shanghai");
     $time = strtotime(date('Y-m-d H:i:s'));
-    if(!$this->redis->sismember("comment:uploadset",$comment_id)){
-      // 文章不存在集合里,需要更新
+    if(!$this->redis->sismember("comment:uploadset",$comment_id)){  // 文章不存在集合里,需要更新
       $this->redis->sadd("comment:uploadset",$comment_id);
-      // 更新到队列
       $data = array( "id" => $comment_id,"time" => $time,);
-      $this->redis->lpush("comment:uploadlist",json_encode($data));
+      $this->redis->lpush("comment:uploadlist",json_encode($data));  // 更新到队列
     }
   }
 }
@@ -39746,7 +39738,6 @@ class OutputLog{
   }
 }
 
-
 // index.php
 /*
 Redis的列表经常被用作队列(queue),用于在不同程序之间有序地交换消息(message)。一个程序生产者producer通过LPUSH命令将消息放入队列中,而另一个程序消费者consumer通过RPOP命令取出队列中等待时间最长的消息。
@@ -39819,7 +39810,43 @@ while($rel){
   }
 }
 
-</textarea>
+</textarea><pre>
+【 方案二 】
+功能点设计
+有点赞的功能，统计文章点赞的总数，用户所有文章的点赞数，因此设计的点赞功能模块具有以下功能点：
+某篇文章的点赞数
+用户所有文章的点赞数
+用户点赞的文章
+持久化到MySQL数据库
+
+Redis数据库设计
+Redis是K-V数据库，没有统一的数据结构，针对不同的功能点设计了不同的K-V存储结构
+用户某篇文章的点赞数: 使用HashMap数据结构，HashMap中的key为articleId，value为Set，Set中的值为用户ID，即HashMap< String, Set< String>>
+用户总的点赞数: 使用HashMap数据结构，HashMap中的key为userId，value为String记录总的点赞数
+用户点赞的文章: 使用HashMap数据结构，HashMap中的key为userId，value为Set，Set中的值为文章ID，即HashMap< String, Set< String>>
+
+MySQL数据库设计
+article表结构
+article_name varchar 文章名字
+content	blob 文章内容
+total_like_count bigint	文章总点赞数,文章总的点赞数需要和Redis中的点赞数进行同步
+
+user_like_article表结构,记录用户点赞文章的信息，是一张中间表
+user_id	bigint	用户ID
+article_id	bigint	文章ID
+
+流程图比较简单，点赞和取消点赞基本实现步骤相同
+1、参数校验：对传入的参数进行null值判断
+2、逻辑校验：对于用户点赞，用户不能重复点赞相同的文章,对于取消点赞，用户不能取消未点赞的文章
+3、存入Redis：存入的数据主要有所有文章的点赞数、某篇文章的点赞数、用户点赞的文章
+4、定时任务：通过定时1小时执行一次，从Redis读取数据持久化到MySQL中
+
+代码功能实现
+点赞
+取消点赞
+异步落库
+
+</pre>
 
 <h4>秒杀系统</h4><pre>
 秒杀活动可以分为3个阶段：
