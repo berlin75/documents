@@ -15405,17 +15405,14 @@ if(strpos($tmp,'Googlebot') !== false){
 $_SERVER['HTTP_REFERER']可以获取当前链接的上一个连接的来源地址,即链接到当前页面的前一页面的URL地址,可以做到防盗链作用
 
 a站点的图片全部存储在c站点(云服务器)上,c站点将识别调用方是否来自a站点,否则显示一张错误图片,b站是盗图网站
-if(strpos($_SERVER['HTTP_REFERER'],'www.a.com') !== false){
-  //以下的写法并不严谨,这里只是做测试
-  if(file_exists($_GET['fname'])){
-    echo file_get_contents($_GET['fname']);
-  }
+if(strpos($_SERVER['HTTP_REFERER'],'www.a.com') !== false){ //以下的写法并不严谨,这里只是做测试
+  if(file_exists($_GET['fname'])) echo file_get_contents($_GET['fname']);
 }
 
-$_SERVER['HTTP_REFERER']完全来源于浏览器,并不是所有的用户代理(浏览器)都会设置这个变量,而且有的还可以伪造。因此$_SERVER['HTTP_REFERER']不总是真实正确的。
+$_SERVER['HTTP_REFERER']完全来源于浏览器,并不是所有的用户代理(浏览器)都会设置这个变量,而且有的还可以伪造,因此$_SERVER['HTTP_REFERER']不总是真实正确的。
 
 HTTP_REFERER存在需要两个条件：
-1、浏览器(客户端)请求(服务器端请求的情况下是不存在HTTP_REFERER的,但是可以伪造header);
+1、客户端浏览器请求(服务器端请求的情况下是不存在HTTP_REFERER的,但可以伪造header);
 2、存在前导页;
 
 获取不到HTTP_REFERER值的情况：
@@ -15437,9 +15434,9 @@ flash中的链接。
 form提交的表单(POST或GET)
 src请求(如js的script标签及html中img标签的src属性)
 
-由于$_SERVER['HTTP_REFERER']对POST表单访问也是有效的,因此在表单数据处理页面一定程度上可以通过校验 $_SERVER['HTTP_REFERER'] 来防止表单数据的恶意提交。但该方法并不能保证表单数据的绝对正确,即对表单数据的真实性检测并不能完全依赖于 $_SERVER['HTTP_REFERER']
+由于$_SERVER['HTTP_REFERER']对POST表单访问也是有效的,因此在表单数据处理页面一定程度上可以通过校验$_SERVER['HTTP_REFERER']来防止表单数据的恶意提交。但该方法并不能保证表单数据的绝对正确,即对表单数据的真实性检测并不能完全依赖于$_SERVER['HTTP_REFERER']
 
-如何伪造HTTP_REFERER
+</pre>如何伪造HTTP_REFERER<textarea>
 $HTTP_REFERER = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
 exit(json_encode(['status' => 'ok','refer' => $HTTP_REFERER));
 
@@ -15481,7 +15478,7 @@ if (!$fp) {
   fclose($fp);
 }
 
-</pre><textarea>
+</textarea><textarea>
 淘宝ip查询接口结果：市级地址和运营商
 $data=file_get_contents('http://ip.taobao.com/service/getIpInfo.php?ip='.$_SERVER['REMOTE_ADDR']);
 dump(json_decode($data,$assoc = true));
@@ -15527,10 +15524,10 @@ xmlHttpRequest.setRequestHeader("X_REQUESTED_WITH","任意字符串");
 
 </pre><pre>
 【 $_REQUEST 】
-用于收集 HTML 表单提交的数据
+用于收集HTML表单提交的数据
 
 </pre><textarea>
-< form method="post" action="<?php echo $_SERVER['PHP_SELF'];?>">
+< form method="post" action="< ?php echo $_SERVER['PHP_SELF'];?>">
   < input type="text" name="fname" placeholder="name">
   < input type="submit">
 < /form>
@@ -15578,6 +15575,15 @@ GET对所发送信息的数量也有限制,限制在大于2000个字符。不过
 cookie里通常存放一些访问信息,比如自动登录、淘宝购物车,商品浏览信息等
 session里存放登录状态,用户操作等
 本地存储(Local Storage)常用缓存文件,如全局JS、CSS、图片编码,也会放一些用户足迹,访问时间等,留作大数据分析
+
+cookie和session的区别,从协议、产生的原因、作用说明等方面来说一下
+1、http无状态协议，不能区分用户是否是从同一个网站上来的，同一个用户请求不同的页面不能看作是同一个用户。
+2、SESSION存储在服务器端，COOKIE保存在客户端。
+COOKIE可以通过js来操作，使用起来比较方便,COOKIE用某些手段可以修改，可以分析存放在本地的Cookie并进行Cookie欺骗，不安全,不要将敏感的数据存入COOKIE中。
+SESSION依赖于COOKIE进行传递,SESSION比较安全，存储在服务器端，远程用户没办法修改Session文件的内容
+3、禁用COOKIE后，SESSION不能正常使用。SESSION的缺点：保存在服务器端，每次读取都从服务器进行读取，对服务器有资源消耗。目前可以通过使用redis来保存SESSION信息，SESSION保存在服务器端的文件或数据库中，默认保存在文件中，文件路径由php配置文件的session.save_path指定。SESSION文件是公有的。
+4、COOKIE的存储量有限、只允许存入4KB，很多浏览器都限制一个网址最多保存20个cookie，而SESSION是无限量的
+session会在一定时间内保存在服务器上。当访问增多，会比较占用服务器的性能,考虑到减轻服务器性能方面，应当使用Cookie。
 
 </pre>
 
@@ -15830,10 +15836,114 @@ var_dump($cookie->get('aaa'));  // null
 
 </textarea>
 
-<h3 id="session">session会话控制</h3><pre>
-session是服务器端技术,服务器以此为每个用户的浏览器创建一个为其独享的session文件,用户在访问服务器的web资源时,可以把各自的数据放在各自的session中,当用户再去访问服务器中的其他web资源时,其他web资源再从用户各自的session中取出数据为用户服务
+<h3 id="session">session会话控制</h3>
+<h4>php中Session使用方法</h4><pre>
+【 Session的声明与使用 】
+Session的设置不同于Cookie，必须先启动，在PHP中必须调用session_start()
+Bool session_start(void) //创建Session，开始一个会话，进行Session初始化
+session_start()函数之前不能有任何输出
 
-session变量用于存储有关用户会话的信息或更改用户会话的设置,保存的信息是单一用户的,并且可供应用程序中的所有页面使用。允许将请求的数据保存在超全局变量$_SESSION中
+当第一次访问网站时，Seesion_start()函数就会创建一个唯一的Session ID，并自动通过HTTP的响应头，将这个Session ID保存到客户端Cookie中。同时，也在服务器端创建一个以Session ID命名的文件，用于保存这个用户的会话信息。当同一个用户再次访问这个网站时，也会自动通过HTTP的请求头将Cookie中保存的Seesion ID再携带过来，这时Session_start()函数就不会再去分配一个新的Session ID，而是在服务器的硬盘中去寻找和这个Session ID同名的Session文件，将这之前为这个用户保存的会话信息读出，在当前脚本中应用，达到跟踪这个用户的目的。 Session以数组的形式使用，如：$_SESSION['session名']
+
+【 注册一个会话变量和读取Session 】
+在PHP中使用Session变量，除了要启动之外，还要经过注册的过程。注册和读取Session变量都要通过访问$_SESSION数组完成。在$_SESSION关联数组中的键名具有和PHP中普通变量相同的命名规则
+
+//启动session的初始化
+session_start();
+//注册session变量，赋值为一个用户的名称
+$_SESSION["username"]="skygao";
+//注册session变量，赋值为一个用户的ID
+$_SESSION["uid"]=1;
+
+执行该脚本后，两个Session变量就会被保存在服务器端的某个文件中，该文件的位置是通过php.ini文件，在session.save_path属性指定的目录下。
+
+【 注销变量与销毁Session 】
+当使用完一个Session变量后，可以将其删除，当完成一个会话后，也可以将其销毁。如果用户退出Web系统，就需要为他提供一个注销的功能，把他的所有信息在服务器中销毁。销毁和当前Session有关的所有的资料，可以调用session_destroy()函数结束当前的会话，并清空会话中的所有资源。该函数的语法格式如下所示：
+bool session_destroy(void) //销毁和当前Session有关的所有资料
+该函数并不会释放和当前Session相关的变量，也不会删除保存在客户端Cookie中的SessionID。因为$_SESSION数组和自定义的数组在使用上是相同的，所以我们可以使用unset()函数来释放在Session中注册的单个变量。如下所示：
+unset($_SESSION['键名']);
+
+一定要注意，不要使用unset($_SESSION)删除整个$_SESSION数组，这样将不能再通过$_SESSION超全局数组注册变量了。但如果想把某个用户在Session中注册的所有变量都删除，可以直接将数组变量$_SESSION赋上一个空数组。如下所示：
+$_SESSION=array()
+
+PHP默认的Session是基于Cookie的，SessionID被服务器存储在客户端的Cookie中，所以在注销Session时也需要清除Cookie中保存的SessionID，而这就必须借助setCookie()函数完成。在PHP脚本中，可以通过调用session_name()函数获取Session名称。删除保存在客户端Cookie中的SessionID，代码如下所示：
+//判断Cookie中是否存在session ID
+if(isset($_COOKIE[session_name()])){
+    //删除包含Session ID的cookie，注意第四个参数一定要和php.ini设置的路径相同
+    setcookie(session_name(),'',time()-3600,'/');
+}
+
+通过前面的介绍可以总结出，Session的注销过程共需要4个步骤。在下例中，提供完整的四个步骤代码，运行该脚本就可以关闭Session，并销毁与本次会话有关的所有资源。代码如下所示：
+
+//第一步：开启Session并初始化
+session_start();
+//第二部：删除所有Session的变量，也可以用unset($_SESSION[XXX])逐个删除
+$_SESSION = array();
+//第三部：如果使用基于Cookie的session，使用setCookkie()删除包含Session ID的cookie
+if(isset($_COOKIE[session_name()])) setCookie(session_name(), "", time()-42000, "/");
+//第四部：最后彻底销毁session
+session_destroy();
+
+【 session的phpini配置选项 】
+php.ini文件和Session有关的几个常用配置选项：
+session.auto_start = 0 ; 在请求启动时初始化session
+session.cache_expire = 180 ; 设置缓存中的会话文档在 n 分钟后过时
+session.cookie_lifetime = 0 ; 设置按秒记的cookie的保存时间，相当于设置Session的过期时间，为0时表示直到浏览器被重启
+
+session.auto_start=1，这样就无需每次使用session之前都要调用session_start()不建议使用.但启用该选项也有一些限制，如果确实启用了 session.auto_start，则不能将对象放入会话中，因为类定义必须在启动会话之前加载以在会话中重建对象。
+
+session.cookie_path = / ; cookie的有效路径
+session.cookie_domain = ; cookie的有效域
+session.name = PHPSESSID; 用在cookie里的session的名字
+session.save_handler = files ; 用于保存/取回数据的控制方式
+session.save_path = /tmp ; 在 save_handler 设为文件时传给控制器的参数， 这是数据文件将保存的路径.
+session.use_cookies = 1 ; 是否使用cookies
+Session的垃圾自动回收机制
+
+可以通过session_destroy()函数在页面中提供一个“退出”按钮，通过单击销毁本次会话。但如果用户没有单击退出按钮，而是直接关闭浏览器，或断网等情况，在服务器端保存的Session文件是不会删除的。虽然关闭浏览器，下次需要重新分配一个新的Session ID重新登录，但这只是因为在php.ini中的设置seesion.cookie_lifetime=0，来设定Session ID在客户端Cookie中的有效限期，以秒为单位指定了发送到浏览器的Cookie的生命周期。当系统赋予Session有效期限后不管浏览器是否开启，Session ID都会自动消失。而客户端Session ID消失服务器端保存的Session文件并没有被删除。所以没有被Sessoin ID引用的服务器端Session文件，就成为了“垃圾”。
+
+服务器保存的Session文件就是一个普通文本文件，所以都会有文件修改时间。“垃圾回收程序”启动后就是根据Session文件的修改时间，将所有过期的Session文件全部删除。通过在php.ini中设置session.gc_maxlifetime选项来指定一个时间(单位：秒)，例如设置该选项值为1440(24分钟)。“垃圾回收程序”就会在所有Session文件中排查，如果有修改时间距离当前系统时间大于1440秒的就将其删除。
+
+“session垃圾回收程序”是怎样的启动机制呢?“垃圾回收程序”是在调用session_start()函数时启动的。而一个网站有多个脚本，没有脚本又都要使用session_start()函数开启会话，又会有很多个用户同时访问，这就很可能session_start()函数在1秒内被调用N次，而如果每次都会启动“session垃圾回收程序”，这样是很不合理的。可以通过php.ini文件中修改“session.gc_probability和session.gc_divisor”两个选项，设置启动垃圾回收程序的概率。会根据“session.gc_probability/session.gc_divisor”公示计算概率，例如选项session.gc_probability=1，而选项session.gc_divisor=100，这样的概率就是“1/100”，即session_start()函数被调用100次才会有一次可能启动“垃圾回收程序”。
+
+【 php.ini中相关的配置 】
+session.cookie_lifetime=0; 关闭浏览器相应的cookie文件即被删除
+session.gc_maxlifetime; 设置过期session时间，默认1440秒(24分钟)
+session.gc_probability/session.gc_divisor; 启动垃圾回收机制的概率(建议值为1/1000——5000)
+
+【 cookie禁用时通过URL传递session的ID 】
+使用Session跟踪一个用户，是通过在各个页面之间传递唯一的Session ID，并通过Session ID提取这个用户在服务器中保存的Session变量。常见的Session ID传送方法有以下两种。
+第一种方法是基于cookie的方式传递session ID，这种方式更优，但不总是可用， 因为用户在客户端可以屏蔽cokie;
+第二种方法是通过url参数进行传递，直接将session ID嵌入到URL中去。
+
+在Session的实现中通常都是采用Cookie的方式，客户端保存的Session ID就是一个Cookie。当客户禁用Cookie时，Session ID就不能在Cookie中保存，也就不能在页面之间传递，此时Session失效。不过PHP5在Linux平台可以自动检查Cookie状态，如果客户端禁用它，则系统自动把Session ID附加到URL上传送。而使用Windows系统作为Web服务器则无此功能。
+
+在PHP中提出了跟踪Session的另一种机制，如果客户浏览器不支持Cookie，则PHP可以重写客户请求的URL，把Session ID添加到URL信息中。可以手动地在每个超链接的URL中都加上一个Session ID，但工作量比较大，不建议使用这种方法。如下所示：
+
+//开启session
+session_start();
+
+//在每个URL后面附加上参数，变量名为session_name()获取名称，值通过session_id()获取
+echo '< a href="demo.php?'.session_name().'='.session_id().'">连接演示< /a>';
+
+在使用Linux系统做服务器时，则在编辑PHP时如果使用了–enable-trans-sid配置选项，和运行时选项session.use_trans_sid都被激活，在客户端禁用Cookie时，相对URL将被自动修改为包含会话ID。如果没有这么配置，或者使用Windows系统作为服务器时，可以使用常量SID。该常量在会话启动时被定义，如果客户端没有发送适当的会话Cookie，则SID的格式为session_name=session_id,否则就为一个空字符串。因此可以无条件地将其嵌入到URL中去。在下例中使用两个脚本程序，演示了Session ID的传送方法。
+session_start();
+$_SESSION["username"]="admin";
+echo "session ID:".session_id();
+
+</pre>
+
+<h4>session</h4><pre>
+一般在网站上某一个页面中的变量是不能在下一页中用的，有了session就好办了。session中注册的变量可以作为全局变量使用,这样就可以将session用于用户身份认证,程序状态记录,页面之间参数传递
+
+session是服务器端技术,服务器以此为每个用户的浏览器创建一个为其独享的session文件,用户在访问服务器的web资源时,可以把各自的数据放在各自的session中,当用户再去访问服务器中的其他web资源时,其他web资源再从用户各自的session中取出数据为用户服务
+只有访问JSP、Servlet等程序时才会创建Session，只访问HTML、IMAGE等静态资源并不会创建Session
+
+session变量用于存储有关用户会话的信息或更改用户会话的设置,保存的信息是单一用户的,并且可供应用程序中的所有页面使用,允许将请求的数据保存在超全局变量$_SESSION中
+
+在计算机上操作某个应用程序时，打开它做些更改，然后关闭它。这很像一次对话（Session）,计算机知道您是谁,清楚在何时打开和关闭应用程序。然而在因特网上问题出现了：由于HTTP地址无法保持状态，Web服务器并不知道您是谁以及您做了什么。
+session解决了这个问题，它通过在服务器上存储用户信息以便随后使用（如用户名称、购买商品等）,然而会话信息是临时的，在用户离开网站后将被删除。如果需要永久存储信息，可以把数据存储在数据库中。
+Session的工作机制是：为每个访客创建一个唯一的id(UID)，并基于这个UID来存储变量。UID存储在cookie中，或通过URL进行传导
 
 session保存在服务器的文件或数据库中,默认是磁盘文件
 session.save_handler=file
@@ -15842,34 +15952,46 @@ session.save_path="E:/wamp/tmp"
 浏览器访问a.php页面时,服务器产生一个session文件,将其存放在服务器,同时将session_id发送给浏览器,浏览器将其保存到cookie,浏览器再次访问b.php时候,从cookie中获取session_id发送到服务器,服务器根据session_id获取相应session内容
 
 session文件用记事本打开是一些字符,这是php对象数组序列化之后的字符串,就是把session对象序列化之后写到文件中达到session的持久化。
-如果采用默认配置的话,多个网站的session文件都是存在一个地方的。如果同一台服务器中有两个网站,网站a和网站b的session文件都会存储在一个地方,session文件都有自己的唯一标示符sessionID。sessionID的生成是唯一的,这个sessionID跟session的持久化文件名称是对应的。php通过sessionID去获取session文件,反序列化出来就能读取session
+如果采用默认配置的话,多个网站的session文件都是存在一个地方的。如果同一台服务器中有两个网站,网站a和网站b的session文件都会存储在一个地方,session文件都有自己的唯一标示符sessionID,这个sessionID跟session的持久化文件名称是对应的,php通过sessionID去获取session文件,反序列化出来就能读取session
+
+【 基本用法 】
+通过为每个独立用户分配唯一的会话ID，可以实现针对不同用户分别存储数据的功能。 会话通常被用来在多个页面请求之间保存及共享信息。 一般来说会话ID通过cookie的方式发送到浏览器，并且在服务器端也是通过会话ID来取回会话中的数据。 如果请求中不包含会话ID信息，那么PHP就会创建一个新的会话，并为新创建的会话分配新的ID
+
+会话的工作流程很简单。当开始一个会话时PHP会尝试从请求中查找会话ID （通常通过会话cookie）， 如果请求中不包含会话ID信息，PHP就会创建一个新的会话。 会话开始之后，PHP就会将会话中的数据设置到$_SESSION变量中。 当PHP停止的时候，它会自动读取$_SESSION中的内容，并将其进行序列化，然后发送给会话保存管理器来进行保存。
+
+默认情况下，PHP使用内置的文件会话保存管理器（files）来完成会话的保存。 也可以通过配置项session.save_handler来修改所要采用的会话保存管理器。对于文件会话保存管理器，会将会话数据保存到配置项session.save_path所指定的位置。
+
+可以通过调用函数session_start()来手动开始一个会话。如果配置项session.auto_start设置为1，那么请求开始的时候会话会自动开始。
+
+PHP脚本执行完毕之后会话会自动关闭,同时也可以通过调用函数session_write_close()来手动关闭会话
+
+最好不要把大量的信息存入Session变量中，或者创建很大Session变量。如果Session变量保存的信息太多，同时访问网站的用户又很多会非常占用服务器资源
 
 【 Session存储 】
 1.session_id
 用户session唯一标识符,随机生成的一串字符串,具有唯一性、随机性,主要用于区分其它用户的session数据。用户第一次访问Web页面的时候,PHP的session初始化函数调用会分配给当前来访用户一个唯一的ID即session_id
 
 2.session data
-把需要通过session保存的用户状态信息,称为用户session数据,一般是在当前session生命周期,相应用的$_SESSION数据
+需要通过session保存的用户状态信息称为用户session数据,一般是在当前session生命周期,相应用的$_SESSION数据
 
 3.session file
 PHP默认将session数据存放在一个文件里,由特殊的php.ini设置,session.save_path指定session文件的存放路径,CentOS5.3默认存放在/var/lib/php/session目录中
-用户session文件的名称就是以sess_为前缀,以session_id为结尾命名,比如session id为vp8lfqnskjvsiilcp1c4l484d3,那么session文件名就是sess_vp8lfqnskjvsiilcp1c4l484d3
+用户session文件的名称就是以sess_为前缀,以session_id为结尾命名,比如session文件名sess_vp8lfqnskjvsiilcp1c4l484d3中sess_后面的部分就是session id
 
 4.session lifetime
 初始化session开始直到注销session这段期间称为session生命周期,这样有助于理解session管理函数。
 当每个用户访问Web,PHP的session初始化函数都会给当前来访用户分配一个唯一的session ID,在session生命周期结束的时候,将用户在此周期产生的session数据持久到session文件中。用户再次访问时session初始化函数又会从session文件中读取session数据,开始新的session生命周期。
 
 【 与session存储相关php.ini设置 】
-1.session.save_handler = file
+1.session.save_handler = files
 用于读取/回写session数据的方式,默认files,它会让PHP的session管理函数使用指定的文本文件存储session数据。
 
 2.session.save_path = "/var/lib/php/session"
 指定保存session文件的目录,可自定义,但指定目录必须要有httpd守护进程属主(比如apache或www等)写权限,否则无法回存session数据。
 当指定目录不存在时php session环境初始化函数不会创建指定目录,所以需要手工建立指定目录。
-还可以写成这样session.save_path = "N;/path"其中N是整数,这样使得不是所有的session文件都保存在同一个目录中,而是分散在不同目录。这对于服务器处理大量session文件是很有帮助的,目录需要手工创建
 
-session.save_path = "2;C:/Temp"
-上面的设置表示把php的session文件进行两级目录存储,每一级目录分别是0-9和a-z共36个字母数字为目录名,这样存放session的目录可以达到36*36共1332个文件夹,作为单台服务器来说这是完全够用了,如果系统架构设计为多台服务器共享session数据,可以把目录级增加到3级或更多
+还可以写成这样session.save_path = "N;/path"其中N是整数,这样使得不是所有的session文件都保存在同一个目录中,而是分散在不同目录,这对于服务器处理大量session文件是很有帮助的
+session.save_path = "2;C:/Temp"表示把php的session文件进行两级目录存储,每一级目录分别是0-9a-z共36个字母数字为目录名,这样存放session的目录可以达到36*36共1332个文件夹,作为单台服务器来说这是完全够用了,如果系统架构设计为多台服务器共享session数据,可以把目录级增加到3级或更多
 
 3.session.auto_start = 0
 启用该选项用户的每次请求都会初始化session,不推荐,最好通过session_start()显示地初始化session
@@ -15878,20 +16000,37 @@ session.save_path = "2;C:/Temp"
 为每个访问者创建一个唯一的id(session_id)即会话id,并基于这个session_id来存储变量。session_id存储在cookie中,亦或通过URL进行传导
 
 session_start()
+把用户信息存储到PHP session中之前首先必须启动会话,session_start()函数前不能有任何代码输出到浏览器，最好加在页面头部，或者先用ob_start()函数打开输出缓冲区
 启动新会话或重用现有会话
 初始化session标识着session生命周期的开始,开始session保存用户信息,同时自动为用户分配一个UID
-声明一个全局数组$_SESSION,映射寄存在内存的session数据。如果session文件已经存在,并且保存有session数据,session_start()则会读取session数据填入$_SESSION中,开始一个新的session生命周期
+声明一个全局数组$_SESSION,映射寄存在内存的session数据。
+如果session文件已经存在,并且保存有session数据,session_start()则会读取session数据填入$_SESSION中,开始一个新的session生命周期
 
 $_SESSION
-全局变量,类型是Array,映射了session生命周期寄存在内存中的session数据,在session初始化的时候从session文件中读取数据填入该变量中。在session生命周期结束时将$_SESSION数据写回session文件
+全局变量,类型是Array,映射了session生命周期寄存在内存中的session数据,session初始化时从session文件中读取数据填入该变量中,session生命周期结束时将$_SESSION数据写回session文件
 
 设置存储session
 $_SESSION[name]=value;
-$_SESSION['views']=1;
+
+</pre><textarea>
+session_start();
+$_SESSION['views'] = isset($_SESSION['views'] ? $_SESSION['views']+1 : 1;
+echo "浏览量：". $_SESSION['views'];
 unset($_SESSION['var'])
 
+session_start();
+if (empty($_SESSION['count'])) {
+   $_SESSION['count'] = 1;
+} else {
+   $_SESSION['count']++;
+}
+< p>Hello visitor, you have seen this page < ?php echo $_SESSION['count']; ?> times.< /p>
+< p>To continue, < a href="nextpage.php?< ?php echo htmlspecialchars(SID); ?>">click here< /a>< /p>
+使用htmlspecialchars()来打印SID常量的展开字符串以避免XSS相关的攻击
+
+</textarea><pre>
 session_register()
-在session生命周期内,使用全局变量名称将全局变量注册到当前session中,注册就是将变量填入$_SESSION中,值为NULL,它不会对session文件进行任何IO操作,只是影响$_SESSION变量。
+在session生命周期内使用全局变量名称将全局变量注册到当前session中,注册就是将变量填入$_SESSION中,值为NULL,它不会对session文件进行任何IO操作,只是影响$_SESSION变量。
 正确写法是session_register('varname'),而不是session_register($varname)
 
 session_unregister()
@@ -15914,7 +16053,7 @@ session_commit()
 是session_write_close()函数的别名。结束当前session的生命周期,并将session数据立即强制写入session文件。不推荐通过session_commit()来手工写入session数据,因为PHP会在页面生命周期结束的时候,自动结束当前没有终止的session生命周期,它会产生一个IO写操作。
 
 end session
-结束session,默认是在页面生命周期结束的之前,PHP会自动结束当前没有终止的session。但还可以通过session_commit()与session_destroy()二个函数提前结束session。不管是哪种方式结束session都会产生IO操作。默认产生一个IO写操作,将当前session数据写回session文件。session_commit()则是调用该函数那刻产生一个IO写操作,将session数据写回session文件。而session_destroy()不一样在于不会将数据写回session文件,而是直接删除当前session文件。
+结束session,默认是在页面生命周期结束之前,PHP会自动结束当前没有终止的session,但还可以通过session_commit()与session_destroy()函数提前结束session。不管是哪种方式结束session都会产生IO操作,默认产生一个IO写操作,将当前session数据写回session文件。session_commit()则是调用该函数那刻产生一个IO写操作将session数据写回session文件。而session_destroy()不一样在于不会将数据写回session文件,而是直接删除当前session文件。
 不管是session_commit()还是session_destroy()都不会清空$_SESSION数组,更不会删除$_SESSION数组,只是所有session_*函数不能再操作session数据,因为当前的session生命周期终止了,即不能操作一个未定义对象。
 
 用户注销web应用系统,最好的调用方式依次是
@@ -15925,26 +16064,19 @@ setcookie(session_name(),session_id(),time()-10,'/');  // 删除cookie中的sess
 $_SESSION = array();      // 删除多个会话即一次注销所有的会话变量
 
 </pre><textarea>
-// 开启session
-session_start();
-// 清空$_SESSION数据
-$_SESSION = [];
-// 删除会话cookie
-if(ini_get('session.use_cookie')){
+session_start();  // 开启session
+$_SESSION = [];   // 清空$_SESSION数据
+if(ini_get('session.use_cookie')){  // 删除会话cookie
   $params = session_get_cookie_params();
   setcookie(session_name(),'',time()-1,$params['path'],$params['domain'],$params['secure'],$params['httponly']);
 }
-// 销毁会话
-session_destroy();
+session_destroy();  // 销毁会话
 
 </textarea><pre>
 【 session_name() 】
 session_name ([ string $name ]): string
 读取/设置当前会话名称,如果指定name参数则会更新会话名称,并返回原来的会话名称
-
-参数name是用在cookie或URL中的会话名称,如PHPSESSID。
-只能用字母和数字作为会话名称,建议尽可能的短,且望文知意,对于启用了cookie警告的用户来说,方便其判断是否要允许此cookie
-
+参数name是用在cookie或URL中的会话名称,如PHPSESSID,只能用字母和数字作为会话名称,建议尽可能的短,且望文知意,对于启用了cookie警告的用户来说,方便其判断是否要允许此cookie
 请求开始的时候会话名称会被重置并存储到session.name配置项。 因此要想设置会话名称,那么对于每个请求都需要在调用session_start()或session_register()函数之前调用session_name()
 
 【 session_id() 】
@@ -15953,7 +16085,6 @@ session_id ([ string $id ] ): string
 为了能够将会话ID很方便的附加到URL之后,可以使用常量SID获取以字符串格式表达的会话名称和ID
 如果指定了id参数的值则使用指定值作为会话ID,必须在调用session_start()之前调用session_id()
 不同的会话管理器对于会话ID中可以使用的字符有不同的限制,例如文件会话管理器仅允许会话ID中使用以下字符：a-z A-Z 0-9 ,和-
-
 如果使用cookie方式传送会话ID,并且指定了id参数,在调用session_start()之后都会向客户端发送新的cookie,无论当前的会话ID和新指定的会话ID是否相同。
 
 【 session_status() 】
@@ -15969,6 +16100,7 @@ session_start();
 $_SESSION['test'] = 'hello world';
 $_SESSION['php'] = 'hello php';
 setCookie(session_name(), session_id(), time+60*60);
+
 session_start();
 var_dump(session_name());   // string 'PHPSESSID' (length=9)
 var_dump(session_id());     // string 'bbtjeog21o8tc0vko7jekpvj13' (length=26)
@@ -15999,6 +16131,28 @@ if(!is_session_started()) session_start();
 </textarea>
 
 <h4>严格设置php中session过期时间</h4><pre>
+Session的生命期指从用户在Session有效期内第一次访问网站直到不再访问网站为止的这段时间。
+
+在谈bai论session机制的时候，常常听到这样一种误解“只要du关闭浏zhi览器，session就消失了”。其实可以想象一下dao会员卡的例子，除非顾客主动对店家提出销卡，否则店家绝对不会轻易删除顾客的资料。对session来说也是一样的，除非程序通知服务器删除一个session，否则服务器会一直保留，程序一般都是在用户做log off的时候发个指令去删除session。然而浏览器从来不会主动在关闭之前通知服务器它将要关闭，因此服务器根本不会有机会知道浏览器已经关闭，之所以会有这种错觉，是大部分session机制都使用会话cookie来保存session id，而关闭浏览器后这个session id就消失了，再次连接服务器时也就无法找到原来的session。如果服务器设置的cookie被保存到硬盘上，或者使用某种手段改写浏览器发出的HTTP请求头，把原来的session id发送给服务器，则再次打开浏览器仍然能够找到原来的session。
+
+关闭浏览器后session本来就不会销毁，只不过是关联的cookie被销毁了，所以服务器上的那个session也就没用了
+20分钟后session自动销毁，只是讲20分钟后session文件被视为垃圾，还要等待一定几率被系统回收，这个几率可以在php.ini里设置
+
+session是存硬盘，并不是存内存,所以没自动回收这一说
+客户端cookie里边有个sessionid,关闭客户端，只是sessionid没了,服务器端的session还在
+如果每次关闭浏览器 都用删除SESSION文件的话,那对硬盘的压力会非常非常大的
+
+设置Session有效期：
+ini_set('session_save_path','/tmp/');//设置保存路径
+ini_set('session.gc_maxlifetime',60);//保存1分钟
+setcookie(session_name(),session_id(),time()+6,"/");//设置会话cookie的过期时间
+ 
+说明：
+（1）关闭浏览器不会使一个Session结束，但会使这个Session永远无法访问。因为当用户打开新的浏览器窗口又会产生一个新的Session。
+（2）Session对象不是一直有效，默认有效期为24分钟。
+（3）增加Session的有效期会导致Web服务器保存用户Session的信息的时间增长，如果访问的用户很多，会加重服务器负担。
+（4）不能单独对某个用户的Session设置有效期。
+
 如何严格限制session在30分钟后过期
 1.设置客户端cookie的lifetime为30分钟;
 2.设置session的最大存活周期也为30分钟;
@@ -16008,30 +16162,29 @@ php中session有效期默认1440秒(24分钟),客户端超过24分钟没有刷�
 Session储存在服务器端,根据客户端提供的SessionID来得到这个用户的文件,然后读取文件,取得变量的值,SessionID可以使用客户端的Cookie或Http1.1协议的Query_String来传送给服务器,然后服务器读取Session的目录
 
 要控制Session的生命周期,首先需要了解一下php.ini关于Session的相关设置：
-1、session.use_cookies：默认值是"1",代表SessionID使用Cookie来传递,反之就是使用Query_String来传递;
-2、session.name：SessionID储存的变量名称,可能是Cookie,也可能是Query_String来传递,默认值是"PHPSESSID";
+1、session.use_cookies：默认"1",代表SessionID使用Cookie来传递,反之就是使用Query_String来传递;
+2、session.name：SessionID储存的变量名称,可能是Cookie,也可能是Query_String来传递,默认"PHPSESSID";
 3、session.cookie_lifetime：代表SessionID在客户端Cookie储存的时间,默认0即浏览器关闭SessionID就作废,所以Session不能永久使用
 4、session.gc_maxlifetime：Session数据在服务器端储存的时间,如果超过这个时间Session数据就自动删除
 
 如何设置Session的存活周期
 服务器通过SessionID来读取Session的数据,但一般浏览器传送的SessionID在浏览器关闭后就没有了,那么只需人为的设置SessionID并保存下来
 如果拥有服务器的操作权限,那么设置这个非常简单,只是需要进行如下的步骤：
-1、把"session.use_cookies"设置为1,使用Cookie来储存SessionID,不过默认就是1,一般不用修改;
-2、把"session.cookie_lifetime"改为需要设置的时间(比如一个小时就可以设置为3600,以秒为单位);
+1、把"session.use_cookies"设置为1,使用Cookie来储存SessionID,默认就是1,一般不用修改;
+2、把"session.cookie_lifetime"改为需要设置的时间,比如一个小时就可以设置为3600
 3、把"session.gc_maxlifetime"设置为和"session.cookie_lifetime"一样的时间;
 
-设定session有效期的参数是session.gc_maxlifetime,可以在php.ini文件中或通过ini_set()函数来修改。问题在于经过多次测试,修改这个参数基本不起作用,session有效期仍然保持24分钟的默认值。
+设定session有效期的参数是session.gc_maxlifetime,可以在php.ini文件或通过ini_set()函数来修改。问题在于经过多次测试,修改这个参数基本不起作用,session有效期仍然保持24分钟的默认值。
 由于PHP的工作机制,它并没有一个daemon线程来定时地扫描session信息并判断其是否失效。当一个有效请求发生时,PHP会根据全局变量session.gc_probability/session.gc_divisor(同样可以通过php.ini或ini_set()函数来修改)的值来决定是否启动一个GC(Garbage Collector)。
 默认session.gc_probability ＝ 1,session.gc_divisor ＝100,也就是说有1%的可能性会启动GC。GC的工作就是扫描所有的session信息,用当前时间减去session的最后修
 改时间(modified date),同session.gc_maxlifetime参数进行比较,如果生存时间已经超过gc_maxlifetime就把该session删除。
 
 到此为止,工作一切正常。那为什么会发生gc_maxlifetime无效的情况呢？
-默认session信息会以文本文件的形式,被保存在系统的临时文件目录中。在Linux下这一路径通常为\tmp,在Windows下通常为C:\Windows\Temp。服务器上有多个PHP应用时它们会把自己的session文件都保存在同一个目录中。同样地这些PHP应用也会按一定机率启动GC,扫描所有的session文件。
-
-问题在于,GC在工作时并不会区分不同站点的session。如站点A的gc_maxlifetime设置为2小时,站点B的 gc_maxlifetime设置为默认的24分钟。当站点B的GC启动时,它会扫描公用的临时文件目录,把所有超过24分钟的session文件全部删除掉,而不管它们来自于站点A或B。这样站点A的gc_maxlifetime设置就形同虚设了。
+默认session信息会以文本文件的形式保存在系统的临时文件目录中,Linux下通常为\tmp,在Windows下通常为C:\Windows\Temp或C盘用户目录\AppData\Local\Temp。服务器上有多个PHP应用时它们会把自己的session文件都保存在同一个目录中,同样地这些PHP应用也会按一定机率启动GC,扫描所有的session文件。
+问题在于GC在工作时并不会区分不同站点的session。如站点A的gc_maxlifetime设置为2小时,站点B的 gc_maxlifetime设置为默认的24分钟。当站点B的GC启动时,它会扫描公用的临时文件目录,把所有超过24分钟的session文件全部删除掉,而不管它们来自于站点A或B,这样站点A的gc_maxlifetime设置就形同虚设了。
 找到问题所在,解决起来就很简单了。修改session.save_path参数或使用session_save_path()函数把保存session的目录指向一个专用的目录,gc_maxlifetime参数工作正常了。
 
-gc_maxlifetime只能保证session生存的最长时间,并不能够保存在超过这一时间之后session信息立即会得到删除。因为GC是按机率启动的,可能在某一个长时间内都没有被启动,那么大量的session在超过gc_maxlifetime以后仍然会有效。
+gc_maxlifetime只能保证session生存的最长时间,并不能够保存在超过这一时间之后session信息立即会得到删除,因为GC是按机率启动的,可能在某一个长时间内都没有被启动,那么大量的session在超过gc_maxlifetime以后仍然会有效。
 解决这个问题的一个方法是把session.gc_probability/session.gc_divisor的机率提高,如果提到100%就会彻底解决这个问题,但显然会对性能造成严重的影响。另一个方法是自己只使用php实现,创建一个session类,在session写入时把过期时间也写入,读取时根据过期时间判断是否已过期
 
 </pre><textarea>
@@ -16065,7 +16218,6 @@ class Session{
 
 // demo.php
 session_start();
-
 $data = '123456';
 session::set('test',$data,10);
 echo session::get('test'); // 未过期,输出
@@ -16073,6 +16225,108 @@ sleep(10);
 echo session::get('test'); // 已过期
 
 </textarea>
+
+<h4>PHP如何修改SESSION的生存时间</h4><pre>
+需求背景：
+用户希望他登录之后，浏览器就帮他记住登录状态，这样他就不用每次进入的时候，都需要登录一次。
+
+session过期时间：
+如果我们没有设置session的生成时间，在配置文件中默认的生存时间是1440秒
+也就是说session的生存时间是24分钟，这里可能有些人会有这样的疑问：
+为什么我登录之后，24分钟之后，并没有退出呀？
+其实在24分钟之后，session是失效的，为什么用户没有退出是由于php的回收机制造成的。
+
+在配置文件php.ini中，你可以找到这两个配置项，上边的注释基本是一样，大概意思就是说：
+"回收机制"在每个session初始化发生是一个概率事件，这个概率是由以下公式得出的：
+gc_probability除以gc_divisor。如果gc_probability值为1，gc_divisor值为100，那么触发“回收机制”的概率为1%。
+就意味着可能有100次php请求，可能才会有一次触发“回收机制”的可能性。所以说如果session已经过期了，但是没有
+触发到“回收机制”，session文件还没有被删除，那session就是还有效的。
+如果需要很精准的触发“回收机制”，让session已过期马上删除，就把以上两个值都设置为1.
+但是这样会极其影响PHP性能。
+
+sessionID在cookie中的生存时间：
+一般我们关闭浏览器，如果我们没有单独设置sessionID过期时间的话，浏览器就会把cookie中对应的sessionid删除。
+我们没有关闭浏览器，session的时间到了，也是失效的。但是由于php的回收机制,可能不会立马就失效。
+
+session_start();
+$_SESSION["username"] = "peter";
+echo "登记的用户名为：".$_SESSION["username"];
+
+如果我们执行这段代码的时候，我们在Chrome浏览器下的Application下查看我们刚才访问的网站的sessionid的过期时间1969-12-31就说明是没有设置缓存时间，关闭浏览器则会被删除
+
+把以上代码修改为下：
+$lifeTime = 24 * 3600;
+session_set_cookie_params($lifeTime);
+session_start();
+$_SESSION["username"] = "peter";
+echo "登记的用户名为：".$_SESSION["username"];
+这时就可以看见我们设置的session在cookie中的失效时间修改了
+
+设置session的生存时间
+
+1.最有效的方法 修改php.ini中
+#session的超时时间
+session.gc_maxlifetime = 1440
+
+2.通过php去修改这个值
+$Lifetime = 3600;
+$DirectoryPath = "./tmp";
+is_dir($DirectoryPath) or mkdir($DirectoryPath, 0777);
+//是否开启基于url传递sessionid,这里是不开启，发现开启也要关闭掉
+if (ini_get("session.use_trans_sid") == true) {
+ini_set("url_rewriter.tags", "");
+ini_set("session.use_trans_sid", false);
+}
+ini_set("session.gc_maxlifetime", $Lifetime);//设置session生存时间
+ini_set("session.gc_divisor", "1");
+ini_set("session.gc_probability", "1");
+ini_set("session.cookie_lifetime", "0");//sessionID在cookie中的生存时间
+ini_set("session.save_path", $DirectoryPath);//session文件存储的路径
+session_start();
+注意：如果你的网站自定义了session_save_path,你就需要给session.gc_probability设置值，否则的话，你的session产生的sessionID文件永远不会被删除。
+
+3.采用增加cookie的时间，变相的增加session的时间
+/**
+* 下面只是设置了保存sessionid的那个时间，这样的结果是关闭浏览器后session仍可以用
+* 实际并没有改变session的生存时间,如果session已经过期，这也就没有意义了
+*/
+//只会在用户第一次访问的时候设置保存sessionid的那个cookie的过期时间
+$lifetime=600;
+session_set_cookie_params($lifetime);#注意到放到start的前面
+session_start();
+//每次都设置保存sessionid的那个cookie的过期时间
+$lifetime=600;
+session_start();
+setcookie(session_name(),session_id(),time()+$lifetime);
+
+注意：个人觉得，要么设置第二种方法，要么就把第一种和第三种想结合，这样才能从根本上解决问题
+$lifetime=86400;
+session_set_cookie_params($lifetime);
+session_start();
+session_regenerate_id(true);
+
+session处理是所有的Web应用都必须面对的问题。PHP中对session有效期的处理，和其他的解决方案有着很大的不同，这是和PHP的工作机制相关的。
+在传统的client/server应用中，对于session失效的情况，可以交给网络协议自己来处理。无论是client端主动关闭连接，还是因为网络异常而导致的连接中断，server端都能够得到通知，触发连接中断的事件。只要编程响应这一事件，执行指定的操作即可。
+但对于web应用来说，情况却完全不一样。HTTP协议本身是无状态的，也就是说，每当client/server完成一次请求/响应的过程后，连接就会被断开。在断开连接以后，server并不知道client是否继续“在线”，还会继续发送下一次请求。
+换句话说，无论client端的用户已经关闭了浏览器窗口，还是用户仅仅在阅读当前网页并准备在下一秒钟继续浏览，或者用户因为Windows崩溃/停电/硬盘坏掉/网线被拔/地球爆炸而彻底无法再发送下一个请求，server都一无所知。（在HTTP 1.1中，浏览器可以通过keep-alive参数，来通知server不要在响应请求后主动断开连接，从而实现物理上的长连接。但是，这只是为了提高网络传输的性能而采取的措施，HTTP 在逻辑上仍然是无状态的。）因此，只能通过某种模拟的方式来判断当前session是否有效。如果某个session在超过一段时间后没有对server 端发出请求，server都会判断用户已经“离线”，当前session失效，并触发连接中断的事件。要做到这一点，server需要运行一个后台线程，定时扫描所有的session信息，判断session是否已经超时。
+PHP处理session的原理也不例外，但是在具体的实现方式上，却与众不同。这是因为，由于PHP的工作机制，它并没有一个后台线程，来定时地扫描session信息并判断其是否失效。它的解决之道是，当一个有效请求发生时，PHP会根据某个概率，来决定是否调用一个GC（Garbage Collector）。
+GC的工作，就是扫描所有的session信息，用当前时间减去session的最后修改时间（modified date），同配置参数（configuration option）session.gc_maxlifetime的值进行比较，如果生存时间已经超过gc_maxlifetime，就把该session删除。
+这是很容易理解的，因为如果每次请求都要调用GC代码，那么PHP的效率就会低得令人吃不消了。这个概率取决于配置参数 session.gc_probability/session.gc_divisor的值（可以通过php.ini或者ini_set()函数来修改）。
+默认session.gc_probability = 1，session.gc_divisor=100，也就是说有1%的可能性会启动GC。这三个参数，session.gc_maxlifetime/session.gc_probability/session.gc_divisor都可以通过php.ini或者ini_set()函数来修改。但要记得，如果使用ini_set()函数的话，必须在每一个页面的开始处都调用 ini_set()。
+这又导致了另外一个问题，gc_maxlifetime只能保证session生存的最短时间，并不能够保存在超过这一时间之后session信息立即会得到删除。因为GC是按概率启动的，可能在某一个长时间内都没有被启动，那么大量的session在超过 gc_maxlifetime以后仍然会有效。当然，发生这种情况的概率很小，但是如果你的应用对 session的失效期要求很精确的话，这会导致很严重的问题。解决这个问题的一个方法是，把 session.gc_probability/session.gc_divisor的机率提高，如果提到100%，就会彻底解决这个问题，但显然会对性能造成严重的影响。另一个方法是放弃PHP的GC，自己在代码中判断当前session的生存时间，如果超出了 gc_maxlifetime，就清空当前session。
+PHP中的session有效期默认是1440秒（24分钟），也就是说，客户端超过24分钟没有刷新，当前session就会失效。要修改这个默认值，正确的解决办法是修改配置参数session.gc_maxlifetime。
+我曾经在网上搜索过这个问题的解决方式，找到的结果千奇百怪。
+有的说要设置“session_life_time”，据我知所，PHP中没有这个参数。有的说要调用session_set_cookie_params，或者设置 session.cookie_lifetime，这仅仅用于设置client端cookie的生存时间，换言之，只当client端cookie的生存时间小于server端的session生存期时，修改这个值才有效，并且最长不能超过server端的session生存期，原因很简单，当 server端的session已经失效时，client端cookie的生存时间再长也是没有意义的。还有的说要调用 session_cache_expire，这个参数用于通知浏览器和proxy，当前页面的内容应该被缓存多长时间，和session的生存期并没有直接关系。
+听起来，这种解决方案很完美。但是，当你在实际中尝试修改session.gc_maxlifetime的值的时候，你很可能会发现，这个参数基本不起作用，session有效期仍然保持24分钟的默认值。甚至可能出现，在开发环境下工作正常，在服务器上却无效！
+为了彻底解决这个问题，需要对PHP的工作细节进行进一步的分析。
+在默认情况下，PHP 中的session信息会以文本文件的形式，被保存在系统的临时文件目录中。这个路径由配置参数session.save_path指定。在Linux下，这一路径通常为\tmp，在 Windows下通常为C:\Windows\Temp。当服务器上有多个PHP应用时，它们会把自己的session文件都保存在同一个目录中（因为它们使用同一个session.save_path参数）。同样地，这些PHP应用也会按一定机率启动GC，扫描所有的session文件。
+问题在于，GC在工作时，并不会区分不同站点的session。举例言之，站点A的gc_maxlifetime设置为2小时，站点B的 gc_maxlifetime设置为默认的24分钟。当站点B的GC启动时，它会扫描公用的临时文件目录，把所有超过24分钟的session文件全部删除掉，而不管它们来自于站点A或B。这样，站点A的gc_maxlifetime设置就形同虚设了。
+找到问题所在，解决起来就很简单了。在页面的开始处调用session_save_path()函数，它能够修改session.save_path参数，把保存session的目录指向一个专用的目录，例如\tmp\myapp\。这样，gc_maxlifetime参数就工作正常了。
+使用公用的session.save_path还会导致安全性问题，因为这意味着，同一台服务器上的其它PHP程序也可以读取你的站点的session文件，这可能被用于黑客攻击。另一个问题是效率：在一个繁忙的站点中，可能存在成千上万个session文件，而把许多不同网站的session文件都放在同一个目录下，无论是对单个文件的读写，还是遍历所有文件进行GC，都无疑会导致性能的降低。因此，如果你的PHP应用和别的PHP应用运行在同一台服务器上的话，强烈建议你使用自己的 session.save_path。
+严格地来说，这算是PHP的一个bug。当PHP在进行GC时，它应该区别来自不同站点的session文件，并应用不同的gc_maxlifetime值。目前，最新的PHP 5.2.X仍然存在这个问题。
+上文说到，在一个繁忙的站点中，可能存在成千上万个session文件，即使区分了不同站点的session.save_path目录，单个站点的session文件数目仍然可能导致效率问题。
+
+</pre>
 
 <h4>SESSION文件锁的操作</h4><pre>
 默认php是将session数据保存在文件里,并且文件以sessionid命名的
@@ -16083,12 +16337,10 @@ echo session::get('test'); // 已过期
 对于同一个SESSION会话,有很多地方在读写,而且还不能够确定是读在前还是写在前
 如果没有锁的引入,有可能读取的数据是修改之前的数据,而不是修改之后的数据,这样使用修改之前的数据进行一些操作,势必会引入很多数据不一致的问题,尤其涉及用户财产安全的数据,这种情况其实和数据库一样,而数据库是使用事务来处理,而PHP是使用锁来处理,锁定相应的SESSION文件
 
-</pre><textarea>
 session_start();
 $_SESSION['name'] = '数据库获取的用户名';
 sleep(1000);
 
-</textarea><pre>
 默认PHP脚本结束了SESSION对话就自动关闭,现在由于休眠,所以SESSION对话没有关闭,导致打开选项卡访问另一个有SESSION操作的页面时,页面一直等待一直转圈圈
 
 上面实例模拟一种session锁的情况,这种情况描述了一种生产环境下后面的代码需要执行的时间很长的情况,这种情况可以采用提前关闭结束SESSION会话的方式来解决锁等待的问题。
@@ -16105,15 +16357,9 @@ php5.4后session_set_save_handler支持传递SessionHandlerInterface的方式,�
 
 </pre><textarea>
 session_start();
-
-//可以读写session
-$_SESSION['latestRequestTime'] = time();
-
-//关闭session
-session_write_close();
-
-//读取session
-$twitterId = $_SESSION['twitterId'];
+$_SESSION['latestRequestTime'] = time();  //可以读写session
+session_write_close();  //关闭session
+$twitterId = $_SESSION['twitterId'];  //读取session
 
 </textarea>
 
@@ -16375,6 +16621,10 @@ var_dump($_SESSION);
 
 </textarea><pre>
 【 客户端禁止Cookie 】
+有两种方式用来传送会话ID：
+Cookies
+URL参数: 无需开发人员干预，PHP就可以自动处理URL传送会话ID的场景。如果启用了session.use_trans_sid选项，PHP将会自动在相对URI中包含会话ID
+
 若客户端禁用cookie可以用URl传递session_id(),原理都是传递是session_id,但不安全
 session_id($ssid);  自定义session_id
 uniqid()            删除唯一的id值,length=13的string (系统自动生成的是26位)
@@ -16398,7 +16648,7 @@ print_r($_SESSION);
 
 </pre>通过get方式<textarea>
 // 表单页面index.php
-action="page.php?<?=session_name();?>=<?=session_id(); ?>"
+action="page.php?< ?=session_name();?>=< ?=session_id(); ?>"
 
 // 接收页面page.php,session文件在当前目录的temp目录
 header("Content-Type:text/html;charset=utf-8");
@@ -16442,7 +16692,7 @@ client request  ->  nginx load  -|
                                   ->webserver phpapp
 
 </textarea><pre>
-先前在PHP应用所在的主机需要安装Nginx或apache等这类web服务器,然后再在前面使用Nginx作为负载。Nginx负载和php应用之间的通信是在应用层的,Nginx负载其实就相当于一个代理。但是现在情况不同了。Fastcgi技术的应用允许在php应用层可以不用再安装web服务器。现在PHP5.5版本已经将fpm作为内部模块支持了。在这种情况下Nginx负载和php应用之间的通信是在传输层的,二者之间使用socket进行通信。当然这需要fpm服务的支持
+先前在PHP应用所在的主机需要安装Nginx或apache等这类web服务器,然后再在前面使用Nginx作为负载。Nginx负载和php应用之间的通信是在应用层的,Nginx负载其实就相当于一个代理。但是现在情况不同了。Fastcgi技术的应用允许在php应用层可以不用再安装web服务器。PHP5.5版本已经将fpm作为内部模块支持了。在这种情况下Nginx负载和php应用之间的通信是在传输层的,二者之间使用socket进行通信。当然这需要fpm服务的支持
 
 </pre><textarea>
                                   ->fpm服务 phpapp
@@ -16556,7 +16806,7 @@ if(isset($_COOKIE[session_name()])){
   header("location:login.php");
 }
 
-4、如果用户是通过cookie登录的,设置session。
+4、如果用户是通过cookie登录的,设置session
 $_SESSION['userid'] = $_COOKIE['userid'];
 $_SESSION['username'] = $_COOKIE['username'];
 
@@ -16569,7 +16819,7 @@ setcookie('autoLogin',$value,7*24*3600+time());
 
 2、直接用url传递用户token或SESSION_ID
 可以在用户登陆后,给用户的地址添加token,然后这个token有效期是一周
-eg. http://segmentfault.com/q/1010000000666346?tk=e2hf92ehfui2hj9dxhj19dsh9u21hd921hwf9de2h9f
+http://xxx.com/q/1010000000666346?tk=e2hf92ehfui2hj9dxhj19dsh9u21hd921hwf9de2h9f
 
 </pre>纯cookie实现自动登录<textarea>
 function login(){
