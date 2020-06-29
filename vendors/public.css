@@ -2,8 +2,8 @@ body,main,h1,h1,h3,h4,h5,h6,ol,ul,li,pre,article,section,aside,header,footer,nav
 	margin:0; padding:0; font-family: "Brandon Grotesque", "微软雅黑", "宋体", simsun, sans-serif, Arial;
 }
 small{ font-size:0.5rem;}
-h1{width:80%; margin:1rem 0 2rem 2rem;}
-main{width:80%; padding:1rem 0 2rem 2rem;}
+main{width:83%; padding:1rem 1rem 2rem 1rem;}
+pre{display: block; width: 100%;white-space:pre-line;word-wrap:break-word;word-break:break-all;overflow-x:hidden;margin: 1em 0px 1em;}
 h1{ text-align:center; padding:15px 0; background:#0d89e9; color:white;}
 h2{ background:#FFFF00;text-indent:1rem; line-height:3rem; }
 h2:before{ content: "\27A4";color: #A101A9;}
@@ -15,7 +15,7 @@ h1 a,h2 a,h3 a,h4 a{text-decoration: none;color: #fff;}
 
 /*右侧导航栏样式start*/
 ol{
-	position:fixed;top:10px;right:50px;width:160px;padding:8px;border:1px solid #ddd;border-radius: 5px;
+	position:fixed;top:10px;right:10px;width:12%;padding:8px;border:1px solid #ddd;border-radius: 5px;
 	height: calc(100vh - 50px);overflow-x: hidden;overflow-y: scroll;
 }
 ol li{width: 100%;list-style:none;}
