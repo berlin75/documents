@@ -2,8 +2,8 @@ body,main,h1,h1,h3,h4,h5,h6,ol,ul,li,pre,article,section,aside,header,footer,nav
 	margin:0; padding:0; font-family: "Brandon Grotesque", "微软雅黑", "宋体", simsun, sans-serif, Arial;
 }
 small{ font-size:0.5rem;}
-main,h1{width:80%; margin:1rem 0 2rem 2rem;}
-pre:not(.language-php),pre:not(.language-css),pre:not(.language-js),pre:not(.language-html),pre:not(.language-python){display: block; width: 100%;white-space:pre-line;word-wrap:break-word;word-break:break-all;overflow-x:hidden;margin: 1em 0px 1em;}
+h1{width:80%; margin:1rem 0 2rem 2rem;}
+main{width:80%; padding:1rem 0 2rem 2rem;}
 h1{ text-align:center; padding:15px 0; background:#0d89e9; color:white;}
 h2{ background:#FFFF00;text-indent:1rem; line-height:3rem; }
 h2:before{ content: "\27A4";color: #A101A9;}

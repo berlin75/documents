@@ -161,13 +161,6 @@
       <li><a href="#rbac">rbac</a></li>
     </ul>
   </li>
-  <li>
-    <a href="#mail">office ▼</a>
-    <ul>
-      <li><a href="#mail">phpmailer</a></li>
-      <li><a href="#phpexcell">phpexcell</a></li>
-    </ul>
-  </li>
   <li><a href="#curl">curl</a></li>
   <li>
     <a href="#mvc">mvc ▼</a>
@@ -233,7 +226,17 @@
         <li><a href="#swoole_easy-swoole">easy-swoole</a></li>
     </ul>
   </li>
-  <li><a href="#module">功能模块</a></li>
+  <li>
+    <a href="#module">功能模块 ▼</a>
+    <ul>
+        <li><a href="#sort">排序算法</li>
+        <li><a href="#mq">消息队列</li>
+        <li><a href="#erp">erp</li>
+        <li><a href="#eshop">eshop</li>
+        <li><a href="#mail">phpmailer</a></li>
+        <li><a href="#phpexcell">phpexcell</a></li>
+    </ul>
+  </li>
 </ol>
 
 <h1><a name="top">PHP服务器脚本</a></h1>
@@ -50959,373 +50962,6 @@ RBAC-0模型是权限最基础也是最核心的模型,它包括用户/角色/�
 </pre>
 </div>
 
-<div id="mail">
-<h2>mail()函数用于从脚本中发送电子邮件</h2><pre>
-PHP运行邮件函数需要一个已安装且正在运行的邮件系统(如sendmail、postfix、qmail等),所用的程序通过在php.ini文件中的配置设置进行定义
-
-mail(to,subject,message,headers,parameters)
-to	    必需,规定email接收者
-subject	必需,规定email的主题,该参数不能包含任何新行字符
-message	必需,定义要发送的消息,应使用LF (\n)来分隔各行,每行应该限制在70个字符内
-headers	可选,规定附加的标题如From、Cc和Bcc,应当使用CRLF (\r\n)分隔附加的标题
-parameters	可选。对邮件发送程序规定额外的参数
-
-</pre><textarea>
-if(isset($_REQUEST['email'])){
-  $mailcheck = filter_var($_REQUEST['email'], FILTER_VALIDATE_EMAIL)  // 判断邮箱是否合法
-  if ($mailcheck === FALSE){
-    echo "非法输入";
-  }else{
-    $email = $_REQUEST['email'] ;
-    $subject = $_REQUEST['subject'] ;
-    $message = $_REQUEST['message'] ;
-    mail("someone@example.com", "Subject: $subject", $message, "From: $email" );
-    echo "Thank you for using our mail form";
-  }
-}else{
-  echo "< form method='post' action='mailform.php'>
-  Email: < input name='email' type='text'>< br>
-  Subject: < input name='subject' type='text'>< br>
-  Message:< br>
-  < textarea name='message' rows='15' cols='40'>< /textarea>< br>
-  < input type='submit'>
-  < /form>";
-}
-
-</textarea>
-
-<h3>phpmailer https://github.com/PHPMailer/PHPMailer</h3><pre>
-composer require phpmailer/phpmailer
-"phpmailer/phpmailer": "~6.0" // composer.json
-
-PHPMailer需要PHP的sockets扩展支持,而登录QQ邮箱SMTP服务器则必须通过SSL加密的,PHP还得包含openssl的支持
-
-QQ邮箱设置
-所有的主流邮箱都支持SMTP协议,但并非所有邮箱都默认开启,可以在邮箱的设置-账户里面手动开启IMAP/SMTP服务
-第三方服务在提供了账号和密码(授权码)之后就可以登录SMTP服务器,通过它来控制邮件的中转方式
-
-</pre><textarea>
-date_default_timezone_set("PRC");
-
-require_once("PHPMailer/src/PHPMailer.php");
-require_once("PHPMailer/src/SMTP.php");
-require_once("PHPMailer/src/Exception.php");
-use \PHPMailer\PHPMailer\PHPMailer;
-use \PHPMailer\PHPMailer\Exception;
-
-$mail = new PHPMailer();         // 实例化PHPMailer核心类
-// Enable SMTP debugging,0=off (for production use),1=client messages,2=client and server messages
-$mail->SMTPDebug = 2;            // 是否启用smtp的debug调试,开发环境建议开启,生产环境注释掉即可,默认关闭
-// $mail->Debugoutput = 'html';  // 调试输出格式
-$mail->isSMTP();                 // 使用smtp鉴权方式发送邮件
-$mail->SMTPAuth = true;          // smtp需要鉴权必须是true
-$mail->Host = 'smtp.qq.com';     // 链接qq域名邮箱的服务器地址
-$mail->SMTPSecure = 'ssl';       // 设置使用ssl加密方式登录鉴权
-$mail->Port = 465;               // 设置ssl连接smtp服务器的远程服务器端口号,likely to be 25,465 or 587
-$mail->CharSet = 'UTF-8';        // 设置发送的邮件的编码,默认ISO-8859-1,如果发中文此项必须设置,否则乱码
-$mail->FromName = 'phpmailer';   // 设置发件人昵称 显示在收件人邮件的发件人邮箱地址前的发件人姓名
-$mail->Username = '465137869@qq.com';  // smtp登录的账号 QQ邮箱即可
-$mail->Password = 'htyrnrdxwaqkcaga';  // smtp登录的密码,使用生成的授权码
-$mail->From = '465137869@qq.com';      // 设置发件人邮箱地址 同登录账号
-$mail->addReplyTo('replyto@example.com','First Last');  // 回复地址
-$mail->isHTML(true);                   // send as HTML,邮件正文是否为html编码,注意此处是一个方法
-$mail->addAddress('1024940433@qq.com');// 设置收件人邮箱地址,添加多个收件人则多次调用方法即
-$mail->addAddress('heiying6958@sina.com');
-$mail->Subject = '邮件主题';            // 添加该邮件的主题
-$mail->Body = '<h1>Hello World</h1>';  // 添加邮件正文
-$mail->addAttachment('./a.txt');       // 为该邮件添加附件
-$status = $mail->send();               // 发送邮件,返回状态的布尔值
-
-</textarea><textarea>
-// Import PHPMailer classes into the global namespace
-// These must be at the top of your script,not inside a function
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
-// Load Composer's autoloader
-require 'vendor/autoload.php';
-
-$mail = new PHPMailer(true);                          // Passing `true` enables exceptions
-try {
-  // Server settings
-  $mail->SMTPDebug = 2;                               // Enable verbose debug output
-  $mail->isSMTP();                                    // Set mailer to use SMTP
-  $mail->Host = 'smtp1.example.com;smtp2.example.com';// Specify main and backup SMTP servers
-  $mail->SMTPAuth = true;                     // Enable SMTP authentication
-  $mail->Username = 'user@example.com';       // SMTP username
-  $mail->Password = 'secret';                 // SMTP password
-  $mail->SMTPSecure = 'tls';                  // Enable TLS encryption,`ssl` also accepted
-  $mail->Port = 587;                          // TCP port to connect to
-
-  // Recipients(收件人)
-  $mail->setFrom('from@example.com','Mailer');
-  $mail->addAddress('joe@example.net','Joe User');     // Add a recipient
-  $mail->addAddress('ellen@example.com');              // Name is optional
-  $mail->addReplyTo('info@example.com','Information');
-  $mail->addCC('cc@example.com');
-  $mail->addBCC('bcc@example.com');
-
-  // Attachments
-  $mail->addAttachment('/var/tmp/file.tar.gz');        // Add attachments
-  $mail->addAttachment('/tmp/image.jpg','new.jpg');    // Optional name
-
-  // Content
-  $mail->isHTML(true);                                 // Set email format to HTML
-  $mail->Subject = 'Here is the subject';
-  $mail->Body    = 'This is the HTML message body < b>in bold!< /b>';
-  $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
-
-  $mail->send();
-  echo 'Message has been sent';
-} catch (Exception $e) {
-  echo 'Message could not be sent. Mailer Error: ',$mail->ErrorInfo;
-}
-
-</textarea><textarea>
-require_once("PHPMailer/src/PHPMailer.php");
-require_once("PHPMailer/src/SMTP.php");
-require_once("PHPMailer/src/Exception.php");
-use \PHPMailer\PHPMailer\PHPMailer;
-use \PHPMailer\PHPMailer\Exception;
-function postmail($to,$subject,$body){
-  $mail = new PHPMailer();               // 创建phpmailer实例
-  $mail->CharSet = 'utf-8';              // 设置编码形式,默认iso-99591
-  $mail->isSMTP();                       // 表示使用smtp服务
-  $mail->SMTPAuth = true;                // 使用smtp认证
-  $mail->Host = 'smtp.163.com';          // smtp主机名,以163为例
-  $mail->Username = '465137869@163.com'; // smtp服务的用户名
-  $mail->Password = 'htyrnrdxwaqkcaga';  // smtp服务的密码,现多采用授权码
-
-  // 用户可见部分
-  $mail->setFrom("465137869@163.com","username");  // 二参表示用户看到的发送方姓名,可随意改
-  $mail->Subject = $subject;              // 邮件主题
-  $mail->msgHTML($body);                  // 邮件内容,这里采用HTML
-  $mail->addAddress($to,'');              // 地址,二参是接受者,发送对象名为''时163的测试结果是smtp服务商会把它改成'我'
-  $mail->addAttachment('./php.png');      // 添加附件
-  // 发送
-  if($mail->send()){
-    echo '邮件发送成功';
-  }else{
-    echo '邮件发送失败'.'Mailer Error: ' . $mail->ErrorInfo;
-  }
-}
-
-postmail('465137869@qq.com','测试','hello world');
-
-</textarea><pre>
-【 telnet模拟邮件发送 】
-准备2个邮箱,建议sina和aliyun
-
-> telnet smtp.aliyun.com 25 // 连接阿里云邮箱服务的smtp服务器
-> helo sayhi  // 和smtp服务器打招呼
-> auth login  // 开始身份认证,用base64加密的邮箱和登录密码字符串与smtp服务器验证身份,126邮箱用授权码,qq用独立密码
-> sdsdDSDcMIMNunSDCNSYYdsdcsd  // 邮箱的base64编码字符串
-> YHbsdnUNSdcsdcs=  // 邮箱密码的base64编码字符串
-> mail from:<phpjiaoxuedev@aliyun.com>  // 身份验证成功之后开始写邮件,发件人邮箱
-> rcpt to:<phpjiaoxuedev@sina.com>  // 收件人邮箱
-> DATA     // 输入DATA指令开始写邮件
-data下的可选项：
-输入from:发件人名称,可任意填入,将显示在收件箱的发件人一栏
-输入to:收件人名称,可任意填入,将像是在收件箱收件人一栏
-输入subject:邮件主题,显示在收件箱主题一栏
-此时需空一行,表示正文部分开始
-空行后输入邮件的正文内容
-按下回车键.回车键邮件就发出去了,最后quit就可以退出
-
-</pre>
-</div>
-
-<div id="phpexcell">
-<h2>phpexcell</h2><pre>
-下载PHPExecel类文件,帮助文档可以参考PHPExcel中文帮助手册|PHPExcel使用方法
-PHP必须启用了zip、gd2、xml
-
-【使用PHPExcel实现数据批量导出为excel表格】
-
-</pre><textarea>
-<a href="./Process1.php">导出excel表格</a>
-
-/**
-* 批量导出数据
-* @param $arr  从数据库查询出来,即要导出的数据
-*        $name  excel表歌名
-*/
-function expExcel($arr,$name){
-
-    require_once 'PHPExcel.php';
-    //实例化
-    $objPHPExcel = new PHPExcel();
-    /*右键属性所显示的信息*/
-     $objPHPExcel->getProperties()->setCreator("zxf")       //作者
-                           ->setLastModifiedBy("zxf")       //最后一次保存者
-                           ->setTitle('数据EXCEL导出')      //标题
-                           ->setSubject('数据EXCEL导出')    //主题
-                           ->setDescription('导出数据')     //描述
-                           ->setKeywords("excel")           //标记
-                          ->setCategory("result file");     //类别
-
-
-    //设置当前的表格
-    $objPHPExcel->setActiveSheetIndex(0);
-    // 设置表格第一行显示内容
-    $objPHPExcel->getActiveSheet()
-        ->setCellValue('A1','业主姓名')
-        ->setCellValue('B1','密码')
-        ->setCellValue('C1','手机号码')
-        ->setCellValue('D1','地址')
-        //设置第一行为红色字体
-        ->getStyle('A1:D1')->getFont()->getColor()->setARGB(PHPExcel_Style_Color::COLOR_RED);
-
-    $key = 1;
-    /*以下就是对处理Excel里的数据,横着取数据*/
-    foreach($arr as $v){
-
-    //设置循环从第二行开始
-    $key++;
-     $objPHPExcel->getActiveSheet()
-                 //Excel的第A列,name是你查出数组的键值字段,下面以此类推
-                  ->setCellValue('A'.$key,$v['name'])
-                  ->setCellValue('B'.$key,$v['pwd'])
-                  ->setCellValue('C'.$key,$v['phone'])
-                  ->setCellValue('D'.$key,$v['address']);
-
-    }
-    //设置当前的表格
-    $objPHPExcel->setActiveSheetIndex(0);
-　　 ob_end_clean();     //清除缓冲区,避免乱码
-     header('Content-Type: application/vnd.ms-excel');  //文件类型
-     header('Content-Disposition: attachment;filename="'.$name.'.xls"');    //文件名
-     header('Cache-Control: max-age=0');
-     header('Content-Type: text/html; charset=utf-8');  //编码
-     $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel,'Excel5');     //excel 2003
-     $objWriter->save('php://output');
-     exit;
-
-}
-
-/***********调用**********************/
-header("Content-type:text/html;charset=utf-8");
-
-//链接数据库
-$link = @mysql_connect('localhost','root','') or die('连接数据库失败');
-mysql_select_db('test',$link);
-mysql_query('set names utf8');
-
-$sql = "select * from house";  //先获取数据
-$res = mysql_query($sql);
-$arr = array();
-while ($row = mysql_fetch_assoc($res)){  //把$res=>$arr,把结果集内容转移到一个数组中
-    $arr[] = $row;
-}
-$name = "用户表";     //excel表格名
-expExcel($arr,$name)  //调用
-
-</textarea>【使用PHPExcel实现数据批量导入到数据库】<textarea>
-//只能上传Excel2003类型的xls文件,大小不超过5M;
-//此例子只使用execel2003的.xls文档,若使用的是其他版本,可以保存格式为"Execel 97-2003 工作簿(*.xls)"即.xls文件类型即可
-
-< form enctype="multipart/form-data" action="./Process.php" method="post">
-  < table>
-    < tr>< td align="center" colspan="2">< font style="font-size: 40px; font-family: 华文彩云;" >上传表格< /font>< /td></tr>
-    < tr>< td>请先< a href="./sample/sample01.xls">下载excel例子模板< /a>编辑后上传文件< /td>< /tr>
-　　< tr>
-      < td>请选择你要上传的文件< /td>
-      < td>< input type="file" name="myfile">< /td>
-    < /tr>
-    < tr>< td>< input type="submit" value="上传文件" />< /td>< /tr>
-  < /table>
-< /form>
-
-</textarea><textarea>
-header("Content-type:text/html;charset=utf-8");
-
-//链接数据库
-$link = @mysql_connect('localhost','root','root') or die('连接数据库失败');
-mysql_select_db('test',$link);
-mysql_query('set names utf8');
-
-function upExecel(){
-
-//判断是否选择了要上传的表格
-if (empty($_POST['myfile'])) {
-  echo "< script>alert('您未选择表格');history.go(-1);< /script>";
-}
-
-//获取表格的大小,限制上传表格的大小5M
-$file_size = $_FILES['myfile']['size'];
-if ($file_size>5*1024*1024) {
-  echo "< script>alert('上传失败,上传的表格不能超过5M的大小');history.go(-1);< /script>";
-  exit();
-}
-
-//限制上传表格类型
-$file_type = $_FILES['myfile']['type'];
-if ($file_type!='application/vnd.ms-excel') {   //application/vnd.ms-excel  为xls文件类型
-    echo "< script>alert('上传失败,只能上传excel2003的xls格式!');history.go(-1)< /script>";
- exit();
-}
-
-//判断表格是否上传成功
-if (is_uploaded_file($_FILES['myfile']['tmp_name'])) {
-  require_once 'PHPExcel.php';
-  require_once 'PHPExcel/IOFactory.php';
-  require_once 'PHPExcel/Reader/Excel5.php';
-  //以上三步加载phpExcel的类
-
-  $objReader = PHPExcel_IOFactory::createReader('Excel5');//use excel2007 for 2007 format
-  //接收存在缓存中的excel表格
-  $filename = $_FILES['myfile']['tmp_name'];
-  $objPHPExcel = $objReader->load($filename); //$filename可以是上传的表格,或是指定的表格
-  $sheet = $objPHPExcel->getSheet(0);
-  $highestRow = $sheet->getHighestRow(); // 取得总行数
-  // $highestColumn = $sheet->getHighestColumn(); // 取得总列数
-
-  //循环读取excel表格,读取一条,插入一条
-  //j表示从哪一行开始读取  从第二行开始读取,因为第一行是标题不保存
-  //$a表示列号
-  for($j=2;$j<=$highestRow;$j++){
-    $a = $objPHPExcel->getActiveSheet()->getCell("A".$j)->getValue();//获取A(业主名字)列的值
-    $b = $objPHPExcel->getActiveSheet()->getCell("B".$j)->getValue();//获取B(密码)列的值
-    $c = $objPHPExcel->getActiveSheet()->getCell("C".$j)->getValue();//获取C(手机号)列的值
-    $d = $objPHPExcel->getActiveSheet()->getCell("D".$j)->getValue();//获取D(地址)列的值
-
-    //null 为主键id,自增可用null表示自动添加
-    $sql = "INSERT INTO house VALUES(null,'$a','$b','$c','$d')";
-    // echo "$sql";
-    // exit();
-    $res = mysql_query($sql);
-    if ($res) {
-      echo "< script>alert('添加成功！');window.location.href='./test.php';< /script>";
-    }else{
-      echo "< script>alert('添加失败！');window.location.href='./test.php';< /script>";
-      exit();
-    }
-  }
-}
-}
-
-upExecel();  //调用
-</textarea>
-
-<h3>用PHP代码读取word文档内容</h3><pre>
-wordphp
-https://github.com/pintobikez/wordphp
-
-中文的WORD文档读取需要把class.wrodphp.php 的最后一行
-return iconv("ISO-8859-1","UTF-8",$text);
-替换成
-return $text;
-
-</pre><textarea>
-// 导入wordphp类
-include 'class.wrodphp.php'
-// 读取内容
-$rt = new WordPHP(true);             // true is debug mode
-echo $rt->readDocument('1.docx');
-
-</textarea>
-</div>
-
 <div id="curl">
 <h2>php网络请求API - cURL</h2><textarea>
 class Http {
@@ -73477,6 +73113,7 @@ var_dump(detect_city('223.104.131.164'));
 
 </textarea>
 
+<div id="sort">
 <h3>排序算法</h3><pre>
 【 冒泡排序 】
 原理：比较相邻的元素,如果第一个比第二个大就交换它们,让较大的数下沉,较小的数上升,和水下冒泡相似,通过两次for循环来获取到相邻的两个值进行比较,一步步进行排序
@@ -73600,7 +73237,9 @@ $arr = [4,8,9,10,22,5,30,9057,38,1,79];
 print_r(quick_sort($arr));
 
 </textarea>
+</div>
 
+<div id="mq">
 <h3>消息队列 MQ (Message queue)</h3><pre>
 消息队列是一种进程间通信或同一进程的不同线程间的通信方式
 
@@ -73916,7 +73555,9 @@ apt install rabbitmq-server(安装之后自动运行,ps aux查看进程,rabbitmq
 3、守护进程：类似于php-fpm和php-cgi,需要shell基础
 
 </pre>
+</div>
 
+<div id="erp">
 <h4>ERP(企业资源计划管理)、CRM(客户关系管理)和OA(Office Automation,办公自动化流程管理)</h4><pre>
 没有OA大家在办事的时候就会哦？(O),啊！(A)
 没有DMS的数据分析支持,营销工作不好开展还"得忙死"
@@ -74167,7 +73808,9 @@ CurrentQuantity：当前库存数。
 海量的用户秒杀请求,本质上是一个排序,先到先得,但是如此之多的请求,注定了有些人是抢不到的,可以在进入上述伪代码Dao层之前增加一个计数器进行控制,比如有50%的流量将直接告诉其抢购失败
 
 </pre>
+</div>
 
+<div id="eshop">
 <h4>电商系统</h4><pre>
 1、B2B：(Business To Business)商家对商家进行交易,是指企业与企业之间通过专用网络或Internet进行数据信息的交换、传递,开展交易活动的商业模式。它将企业内部网,通过B2B网站与客户紧密结合起来,通过网络的快速反应,为客户提供更好的服务,从而促进企业的业务发展。
 
@@ -75402,6 +75045,373 @@ warehouseinfo
 warehouse_product
 
 </pre>
+</div>
+
+<div id="mail">
+<h2>mail()函数用于从脚本中发送电子邮件</h2><pre>
+PHP运行邮件函数需要一个已安装且正在运行的邮件系统(如sendmail、postfix、qmail等),所用的程序通过在php.ini文件中的配置设置进行定义
+
+mail(to,subject,message,headers,parameters)
+to	    必需,规定email接收者
+subject	必需,规定email的主题,该参数不能包含任何新行字符
+message	必需,定义要发送的消息,应使用LF (\n)来分隔各行,每行应该限制在70个字符内
+headers	可选,规定附加的标题如From、Cc和Bcc,应当使用CRLF (\r\n)分隔附加的标题
+parameters	可选。对邮件发送程序规定额外的参数
+
+</pre><textarea>
+if(isset($_REQUEST['email'])){
+  $mailcheck = filter_var($_REQUEST['email'], FILTER_VALIDATE_EMAIL)  // 判断邮箱是否合法
+  if ($mailcheck === FALSE){
+    echo "非法输入";
+  }else{
+    $email = $_REQUEST['email'] ;
+    $subject = $_REQUEST['subject'] ;
+    $message = $_REQUEST['message'] ;
+    mail("someone@example.com", "Subject: $subject", $message, "From: $email" );
+    echo "Thank you for using our mail form";
+  }
+}else{
+  echo "< form method='post' action='mailform.php'>
+  Email: < input name='email' type='text'>< br>
+  Subject: < input name='subject' type='text'>< br>
+  Message:< br>
+  < textarea name='message' rows='15' cols='40'>< /textarea>< br>
+  < input type='submit'>
+  < /form>";
+}
+
+</textarea>
+
+<h3>phpmailer https://github.com/PHPMailer/PHPMailer</h3><pre>
+composer require phpmailer/phpmailer
+"phpmailer/phpmailer": "~6.0" // composer.json
+
+PHPMailer需要PHP的sockets扩展支持,而登录QQ邮箱SMTP服务器则必须通过SSL加密的,PHP还得包含openssl的支持
+
+QQ邮箱设置
+所有的主流邮箱都支持SMTP协议,但并非所有邮箱都默认开启,可以在邮箱的设置-账户里面手动开启IMAP/SMTP服务
+第三方服务在提供了账号和密码(授权码)之后就可以登录SMTP服务器,通过它来控制邮件的中转方式
+
+</pre><textarea>
+date_default_timezone_set("PRC");
+
+require_once("PHPMailer/src/PHPMailer.php");
+require_once("PHPMailer/src/SMTP.php");
+require_once("PHPMailer/src/Exception.php");
+use \PHPMailer\PHPMailer\PHPMailer;
+use \PHPMailer\PHPMailer\Exception;
+
+$mail = new PHPMailer();         // 实例化PHPMailer核心类
+// Enable SMTP debugging,0=off (for production use),1=client messages,2=client and server messages
+$mail->SMTPDebug = 2;            // 是否启用smtp的debug调试,开发环境建议开启,生产环境注释掉即可,默认关闭
+// $mail->Debugoutput = 'html';  // 调试输出格式
+$mail->isSMTP();                 // 使用smtp鉴权方式发送邮件
+$mail->SMTPAuth = true;          // smtp需要鉴权必须是true
+$mail->Host = 'smtp.qq.com';     // 链接qq域名邮箱的服务器地址
+$mail->SMTPSecure = 'ssl';       // 设置使用ssl加密方式登录鉴权
+$mail->Port = 465;               // 设置ssl连接smtp服务器的远程服务器端口号,likely to be 25,465 or 587
+$mail->CharSet = 'UTF-8';        // 设置发送的邮件的编码,默认ISO-8859-1,如果发中文此项必须设置,否则乱码
+$mail->FromName = 'phpmailer';   // 设置发件人昵称 显示在收件人邮件的发件人邮箱地址前的发件人姓名
+$mail->Username = '465137869@qq.com';  // smtp登录的账号 QQ邮箱即可
+$mail->Password = 'htyrnrdxwaqkcaga';  // smtp登录的密码,使用生成的授权码
+$mail->From = '465137869@qq.com';      // 设置发件人邮箱地址 同登录账号
+$mail->addReplyTo('replyto@example.com','First Last');  // 回复地址
+$mail->isHTML(true);                   // send as HTML,邮件正文是否为html编码,注意此处是一个方法
+$mail->addAddress('1024940433@qq.com');// 设置收件人邮箱地址,添加多个收件人则多次调用方法即
+$mail->addAddress('heiying6958@sina.com');
+$mail->Subject = '邮件主题';            // 添加该邮件的主题
+$mail->Body = '<h1>Hello World</h1>';  // 添加邮件正文
+$mail->addAttachment('./a.txt');       // 为该邮件添加附件
+$status = $mail->send();               // 发送邮件,返回状态的布尔值
+
+</textarea><textarea>
+// Import PHPMailer classes into the global namespace
+// These must be at the top of your script,not inside a function
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+// Load Composer's autoloader
+require 'vendor/autoload.php';
+
+$mail = new PHPMailer(true);                          // Passing `true` enables exceptions
+try {
+  // Server settings
+  $mail->SMTPDebug = 2;                               // Enable verbose debug output
+  $mail->isSMTP();                                    // Set mailer to use SMTP
+  $mail->Host = 'smtp1.example.com;smtp2.example.com';// Specify main and backup SMTP servers
+  $mail->SMTPAuth = true;                     // Enable SMTP authentication
+  $mail->Username = 'user@example.com';       // SMTP username
+  $mail->Password = 'secret';                 // SMTP password
+  $mail->SMTPSecure = 'tls';                  // Enable TLS encryption,`ssl` also accepted
+  $mail->Port = 587;                          // TCP port to connect to
+
+  // Recipients(收件人)
+  $mail->setFrom('from@example.com','Mailer');
+  $mail->addAddress('joe@example.net','Joe User');     // Add a recipient
+  $mail->addAddress('ellen@example.com');              // Name is optional
+  $mail->addReplyTo('info@example.com','Information');
+  $mail->addCC('cc@example.com');
+  $mail->addBCC('bcc@example.com');
+
+  // Attachments
+  $mail->addAttachment('/var/tmp/file.tar.gz');        // Add attachments
+  $mail->addAttachment('/tmp/image.jpg','new.jpg');    // Optional name
+
+  // Content
+  $mail->isHTML(true);                                 // Set email format to HTML
+  $mail->Subject = 'Here is the subject';
+  $mail->Body    = 'This is the HTML message body < b>in bold!< /b>';
+  $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
+
+  $mail->send();
+  echo 'Message has been sent';
+} catch (Exception $e) {
+  echo 'Message could not be sent. Mailer Error: ',$mail->ErrorInfo;
+}
+
+</textarea><textarea>
+require_once("PHPMailer/src/PHPMailer.php");
+require_once("PHPMailer/src/SMTP.php");
+require_once("PHPMailer/src/Exception.php");
+use \PHPMailer\PHPMailer\PHPMailer;
+use \PHPMailer\PHPMailer\Exception;
+function postmail($to,$subject,$body){
+  $mail = new PHPMailer();               // 创建phpmailer实例
+  $mail->CharSet = 'utf-8';              // 设置编码形式,默认iso-99591
+  $mail->isSMTP();                       // 表示使用smtp服务
+  $mail->SMTPAuth = true;                // 使用smtp认证
+  $mail->Host = 'smtp.163.com';          // smtp主机名,以163为例
+  $mail->Username = '465137869@163.com'; // smtp服务的用户名
+  $mail->Password = 'htyrnrdxwaqkcaga';  // smtp服务的密码,现多采用授权码
+
+  // 用户可见部分
+  $mail->setFrom("465137869@163.com","username");  // 二参表示用户看到的发送方姓名,可随意改
+  $mail->Subject = $subject;              // 邮件主题
+  $mail->msgHTML($body);                  // 邮件内容,这里采用HTML
+  $mail->addAddress($to,'');              // 地址,二参是接受者,发送对象名为''时163的测试结果是smtp服务商会把它改成'我'
+  $mail->addAttachment('./php.png');      // 添加附件
+  // 发送
+  if($mail->send()){
+    echo '邮件发送成功';
+  }else{
+    echo '邮件发送失败'.'Mailer Error: ' . $mail->ErrorInfo;
+  }
+}
+
+postmail('465137869@qq.com','测试','hello world');
+
+</textarea><pre>
+【 telnet模拟邮件发送 】
+准备2个邮箱,建议sina和aliyun
+
+> telnet smtp.aliyun.com 25 // 连接阿里云邮箱服务的smtp服务器
+> helo sayhi  // 和smtp服务器打招呼
+> auth login  // 开始身份认证,用base64加密的邮箱和登录密码字符串与smtp服务器验证身份,126邮箱用授权码,qq用独立密码
+> sdsdDSDcMIMNunSDCNSYYdsdcsd  // 邮箱的base64编码字符串
+> YHbsdnUNSdcsdcs=  // 邮箱密码的base64编码字符串
+> mail from:<phpjiaoxuedev@aliyun.com>  // 身份验证成功之后开始写邮件,发件人邮箱
+> rcpt to:<phpjiaoxuedev@sina.com>  // 收件人邮箱
+> DATA     // 输入DATA指令开始写邮件
+data下的可选项：
+输入from:发件人名称,可任意填入,将显示在收件箱的发件人一栏
+输入to:收件人名称,可任意填入,将像是在收件箱收件人一栏
+输入subject:邮件主题,显示在收件箱主题一栏
+此时需空一行,表示正文部分开始
+空行后输入邮件的正文内容
+按下回车键.回车键邮件就发出去了,最后quit就可以退出
+
+</pre>
+</div>
+
+<div id="phpexcell">
+<h2>phpexcell</h2><pre>
+下载PHPExecel类文件,帮助文档可以参考PHPExcel中文帮助手册|PHPExcel使用方法
+PHP必须启用了zip、gd2、xml
+
+【使用PHPExcel实现数据批量导出为excel表格】
+
+</pre><textarea>
+<a href="./Process1.php">导出excel表格</a>
+
+/**
+* 批量导出数据
+* @param $arr  从数据库查询出来,即要导出的数据
+*        $name  excel表歌名
+*/
+function expExcel($arr,$name){
+
+    require_once 'PHPExcel.php';
+    //实例化
+    $objPHPExcel = new PHPExcel();
+    /*右键属性所显示的信息*/
+     $objPHPExcel->getProperties()->setCreator("zxf")       //作者
+                           ->setLastModifiedBy("zxf")       //最后一次保存者
+                           ->setTitle('数据EXCEL导出')      //标题
+                           ->setSubject('数据EXCEL导出')    //主题
+                           ->setDescription('导出数据')     //描述
+                           ->setKeywords("excel")           //标记
+                          ->setCategory("result file");     //类别
+
+
+    //设置当前的表格
+    $objPHPExcel->setActiveSheetIndex(0);
+    // 设置表格第一行显示内容
+    $objPHPExcel->getActiveSheet()
+        ->setCellValue('A1','业主姓名')
+        ->setCellValue('B1','密码')
+        ->setCellValue('C1','手机号码')
+        ->setCellValue('D1','地址')
+        //设置第一行为红色字体
+        ->getStyle('A1:D1')->getFont()->getColor()->setARGB(PHPExcel_Style_Color::COLOR_RED);
+
+    $key = 1;
+    /*以下就是对处理Excel里的数据,横着取数据*/
+    foreach($arr as $v){
+
+    //设置循环从第二行开始
+    $key++;
+     $objPHPExcel->getActiveSheet()
+                 //Excel的第A列,name是你查出数组的键值字段,下面以此类推
+                  ->setCellValue('A'.$key,$v['name'])
+                  ->setCellValue('B'.$key,$v['pwd'])
+                  ->setCellValue('C'.$key,$v['phone'])
+                  ->setCellValue('D'.$key,$v['address']);
+
+    }
+    //设置当前的表格
+    $objPHPExcel->setActiveSheetIndex(0);
+　　 ob_end_clean();     //清除缓冲区,避免乱码
+     header('Content-Type: application/vnd.ms-excel');  //文件类型
+     header('Content-Disposition: attachment;filename="'.$name.'.xls"');    //文件名
+     header('Cache-Control: max-age=0');
+     header('Content-Type: text/html; charset=utf-8');  //编码
+     $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel,'Excel5');     //excel 2003
+     $objWriter->save('php://output');
+     exit;
+
+}
+
+/***********调用**********************/
+header("Content-type:text/html;charset=utf-8");
+
+//链接数据库
+$link = @mysql_connect('localhost','root','') or die('连接数据库失败');
+mysql_select_db('test',$link);
+mysql_query('set names utf8');
+
+$sql = "select * from house";  //先获取数据
+$res = mysql_query($sql);
+$arr = array();
+while ($row = mysql_fetch_assoc($res)){  //把$res=>$arr,把结果集内容转移到一个数组中
+    $arr[] = $row;
+}
+$name = "用户表";     //excel表格名
+expExcel($arr,$name)  //调用
+
+</textarea>【使用PHPExcel实现数据批量导入到数据库】<textarea>
+//只能上传Excel2003类型的xls文件,大小不超过5M;
+//此例子只使用execel2003的.xls文档,若使用的是其他版本,可以保存格式为"Execel 97-2003 工作簿(*.xls)"即.xls文件类型即可
+
+< form enctype="multipart/form-data" action="./Process.php" method="post">
+  < table>
+    < tr>< td align="center" colspan="2">< font style="font-size: 40px; font-family: 华文彩云;" >上传表格< /font>< /td></tr>
+    < tr>< td>请先< a href="./sample/sample01.xls">下载excel例子模板< /a>编辑后上传文件< /td>< /tr>
+　　< tr>
+      < td>请选择你要上传的文件< /td>
+      < td>< input type="file" name="myfile">< /td>
+    < /tr>
+    < tr>< td>< input type="submit" value="上传文件" />< /td>< /tr>
+  < /table>
+< /form>
+
+</textarea><textarea>
+header("Content-type:text/html;charset=utf-8");
+
+//链接数据库
+$link = @mysql_connect('localhost','root','root') or die('连接数据库失败');
+mysql_select_db('test',$link);
+mysql_query('set names utf8');
+
+function upExecel(){
+
+//判断是否选择了要上传的表格
+if (empty($_POST['myfile'])) {
+  echo "< script>alert('您未选择表格');history.go(-1);< /script>";
+}
+
+//获取表格的大小,限制上传表格的大小5M
+$file_size = $_FILES['myfile']['size'];
+if ($file_size>5*1024*1024) {
+  echo "< script>alert('上传失败,上传的表格不能超过5M的大小');history.go(-1);< /script>";
+  exit();
+}
+
+//限制上传表格类型
+$file_type = $_FILES['myfile']['type'];
+if ($file_type!='application/vnd.ms-excel') {   //application/vnd.ms-excel  为xls文件类型
+    echo "< script>alert('上传失败,只能上传excel2003的xls格式!');history.go(-1)< /script>";
+ exit();
+}
+
+//判断表格是否上传成功
+if (is_uploaded_file($_FILES['myfile']['tmp_name'])) {
+  require_once 'PHPExcel.php';
+  require_once 'PHPExcel/IOFactory.php';
+  require_once 'PHPExcel/Reader/Excel5.php';
+  //以上三步加载phpExcel的类
+
+  $objReader = PHPExcel_IOFactory::createReader('Excel5');//use excel2007 for 2007 format
+  //接收存在缓存中的excel表格
+  $filename = $_FILES['myfile']['tmp_name'];
+  $objPHPExcel = $objReader->load($filename); //$filename可以是上传的表格,或是指定的表格
+  $sheet = $objPHPExcel->getSheet(0);
+  $highestRow = $sheet->getHighestRow(); // 取得总行数
+  // $highestColumn = $sheet->getHighestColumn(); // 取得总列数
+
+  //循环读取excel表格,读取一条,插入一条
+  //j表示从哪一行开始读取  从第二行开始读取,因为第一行是标题不保存
+  //$a表示列号
+  for($j=2;$j<=$highestRow;$j++){
+    $a = $objPHPExcel->getActiveSheet()->getCell("A".$j)->getValue();//获取A(业主名字)列的值
+    $b = $objPHPExcel->getActiveSheet()->getCell("B".$j)->getValue();//获取B(密码)列的值
+    $c = $objPHPExcel->getActiveSheet()->getCell("C".$j)->getValue();//获取C(手机号)列的值
+    $d = $objPHPExcel->getActiveSheet()->getCell("D".$j)->getValue();//获取D(地址)列的值
+
+    //null 为主键id,自增可用null表示自动添加
+    $sql = "INSERT INTO house VALUES(null,'$a','$b','$c','$d')";
+    // echo "$sql";
+    // exit();
+    $res = mysql_query($sql);
+    if ($res) {
+      echo "< script>alert('添加成功！');window.location.href='./test.php';< /script>";
+    }else{
+      echo "< script>alert('添加失败！');window.location.href='./test.php';< /script>";
+      exit();
+    }
+  }
+}
+}
+
+upExecel();  //调用
+</textarea>
+
+<h3>用PHP代码读取word文档内容</h3><pre>
+wordphp
+https://github.com/pintobikez/wordphp
+
+中文的WORD文档读取需要把class.wrodphp.php 的最后一行
+return iconv("ISO-8859-1","UTF-8",$text);
+替换成
+return $text;
+
+</pre><textarea>
+// 导入wordphp类
+include 'class.wrodphp.php'
+// 读取内容
+$rt = new WordPHP(true);             // true is debug mode
+echo $rt->readDocument('1.docx');
+
+</textarea>
 </div>
 
 </main>
