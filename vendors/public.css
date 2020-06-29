@@ -11,6 +11,7 @@ h3:before{ content:""; display:inline-block; width:0px; height:0px;
 		  border-top:8px solid transparent;border-right:10px solid transparent;border-bottom:8px solid transparent; border-left:10px solid red;}
 h3{ color:#fff;background: #0099cc;text-indent:1rem;line-height:2rem;margin: .8rem 0;}
 h4{ color:#fff;background: #7ec699;padding: .5rem;}
+h1 a,h2 a,h3 a,h4 a{text-decoration: none;color: #fff;}
 
 /*右侧导航栏样式start*/
 ol{

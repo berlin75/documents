@@ -39017,7 +39017,7 @@ $roles  =  array(
 );
 上述是垂直权限的处理,如果遇到了平行权限的问题,如用户A获取用户B的身份信息或者更改其他用户信息,对于这些敏感数据接口都需要加上对用户的判断,这一步一般都在具体的逻辑实现中实现
 
-13、请求速率限制
+13、请求速率限制 限制访问频率 access limit
 根据api_key或用户来判断某段时间的请求次数,将该数据更新到内存数据库(redis,memcached),达到最大数即不接受该用户的请求,同时这样还可以利用到内存数据库key在特定时间自动过期的特性。在php中可以使用APC,AlternativePHP Cache(APC) 是一个开放自由的PHP opcode缓存,它的目标是提供一个自由、 开放和健全的框架用于缓存和优化PHP的中间代码。在返回时设置X-Rate-Limit-Reset:当前时间段剩余秒数,APC的示例代码如下:
 
 Route::filter('api.limit', function(){
@@ -39029,6 +39029,51 @@ Route::filter('api.limit', function(){
   }
 });
 
+<pre>限制一个API访问的频率,例如单用户一分钟之内只能访问多少次。类似于这样的需求很容易用Redis来实现<textarea>
+$redis = new Redis();
+$redis->connect('127.0.0.1',6379);
+
+//获取客户端真实ip地址
+function get_real_ip(){
+    static $realip;
+    if(isset($_SERVER)){
+        if(isset($_SERVER['HTTP_X_FORWARDED_FOR'])){
+            $realip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        }else if(isset($_SERVER['HTTP_CLIENT_IP'])){
+            $realip = $_SERVER['HTTP_CLIENT_IP'];
+        }else{
+            $realip = $_SERVER['REMOTE_ADDR'];
+        }
+    }else{
+        if(getenv('HTTP_X_FORWARDED_FOR')){
+            $realip = getenv('HTTP_X_FORWARDED_FOR');
+        }else if(getenv('HTTP_CLIENT_IP')){
+            $realip = getenv('HTTP_CLIENT_IP');
+        }else{
+            $realip = getenv('REMOTE_ADDR');
+        }
+    }
+    return $realip;
+}
+
+$key = get_real_ip();          //这个key记录该ip的访问次数 也可改成用户id如userid_123456
+$limit = 3;                    //限制次数为3次
+
+if($redis->exists($key)){
+    $redis->incr($key);
+    $count = $redis->get($key);
+    if($count > $limit){
+        exit('已经超出了限制次数,we will response the old content');
+    }
+}else{
+    $redis->incr($key);
+    $redis->expire($key,60);   //限制时间为60秒
+}
+
+$count = $redis->get($key);
+echo '第 '.$count.' 次请求';
+
+</textarea><pre>
 14、安全建议
 尽量使用SSL,在传输过程中采用SSL保证传输安全,尽量采用HTTPS协议进行接口请求,加上一个key做一次hash放在最后即可
 
@@ -40127,7 +40172,7 @@ APP层面可以做类似的事情,虽然疯狂的摇微信,其实x秒才向后�
 
 业务规则上的一些优化,12306分时分段售票,原来统一10点卖票,现在8点,8点半,9点,...每隔半个小时放出一批:将流量摊匀。
 
-��据粒度的优化:购票时对于余票查询这个业务,票剩了多少张并不关注,只关心有票和无票,流量大的时候做一个粗粒度的"有票""无票"缓存即可。
+据粒度的优化:购票时对于余票查询这个业务,票剩了多少张并不关注,只关心有票和无票,流量大的时候做一个粗粒度的"有票""无票"缓存即可。
 
 业务逻辑的异步:例如下单业务与支付业务的分离,这些优化都是结合业务来的,有一个观点"一切脱离业务的架构设计都是耍流氓"架构的优化也要针对业务。
 
@@ -40467,38 +40512,6 @@ Web缓存可以根据不同等级进行配置:
 </pre>
 </div>
 
-<div id="business">
-<h3>业务</h3>
-<h4>基于PHP框架的聚合四方支付系统</h4><pre>
-四方就是属于第四方支付，如聚合支付公司；第三方是支付清算公司，比如支付宝，微信，云闪付等，具有支付牌照的公司；第二方是各大银行，如中国银行，农业银行，工商银行，建设银行等；第一方式银联央行
-
-第三方支付介于银行和商户之间，而聚合支付是介于第三方支付和商户之间，没有支付许可牌照的限制。在没有支付许可牌照的情况下，聚合支付通过聚合各种第三方支付平台、合作银行、合作电信运营商及其他服务商接口等多种支付工具进行综合支付服务。
-第四方聚合支付系统，为减轻用户对支付接口过度定义，仅需面向一套简洁接口即可实现多终端支付，极大的减少接口对接的时间和精力
-
-</pre>
-
-<h4>分销</h4><pre>
-人人商城分销关系
-商城会员成为分销商后，需要推广下线，形成分销层级，商城最高支持三级分销
-分销商推广了下线后，需要看相互的群体进行分析分销层级关系
-
-例如：
-分销商：A、B、C、D、E
-群体1：A是B的上级分销商，B是C的上级分销商，C是D的上级分销商，则他们分销层级是：A是一级分销商，B是二级分销商，C是三级分销商
-群体2：B是C的上级分销商，C是D的上级分销商，D是E的上级分销商，则他们分销层级是：B是一级分销商，C是二级分销商，D是三级分销商，以此类推......
-
-分销商推广了下线，下线会员购买商品后，分销商直接就可以获得佣金，那么以上的A、B、C、D之间的佣金关系如下：
-分销佣金是分开启内购和不开启内购两种：
-
-开启内购
-分销商C购买商品，则C自己获得一级佣金，B获得二级佣金，A获得三级佣金
-
-不开启内购
-分销商D购买商品，则C获得一级佣金，B获得二级佣金，A获得三级佣金
-
-</pre>
-</div>
-
 <p><a href="http://www.cnblogs.com/qq350760546/p/6638588.html">web攻击参考资料</a></p>
 </main>
     <ol>
@@ -40614,7 +40627,6 @@ Web缓存可以根据不同等级进行配置:
         <li><a href="#architecture">architecture架构</a></li>
         <li><a href="#separation">前后端分离</a></li>
         <li><a href="#miaosha">秒杀架构</a></li>
-        <li><a href="#business">业务</a></li>
     </ol>
 
     <script src="vendors/jquery-3.3.1.min.js"></script>
