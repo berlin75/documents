@@ -35745,12 +35745,8 @@ Promise接口
 【 thunkify 模块 】
 generator thunk函数转换器
 
-案例二：nodejs+socket创建简单的聊天室
-引用socket.io和mime,创建简单的聊天室,很简单,大家可以看下！
-github地址：https://github.com/confidence68/node-socket
-
-案例三：一个是form简单提交,一个是读取文件之读取和写入json文件
-github地址：https://github.com/confidence68/nodejsDemo
+案例二：nodejs+socket创建简单的聊天室,引用socket.io和mime,创建简单的聊天室,https://github.com/confidence68/node-socket
+案例三：一个是form简单提交,一个是读取文件之读取和写入json文件,https://github.com/confidence68/nodejsDemo
 
 【 supervisor 】
 每次修改代码后会自动重启,监听当前目录下node和js后缀的文件,当文件发生改动时,supervisor会自动重启程序
@@ -35776,9 +35772,8 @@ forever -l forever.log -o out.log -e err.log app.js
 npm install socket.io --save-dev
 
 socket.io模块实现WebSocket(web实时交互)
-
-Socket.IO是一个开源的WebSocket库,通过Node.js实现WebSocket服务端,也提供客户端JS库。Socket.IO支持以事件为基础的实时双向通讯,可以工作在任何平台、浏览器或移动设备。
-Socket.IO支持4种协议：WebSocket、htmlfile、xhr-polling、jsonp-polling,它会自动根据浏览器选择适合的通讯方式,从而让开发者可以聚焦到功能的实现而不是平台的兼容性,同时Socket.IO具有不错的稳定性和性能
+Socket.IO是一个开源的WebSocket库,通过Node.js实现WebSocket服务端,也提供客户端JS库。Socket.IO支持以事件为基础的实时双向通讯,可工作在任何平台、浏览器或移动设备。
+Socket.IO支持4种协议：WebSocket、htmlfile、xhr-polling、jsonp-polling,它会自动根据浏览器选择适合的通讯方式,从而让开发者聚焦到功能的实现而不是平台的兼容性,同时Socket.IO具有不错的稳定性和性能
 socket.io不仅支持websocket,还能优雅降级,支持flash-socket,long-polling等通信,可以根据浏览器的具体情况选择使用websocket或flash-socket甚至iframe不停刷新等方式来实现,毕竟不是所有浏览器都支持websocket,甚至不是所有浏览器都支持flash。而不管使用什么实现,socket.io都封装成统一的api,使用起来没有差别
 
 Socket.IO模块主要功能是将WebSocket协议应用到所有浏览器,主要用于实时的长连接多求情项目中,如在线联网游戏、实时聊天、实时股票查看、二维码扫描登录等
@@ -35797,37 +35792,29 @@ app.get('/', function(req, res){
   res.send('<h1>Welcome Realtime Server</h1>');
 });
 
-//在线用户
-var onlineUsers = {};
-//当前在线人数
-var onlineCount = 0;
+var onlineUsers = {};  //在线用户
+var onlineCount = 0;   //当前在线人数
 
 io.on('connection', function(socket){
   console.log('a user connected');
 
-  //监听新用户加入
-  socket.on('login', function(obj){
+  socket.on('login', function(obj){  //监听新用户加入
     ...
-    //向所有客户端广播用户加入
-    io.emit('login', {onlineUsers:onlineUsers, onlineCount:onlineCount, user:obj});
+    io.emit('login', {onlineUsers:onlineUsers, onlineCount:onlineCount, user:obj});  //向所有客户端广播用户加入
     console.log(obj.username+'加入了聊天室');
   });
 
-  //监听用户退出
-  socket.on('disconnect', function(){
-    //将退出的用户从在线列表中删除
-    if(onlineUsers.hasOwnProperty(socket.name)) {
+  socket.on('disconnect', function(){              //监听用户退出
+    if(onlineUsers.hasOwnProperty(socket.name)) {  //将退出的用户从在线列表中删除
       ...
-      //向所有客户端广播用户退出
-      io.emit('logout', {onlineUsers:onlineUsers, onlineCount:onlineCount, user:obj});
+      io.emit('logout', {onlineUsers:onlineUsers, onlineCount:onlineCount, user:obj});  //向所有客户端广播用户退出
       console.log(obj.username+'退出了聊天室');
     }
   });
 
-  //监听用户发布聊天内容
-  socket.on('message', function(obj){
-    //向所有客户端广播发布的消息
-    io.emit('message', obj);
+  
+  socket.on('message', function(obj){  //监听用户发布聊天内容
+    io.emit('message', obj);           //向所有客户端广播发布的消息
     console.log(obj.username+'说：'+obj.content);
   });
 });
@@ -35837,27 +35824,20 @@ http.listen(3000, function(){
 });
 
 /* index.html */
+this.socket = io.connect('ws://172.16.0.254:3000');  //连接websocket后端服务器
+this.socket.emit('login', {userid:this.userid, username:this.username});  //告诉服务器端有用户登录
 
-//连接websocket后端服务器
-this.socket = io.connect('ws://172.16.0.254:3000');
-
-//告诉服务器端有用户登录
-this.socket.emit('login', {userid:this.userid, username:this.username});
-
-//监听新用户登录
-this.socket.on('login', function(o){
+this.socket.on('login', function(o){  //监听新用户登录
   console.log(o);
   //处理
 });
 
-//监听用户退出
-this.socket.on('logout', function(o){
+this.socket.on('logout', function(o){  //监听用户退出
   console.log(o);
   //处理
 });
 
-//监听消息发送
-this.socket.on('message', function(obj){
+this.socket.on('message', function(obj){  //监听消息发送
   console.log(obj);
   //处理消息
 });

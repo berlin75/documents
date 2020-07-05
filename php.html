@@ -32,7 +32,15 @@
     </ul>
   </li>
   <li><a href="#data">dataType varible</a></li>
-  <li><a href="#str">String</a></li>
+  <li>
+    <a href="#str">String </a>
+    <ul>
+      <li><a href="#str_func">functions</a></li>
+      <li><a href="#str_sign">sign</a></li>
+      <li><a href="#str_serialize">serialize</a></li>
+      <li><a href="#str_json">json</a></li>
+    </ul>
+  </li>
   <li><a href="#reg">RegExp</a></li>
   <li><a href="#array">Array</a></li>
   <li><a href="#date">Date Time</a></li>
@@ -102,8 +110,9 @@
       <li><a href="#php_redis">php_redis</a></li>
       <li><a href="#redis_lock">redis_lock</a></li>
       <li><a href="#redis_application">redis_application</a></li>
+      <li><a href="#mq">消息队列</a></li>
     </ul>
-    </li>
+  </li>
   <li>
     <a href="#oop">OOP ▼</a>
     <ul>
@@ -230,7 +239,6 @@
     <a href="#module">功能模块 ▼</a>
     <ul>
         <li><a href="#sort">排序算法</li>
-        <li><a href="#mq">消息队列</li>
         <li><a href="#erp">erp</li>
         <li><a href="#eshop">eshop</li>
         <li><a href="#mail">phpmailer</a></li>
@@ -8720,7 +8728,7 @@ var_dump(php_sapi_name());  //返回的字符串可用来判断脚本运行环�
 PHP常量PHP_SAPI具有和php_sapi_name()相同的值
 
 例如CLI的PHP下这个字符串会是"cli",Apache下可能会有几个不同的值,取决于具体使用的SAPI
-aolserver、apache、 apache2filter、apache2handler、 caudium、cgi(直到 PHP 5.3),cgi-fcgi、cli、 cli-server、 continuity、embed、fpm-fcgi、 isapi、litespeed、 milter、nsapi、 phttpd、pi3web、roxen、 thttpd、tux 和 webjames
+aolserver、apache、 apache2filter、apache2handler、 caudium、cgi(直到PHP5.3)、cgi-fcgi、cli、 cli-server、 continuity、embed、fpm-fcgi、 isapi、litespeed、 milter、nsapi、 phttpd、pi3web、roxen、 thttpd、tux和webjames
 
 cli-server -> php built-in webserver
 srv -> hhvm
@@ -8741,10 +8749,10 @@ if (substr(php_sapi_name(),0,3) !== 'cli') {
 【 uniqid() 】
 string uniqid ([ string $prefix = "" [,bool $more_entropy = false ]] )
 获取一个带前缀、基于当前时间微秒数的唯一ID
-本函数不会生成安全加密的值,不应用于加密用途。若需要安全加密的值,考虑使用openssl_random_pseudo_bytes()
-由于基于系统时间,通过该函数生成的ID不是最佳的。如需生成绝对唯一的ID请使用md5()函数
+本函数不会生成安全加密的值,不应用于加密用途。如需安全加密的值则考虑使用openssl_random_pseudo_bytes()
+由于基于系统时间,通过该函数生成的ID不是最佳的。如需生成绝对唯一的ID请使用md5()
 prefix参数可选,规定唯一ID的前缀。如果两个脚本恰好在相同的微秒生成ID,该参数很有用
-more_entropy参数可选,规定位于返回值末尾的更多的熵。这将让结果更具唯一性。当设置为TRUE,返回字符串为23个字符。默认是FALSE,返回字符串为13个字符
+more_entropy参数可选,规定位于返回值末尾的更多的熵。这将让结果更具唯一性。当设置为TRUE返回字符串为23个字符,默认FALSE返回字符串为13个字符
 
 echo uniqid();   // 5af56415a5c1e
 printf("uniqid(): %s\r\n",uniqid());  // 4b3403665fea6
@@ -8755,26 +8763,90 @@ $uniqid = uniqid($prefix);     // 同上
 printf("uniqid('',true): %s\r\n",uniqid('',true));  // 5eef30332721c9.27227183
 
 function makeToken(){
-  return sha1(md5(uniqid(md5(microtime(true)), true)));
+  return sha1(md5(uniqid(md5(microtime(true)), true)));  // string(40) "a7bf1a8c17baa1dc98a96f9f66a95092e24211e9"
 }
 
+// 生成订单号
+function log_no(string $pre = '') {
+  return $pre . date('Ymd') . substr(time(), -5) . substr(microtime(),2,5) . sprintf('%02d', rand(1000, 9999));
+}
+$orderNo = log_no($userId);  // 352020070118357622314143
+
+【 雪花算法 】
+Twitter-SnowFlake算法是源于Twitter为了满足自己业务需求,每秒上万条消息的请求,每条消息都必须分配一条唯一的id,并且在分布式系统中不同机器产生的id必须不同
+
+snowflake的结构如下(每部分用-分开):
+0 - 0000000000 0000000000 0000000000 0000000000 0 - 00000 - 00000 - 000000000000 
+第一位为未使用,接下来的41位为毫秒级时间(41位的长度可以使用69年),然后是5位datacenterId和5位workerId(10位的长度最多支持部署1024个节点),最后12位是毫秒内的计数(12位的计数顺序号支持每个节点每毫秒产生4096个ID序号) 一共加起来刚好64位,为一个Long型。(转换成字符串后长度最多19)
+snowflake生成的ID整体上按照时间自增排序,并且整个分布式系统内不会产生ID碰撞(由datacenter和workerId作区分),并且效率较高。经测试snowflake每秒能够产生26万个ID。
+
+snowflake ID 生成策略图解
+0	41bit	51bit	64bit
+未使用	timestamp(毫秒)	datacenterId+workerId	毫秒内的计数
+
+</pre><textarea>
+class SnowFlake{
+  public function createID(){
+    $machineId = 1234567890;                 //假设一个机器id
+    $time = floor(microtime(true) * 1000);   //41bit timestamp(毫秒)
+    $suffix = 0;                             //0bit 未使用
+    $base = decbin(pow(2,40) - 1 + $time);   //datacenterId  添加数据的时间
+    $machineid = decbin(pow(2,9) - 1 + $machineId);  //workerId  机器ID
+    $random = mt_rand(1, pow(2,11)-1);       //毫秒类的计数
+    $random = decbin(pow(2,11)-1 + $random);         
+    $base64 = $suffix.$base.$machineid.$random;  //拼装所有数据
+    $base64 = bindec($base64);                 n //将二进制转换int
+    $id = sprintf('%.0f', $base64);
+    return $id;
+  }
+}
+
+// 雪花算法类,这个算法的好处很简单可以在每秒产生约400W个不同的16位数字ID(10进制)
+class SnowFlake {
+  const EPOCH = 1479533469598;
+  const max12bit = 4095;
+  const max41bit = 1099511627775;
+  static $machineId = null;
+
+  public static function machineId($mId = 0) {
+    self::$machineId = $mId;
+  }
+
+  public static function generateParticle() {
+    $time = floor(microtime(true) * 1000);   // Time - 42 bits
+    $time -= self::EPOCH;                    // Substract custom epoch from current time
+    $base = decbin(self::max41bit + $time);  // Create a base and add time to it
+    // Configured machine id - 10 bits - up to 1024 machines
+    $machineid = self::$machineId ? str_pad(decbin(self::$machineId), 10, "0", STR_PAD_LEFT) : self::$machineId;
+    // sequence number - 12 bits - up to 4096 random numbers per machine
+    $random = str_pad(decbin(mt_rand(0, self::max12bit)), 12, "0", STR_PAD_LEFT);
+    $base = $base.$machineid.$random;  // Pack
+    return bindec($base);  // Return unique time id no
+  }
+
+  public static function timeFromParticle($particle) {
+    return bindec(substr(decbin($particle),0,41)) - self::max41bit + self::EPOCH;  // Return time
+  }
+}
+
+</textarea><pre>
 【 highlight_file() 】
 highlight_file(filename,return)
 对指定文件的内容进行PHP语法高亮显示。语法通过使用 HTML 标签进行高亮
-提示：用于高亮的颜色可通过 php.ini 文件进行设置或通过调用 ini_set() 函数进行设置
+提示：用于高亮的颜色可通过php.ini文件进行设置或通过调用ini_set()函数进行设置
 注释：当使用该函数时,整个文件都将被显示,包括密码和其他敏感信息
 filename	必需。规定要显示的文件
-return	可选。如果该参数设置为 TRUE,该函数将以字符串形式返回高亮显示的代码,而不是直接进行输出。默认是 FALSE
+return	可选。如果该参数设置为 TRUE,该函数将以字符串形式返回高亮显示的代码,而不是直接进行输出。默认FALSE
 
 【 show_source() 】
-highlight_file() 的别名
+highlight_file()的别名
 
 【 highlight_string() 】
 highlight_string(string,return)
-对字符串进行 PHP 语法高亮显示。字符串通过使用 HTML 标签进行高亮
-用于高亮的颜色可通过 php.ini 文件进行设置或通过调用 ini_set() 函数进行设置
-string	必需。规定要高亮显示的字符串
-return	可选。如果该参数设置为 TRUE,该函数将以字符串形式返回高亮显示的代码,而不是直接进行输出。默认是 FALSE
+对字符串进行PHP语法高亮显示,字符串通过使用HTML标签进行高亮
+用于高亮的颜色可通过php.ini文件进行设置或通过调用ini_set()函数进行设置
+string	必需,规定要高亮显示的字符串
+return	可选,TRUE表示该函数将以字符串形式返回高亮显示的代码,而不是直接进行输出,默认FALSE
 
 </pre>
 </div>
@@ -9791,7 +9863,9 @@ $last = $str[strlen($str)-1]; // 取得字符串的最后一个字符
 $str[strlen($str)-1] = 'e';   // 修改字符串的最后一个字符
 
 </pre>
+</div>
 
+<div id="str_func">
 <h3>string函数</h3><pre>
 【 strlen() 】
 int strlen ( string $string )
@@ -10969,6 +11043,12 @@ if (md5($str) === '1f3870be274f6c49b3e31a0c6728957f') {
   echo "Would you like a green or red apple?";
 }
 
+js的md5()
+var md5 = require('./md5.js');
+var accessToken = md5.hex_md5(data.token + data.time);  // 对accessToken进行md5加密,服务端存储token和time字段
+var sign = accessToken + '-' + data.token;  // 签名 = md5(accessToekn + time) + '-' + 'accessToekn';
+uni.setStorage({ key:"sign", data:sign });  // 记录在本地
+
 【 md5_file() 】
 md5_file($file,true/false)
 计算文件的MD5散列,参数同md5
@@ -11102,7 +11182,355 @@ HMAC：散列消息身份验证码 Hashed Message Authentication Code。它不�
 HMAC-SHA1简要来说就是采用sha1算法,与HMAC机制相结合,制造出更加难以破解的加密串
 
 </pre>
+</div>
 
+<div id="str_sign">
+<h4>接口签名验证</h4><pre>
+在设计接口签名验证的时候,一定要满足以下几点：
+可变性：每次的签名必须是不一样的。
+时效性：每次请求的时效性,过期作废。
+唯一性：每次的签名是唯一的。
+完整性：能够对传入数据进行验证,防止篡改。
+
+常用验证
+举例：/api/login?username=xxx&password=xxx&sign=xxx
+发送方和接收方约定一个加密的盐值,进行生成签名。
+
+</pre><textarea>
+// 创建签名
+private function _createSign(){
+  $str_salt = '1scv6zfzSR1wLaWN';
+  $strVal = '';
+  if($this->params){
+    $params = $this->params;
+    ksort($params);
+    $strVal = http_build_query($params, '', '&', PHP_QUERY_RFC3986)
+  }
+  return md5(md5($strSalt).md5($strVal));
+}
+
+// 验证签名
+if($_GET['sign'] != $this->_createSign()){
+  echo 'Invalid Sign';
+}
+
+</textarea><pre>  
+【 单向散列加密 】
+把任意长的输入串变化成固定长的输出串,并且由输出串难以得到输入串,这种方法称为单项散列加密。
+常用算法: MD5、SHA、MAC、CRC
+
+优点
+以MD5为例
+方便存储：加密后都是固定大小（32位）的字符串,能够分配固定大小的空间存储。
+损耗低：加密/加密对于性能的损耗微乎其微。
+文件加密：只需要32位字符串就能对一个巨大的文件验证其完整性。
+不可逆：大多数的情况下不可逆,具有良好的安全性。
+
+缺点
+存在暴力破解的可能性,最好通过加盐值的方式提高安全性。
+
+应用场景
+用于敏感数据,比如用户密码,请求参数,文件加密等。
+
+推荐密码的存储方式
+password_hash() 使用足够强度的单向散列算法创建密码的哈希（hash）
+
+【 对称加密 】
+同一个密钥可以同时用作数据的加密和解密,这种方法称为对称加密。
+常用算法: DES、AES
+AES是DES的升级版,密钥长度更长,选择更多,也更灵活,安全性更高,速度更快。
+优点: 算法公开、计算量小、加密速度快、加密效率高。
+缺点: 发送方和接收方必须商定好密钥,然后使双方都能保存好密钥,密钥管理成为双方的负担。
+应用场景: 相对大一点的数据量或关键数据的加密。
+
+DES是对称性加密里面常见一种,全称为Data Encryption Standard,即数据加密标准,是一种使用密钥加密的块算法。密钥长度是64位(bit),超过位数密钥被忽略。所谓对称性加密即加密和解密密钥相同,对称性加密一般会按照固定长度,把待加密字符串分成块,不足一整块或者刚好最后有特殊填充字符。
+跨语言做 DES 加密解密经常会出现问题,往往是填充方式不对、编码不一致或者加密解密模式没有对应上造成。
+常见的填充模式有： pkcs5、pkcs7、iso10126、ansix923、zero。
+加密模式有：DES-ECB、DES-CBC、DES-CTR、DES-OFB、DES-CFB
+
+AES
+AES加密类库在网上很容易找得到,php的mcrypt_encrypt和mcrypt_decrypt方法在PHP7.2版本中已经被弃用了,在新版本中使用openssl_encrypt和openssl_decrypt两个方法。
+
+openssl_encrypt($data, $method, $password, $options, $iv)
+openssl_decrypt($data, $method, $password, $options, $iv)
+$data 加密明文
+$method 加密方法,DES-ECB、DES-CBC、DES-CTR、DES-OFB、DES-CFB
+$passwd 加密密钥[密码]
+$options 数据格式选项（可选）,选项有：0、OPENSSL_RAW_DATA=1、OPENSSL_ZERO_PADDING=2、OPENSSL_NO_PADDING=3
+$iv 密初始化向量（可选）,如果method为DES−ECB,则method为DES-ECB,则method为DES−ECB,则iv无需填写
+
+</pre><textarea>
+$data = '1234567887654321';//加密明文
+$method = 'DES-ECB';//加密方法
+$passwd = '12344321';//加密密钥
+$options = 0;//数据格式选项（可选）
+$iv = '';//加密初始化向量（可选）
+
+// 默认填充方式
+$result = openssl_encrypt($data, $method, $passwd, $options);
+var_dump($result);  // string(32) "kQYOdswcm9I5elv2wdJucplqAgqDNqXg"
+$result = 'kQYOdswcm9I5elv2wdJucplqAgqDNqXg'; 
+var_dump(openssl_decrypt($result, $method, $passwd, 0));  // string(16) "1234567887654321"
+
+// OPENSSL_ZERO_PADDING方式,看字面意思,是用0填充,但是测试并不起作用
+$result = openssl_encrypt($data, $method, $passwd, OPENSSL_ZERO_PADDING);
+var_dump($result);  // string(24) "kQYOdswcm9I5elv2wdJucg==" 
+$result = openssl_encrypt($data, $method, $passwd, OPENSSL_ZERO_PADDING);
+var_dump(openssl_decrypt($result, $method, $passwd,OPENSSL_ZERO_PADDING));  // string(16) "1234567887654321"
+
+// OPENSSL_NO_PADDING 不填充,需要手动填充,在openssl_encrypt前加上填充过程
+$str_padded = $data;
+if (strlen($str_padded) % 16) {
+    $str_padded = str_pad($str_padded,strlen($str_padded) + 16 - strlen($str_padded) % 16, "\0");
+}
+$result = openssl_encrypt($str_padded, $method, $passwd, OPENSSL_NO_PADDING);
+var_dump($result);  // string(16) "�v���9z[���nr" 
+var_dump( base64_encode($result));  // string(24) "kQYOdswcm9I5elv2wdJucg=="
+解密：
+//加密begin
+$str_padded = $data;
+if (strlen($str_padded) % 16) {
+    $str_padded = str_pad($str_padded,strlen($str_padded) + 16 - strlen($str_padded) % 16, "\0");
+}
+$result = openssl_encrypt($str_padded, $method, $passwd, OPENSSL_NO_PADDING);
+//加密end
+//解密begin
+$str = base64_encode($result);
+$m = openssl_decrypt( base64_decode($str) , $method, $passwd, OPENSSL_NO_PADDING);
+var_dump( rtrim( rtrim( $m,chr(0) ), chr(7) ) );  // string(16) "1234567887654321",结尾要去除填充字符’\0’和’\a’,‘\a’是为了兼容用OPENSSL_RAW_DATA加密的结果
+//解密 end
+
+</textarea><textarea>
+class AES{
+  protected $method; // 加解密方法
+  protected $secret_key; // 加解密的密钥
+  protected $iv; // 加解密的向量
+  protected $options;
+
+  public function __construct($key = '', $method = 'AES-128-CBC', $iv = '', $options = OPENSSL_RAW_DATA){
+    $this->secret_key = isset($key) ? $key : 'Cwq3g0hgl7Ao20KI';
+    $this->method = in_array($method, openssl_get_cipher_methods()) ? $method : 'AES-128-CBC';
+    $this->iv = $iv;
+    $this->options = in_array($options, [OPENSSL_RAW_DATA, OPENSSL_ZERO_PADDING]) ? $options : OPENSSL_RAW_DATA;
+  }
+
+  public function encrypt($data = ''){
+    return base64_encode(openssl_encrypt($data, $this->method, $this->secret_key, $this->options, $this->iv));
+  }
+
+  public function decrypt($data = ''){
+    return openssl_decrypt(base64_decode($data), $this->method, $this->secret_key, $this->options, $this->iv);
+  }
+}
+
+$aes = new AES('HFu8Z5SjAT7CudQc');
+$encrypted = $aes->encrypt('锄禾日当午');
+var_dump($encrypted);
+$decrypted = $aes->decrypt($encrypted);
+var_dump($decrypted);
+
+</textarea>openssl的用法<textarea>
+// PHP 7.1+ 下 GCM 模式的 AES 认证加密例子
+//$key should have been previously generated in a cryptographically safe way, like openssl_random_pseudo_bytes
+$plaintext = "message to be encrypted";
+$cipher = "aes-128-gcm";
+if (in_array($cipher, openssl_get_cipher_methods())){
+    $ivlen = openssl_cipher_iv_length($cipher);
+    $iv = openssl_random_pseudo_bytes($ivlen);
+    $ciphertext = openssl_encrypt($plaintext, $cipher, $key, $options=0, $iv, $tag);
+    //store $cipher, $iv, and $tag for decryption later
+    $original_plaintext = openssl_decrypt($ciphertext, $cipher, $key, $options=0, $iv, $tag);
+    echo $original_plaintext."\n";
+}
+
+// PHP 5.6+ 的 AES 认证加密例子
+//$key previously generated safely, ie: openssl_random_pseudo_bytes
+$plaintext = "message to be encrypted";
+$ivlen = openssl_cipher_iv_length($cipher="AES-128-CBC");
+$iv = openssl_random_pseudo_bytes($ivlen);
+$ciphertext_raw = openssl_encrypt($plaintext, $cipher, $key, $options=OPENSSL_RAW_DATA, $iv);
+$hmac = hash_hmac('sha256', $ciphertext_raw, $key, $as_binary=true);
+$ciphertext = base64_encode( $iv.$hmac.$ciphertext_raw );
+
+//decrypt later....
+$c = base64_decode($ciphertext);
+$ivlen = openssl_cipher_iv_length($cipher="AES-128-CBC");
+$iv = substr($c, 0, $ivlen);
+$hmac = substr($c, $ivlen, $sha2len=32);
+$ciphertext_raw = substr($c, $ivlen+$sha2len);
+$original_plaintext = openssl_decrypt($ciphertext_raw, $cipher, $key, $options=OPENSSL_RAW_DATA, $iv);
+$calcmac = hash_hmac('sha256', $ciphertext_raw, $key, $as_binary=true);
+if (hash_equals($hmac, $calcmac)){ //PHP 5.6+ timing attack safe comparison
+    echo $original_plaintext."\n";
+}
+
+</textarea><pre>
+【 非对称加密 】
+需要两个密钥来进行加密和解密,这两个秘钥分别是公钥（public key）和私钥（private key）,这种方法称为非对称加密。
+常用算法: RSA
+优点: 与对称加密相比,安全性更好,加解密需要不同的密钥,公钥和私钥都可进行相互的加解密。
+缺点: 加密和解密花费时间长、速度慢,只适合对少量数据进行加密。
+应用场景: 适合于对安全性要求很高的场景,适合加密少量数据,比如支付数据、登录数据等。
+
+RSA 与 RSA2
+算法名称	标准名称	备注
+RSA2	SHA256WithRSA	强制要求RSA密钥的长度至少为2048
+RSA	SHA1WithRSA	对RSA密钥的长度不限制,推荐使用2048位以上
+RSA2比RSA有更强的安全能力,蚂蚁金服,新浪微博都在使用RSA2算法
+
+创建公钥和私钥生成 private_key.pem和public_key.pem两个文件：
+openssl genrsa -out private_key.pem 2048
+openssl rsa -in private_key.pem -pubout -out public_key.pem
+
+</pre><textarea>
+class Rsa2{
+  private static $PRIVATE_KEY = 'private_key.pem内容';
+  private static $PUBLIC_KEY = 'public_key.pem内容';
+
+  // 获取私钥
+  private static function getPrivateKey(){
+    $privateKey = self::$PRIVSTE_KEY;
+    return openssl_pkey_get_private($privateKey);
+  }
+
+  // 获取公钥
+  private static function getPublicKey(){
+    $publicKey = self::$PUBLIC_KEY;
+    return openssl_pkey_get_public($publicKey);
+  }
+
+  // 私钥加密
+  public static function privateEncrypt($data = ''){
+    if(!is_string($data)) return null;
+    return openssl_private_encrypt($data, $encrypted, self::getPrivateKey()) ? base64_encode($encrypted) : null;
+  }
+
+  // 公钥加密
+  public static function publicEncrypt($data = ''){
+    if(!is_string($data)) return null;
+    return openssl_public_encrypt($data, $encrypted, self::getPublicKey()) ? base64_encode($encrypted) : null;
+  }
+
+  // 私钥解密
+  public static function privateDecrypt($encrypted = ''){
+    if(!is_string($encrypted)) return null;
+    return openssl_private_decrypt(base64_decode($encrypted), $encrypted, self::getPrivateKey()) ? $encrypted : null;
+  }
+
+  // 公钥解密
+  public static function publicDecrypt($encrypted = ''){
+    if(!is_string($encrypted)) return null;
+    return openssl_public_decrypt(base64_decode($encrypted), $encrypted, self::getPrivateKey()) ? $encrypted : null;
+  }
+
+  // 创建签名
+  public function createSign($data = ''){
+    if(!is_string($data)) return null;
+    return openssl_sign($data, $sign, self::getPrivateKey(), OPENSSL_ALGO_SHA256) ? base64_encode($sign) : null;
+  }
+
+  // 验证签名
+  public function verifySign($data = '', $sign = ''){
+    if(!is_string($data) || !is_string($sign)) return null;
+    return (bool)openssl_varify($data, base64_decode($sign), self::getPublicKey(), OPENSSL_ALGO_SHA256);
+  }
+}
+
+$sra2 = new Rsa2();
+$privateEncrypt = $sra2->privateEnrypt('锄禾日当午');
+echo '私钥加密后：'.$privateEncrypt;
+$publicDecrypt = $sra2->publicDecrypt($privateEncrypt);
+echo '公钥解密后：'.$publicDecrypt;
+$publicEncrypt = $sra2->publicEncrypt('锄禾日当午');
+echo '公钥加密后：'.$publicEncrypt;
+$privateDecrypt = $sra2->privateDecrypt($publicEncrypt);
+echo '私钥解密后：'.$privateDecrypt;
+$sign = $sra2->createSign('锄禾日当午');
+echo '生成签名：'.$sign;
+$status = $sra2->verifySign('锄禾日当午', $sign);
+echo '验证签名：'.($status ? '成功', '失败');
+
+</textarea><pre>
+【 JS-RSA 】
+JSEncrypt ：用于执行OpenSSL RSA加密、解密和密钥生成的Javascript库。
+Git源：https://github.com/travist/jsencrypt
+应用场景：
+在做WEB的登录功能时一般是通过Form提交或Ajax方式提交到服务器进行验证的。
+为了防止抓包,登录密码肯定要先进行一次加密（RSA）,再提交到服务器进行验证。
+一些大公司都在使用,比如淘宝、京东、新浪等
+
+【 密钥安全管理 】
+这些加密技术能够达到安全加密效果的前提是密钥的保密性,实际工作中不同环境的密钥都应该不同（开发环境、预发布环境、正式环境）,如何安全保存密钥呢？
+1、环境变量: 将密钥设置到环境变量中,每次从环境变量中加载。
+2、配置中心: 将密钥存放到配置中心,统一进行管理。
+3、密钥过期策略: 设置密钥有效期,比如一个月进行重置一次。
+
+【 接口调试工具 】
+Postman
+一款功能强大的网页调试与发送网页 HTTP 请求的 Chrome插件。
+
+SocketLog,
+https://github.com/luofei614/SocketLog
+解决的痛点：
+正在运行的API有Bug,不能在文件中使用var_dump进行调试,因为会影响到client的调用。将日志写到文件中,查看也不是很方便。
+在二次开发一个新系统的时候,想查看执行了哪些Sql语句及程序的warning,notice等错误信息。
+
+SocketLog,可以解决以上问题,它通过WebSocket将调试日志输出到浏览器的console中。
+
+使用方法
+安装、配置Chrome插件
+SocketLog服务端安装
+PHP中用SocketLog调试
+配置日志类型和相关参数
+
+【 在线接口文档 】
+接口开发完毕,需要给请求方提供接口文档,文档的编写现在大部分都使用Markdown格式。
+也有一些开源的系统,可以下载并安装到自己的服务器上。
+也有一些在线的系统,可以在线使用同时也支持离线导出。
+
+常用的接口文档平台：
+eolinker,业内领先的API全生命周期管理解决方案,API 快速生成 | API 研发管理 | API 自动化测试 | API 微服务网关 | API 监控 | API 开放共享
+Apizza
+Yapi
+RAP2
+DOClever
+
+【 HTTP与RPC的区别 】
+在HTTP和RPC的选择上可能会有一些疑问,RPC框架配置比较复杂,明明用HTTP能实现为什么要选择RPC？
+
+传输协议：
+HTTP基于HTTP协议。
+RPC即可以HTTP协议,也可以TCP协议。
+HTTP也是RPC实现的一种方式。
+
+性能消耗：
+HTTP大部分基于JSON实现的,序列化需要时间和性能。推荐一个像JSON,但比JSON传输更快占用更少的新型序列化类库MessagePack
+RPC可以基于二进制进行传输,消耗性能少一点。
+
+还有一些服务治理、负载均衡配置的区别。
+
+使用场景：
+比如浏览器接口、APP接口、第三方接口,推荐使用HTTP
+比如集团内部的服务调用,推荐使用RPC。
+RPC比HTTP性能消耗低,传输效率高,服务治理也方便。
+
+推荐使用的RPC框架：Thrift
+
+【 动态令牌 】
+OTP：One-Time Password 一次性密码。
+HOTP：HMAC-based One-Time Password 基于HMAC算法加密的一次性密码。
+TOTP：Time-based One-Time Password 基于时间戳算法的一次性密码。
+
+使用场景：
+公司VPN登录双因素验证
+服务器登录动态密码验证
+网银、网络游戏的实体动态口令牌
+银行转账动态密码
+
+</pre>
+</div>
+
+<div id="str_serialize">
 <h3>serialize()序列化(串行化)与unserialize()反序列化(反串行化)</h3><pre>
 序列化是将变量转换为可保存或传输的字符串的过程;
 反序列化就是在适当的时候把这个字符串再转化成原来的变量使用
@@ -11202,20 +11630,24 @@ $s=base64_encode(gzcompress(serialize($arr)));
 $original=unserialize(gzcompress(base64_encode($s)));
 
 </textarea>
+</div>
 
+<div id="str_json">
 <h3>PHP编码和解码JSON对象</h3><pre>
-json比serialize快,格式可读,返回数据更小,是开放可以移植的
+json比serialize快,格式可读,返回数据更小,开放可移植
 
 【 json_encode() 】
 string json_encode ($value [,$options = 0 ])
 进行json编码,对变量进行json编码,返回一个除resource类型外的值的json字符串格式的对象,只能用于utf8编码的数据,使用gb2312编码则需要将包含中文的内容使用iconv或mb系列函数转化为utf-8后再json_encode
 value:要编码的值
 options:由以下常量组成的二进制掩码JSON_HEX_QUOT,JSON_HEX_TAG,JSON_HEX_AMP,JSON_HEX_APOS,JSON_NUMERIC_CHECK,JSON_PRETTY_PRINT,JSON_UNESCAPED_SLASHES,JSON_FORCE_OBJECT
+成功则返回JSON编码的string,失败时返回FALSE
 
 【 json_decode() 】
 mixed json_decode ($json_string [,$assoc = false [,$depth = 512 [,$options = 0 ]]])
 json解码,对json格式的字符串进行解码转换成PHP变量,返回数组或对象
 Returns the value encoded in json in appropriate PHP type. Values true,false and null are returned as TRUE,FALSE and NULL respectively. NULL is returned if the json cannot be decoded or if the encoded data is deeper than the recursion limit
+通过恰当的PHP类型返回在json中编码的数据。值true,false和null会相应地返回TRUE,FALSE和NULL。如果json无法被解码或编码数据深度超过了递归限制的话将会返回NULL
 
 json_string: 待解码的JSON字符串,必须是UTF-8编码数据
 assoc: 当该参数为true时将返回数组,默认false返回对象
@@ -11224,6 +11656,11 @@ options: 二进制掩码,目前只支持JSON_BIGINT_AS_STRING
 
 【 json_last_error() 】
 返回数据编解码过程中发生的错误
+
+【 json_last_error_msg() 】
+json_last_error_msg ( void ) : string
+Returns the error string of the last json_encode() or json_decode() call
+Returns the error message on success, "No error" if no error has occurred, 或者在失败时返回FALSE
 
 </pre><textarea>
 // 判断数据不是json格式
@@ -11262,6 +11699,18 @@ function object_to_array($obj){
   return $arr;
 }
 
+</textarea>json api及错误处理<textarea>
+header("Content-Type: application/json;charset=utf-8");
+$json = json_encode($data);
+if ($json === false) {
+  $json = json_encode(["jsonError" => json_last_error_msg()]);
+  if ($json === false) {
+    $json = '{"jsonError":"unknown"}';
+  }
+  http_response_code(500);
+}
+echo $json;
+
 </textarea><textarea>
 var_dump(json_decode("Hello World")); // NULL
 
@@ -11287,7 +11736,7 @@ var_dump($original);          // array(5) { ["a"]=> int(1) ["b"]=> int(2) ["c"]=
 
 将"索引数组"强制转化成"对象"
 json_encode( (object)$arr );
-json_encode( $arr,JSON_FORCE_OBJECT );
+json_encode( $arr, JSON_FORCE_OBJECT );
 
 </pre><textarea>
 // 索引数组的json化:纯数字索引数组的json字符串是按照javascript能够识别的数组来存储的,而不是按照javascript能够识别的对象来存储的
@@ -13134,12 +13583,12 @@ sort ( array &$array [, int $sort_flags = SORT_REGULAR ] ) : bool
 成功时返回TRUE,否则FALSE
 可选的第二个参数 sort_flags 可以用以下值改变排序的行为：
 排序类型标记：
-SORT_REGULAR - 正常比较单元（不改变类型）
+SORT_REGULAR - 正常比较单元(不改变类型)
 SORT_NUMERIC - 单元被作为数字来比较
 SORT_STRING - 单元被作为字符串来比较
-SORT_LOCALE_STRING - 根据当前的区域（locale）设置来把单元当作字符串比较，可以用setlocale()来改变。
+SORT_LOCALE_STRING - 根据当前的区域(locale)设置来把单元当作字符串比较,可以用setlocale()来改变。
 SORT_NATURAL - 和 natsort() 类似对每个单元以“自然的顺序”对字符串进行排序
-SORT_FLAG_CASE - 能够与 SORT_STRING 或 SORT_NATURAL 合并（OR 位运算），不区分大小写排序字符串
+SORT_FLAG_CASE - 能够与 SORT_STRING 或 SORT_NATURAL 合并(OR 位运算),不区分大小写排序字符串
 
 $fruits = array("lemon", "orange", "banana", "apple");
 sort($fruits);
@@ -38802,6 +39251,388 @@ BRPOP orderList 0
 </pre>
 </div>
 
+<div id="mq">
+<h3>消息队列 MQ (Message queue)</h3><pre>
+消息队列是一种进程间通信或同一进程的不同线程间的通信方式
+消息队列技术是分布式应用间交换信息的一种技术,消息队列可驻留在内存或磁盘上,队列存储消息直到它们被应用程序读出。通过消息队列应用程序可独立地执行,它们不需要知道彼此的位置、或在继续执行前不需要等待接收程序接收此消息
+消息队列本质是队列结构中间件,消息放入后可以立即返回,而不需要立即处理,由订阅者/消费者按顺序读取处理
+遇到大并发或耗时长的环节的时候,同时又不需要立即获得其返回结果就可以使用消息队列
+
+业务系统 ---入队---> 消息队列 ---出队---> 队列处理系统
+
+类似于消费者和生产者的关系,首先生产者在消息队列未满的时候才将生产的产品放进消息队列中;消费者在消息队列不为空的时候才从消息队列中取出产品进行消费。出队的那个步骤常用的方法是一直轮询和定时操作
+
+也是解耦的原理：业务系统和队列处理系统没有直接关系,一个写(业务系统),一个读(队列管理系统)
+写的只管往队列里写,别的不用操心,读的能不能读完和写的也没有关系
+读的只管从队列里往外读,来活儿就干,没活儿歇着
+
+消息队列本质是队列,其最简单的操作就是入队和出队,既按照程序决定何时何条件入队和何时何条件出队,遇到入队系统和出队系统的业务诉求不一致时就可以考虑用消息队列来实现
+消息队列有同步或异步实现方式,通常采用异步方式使用消息队列,远程过程调用多采用同步方式。
+
+MQ与RPC有什么不同？
+MQ通常传递无规则协议,这个协议由用户定义并且实现存储转发;而RPC通常是专用协议,调用过程返回结果。
+
+【 应用场景 】
+冗余：持久化的存储在队列中,后续由订单处理程序获取,处理完成之后再把这条记录进行删除
+解耦：入队和出队的系统没有直接的关系,其中一套蹦了,另一套系统不会受影响,因为中间隔了个队列
+流量削锋：秒杀和抢购。流量剧增,配合缓存使用消息队列来限制下,如只允许10个,队列里存10个之后就不存了,再来就提示秒杀结束
+异步通信：因为消息本身就可使入队的系统直接返回,所以说实现了程序的异步操作
+场景扩展性：如现在只有订单系统和财务系统,后续想加个配货系统,直接让配货系统订阅这个队列就可以
+排序保证：有些场景下如银行数据的处理顺序是很重要的,因为队列本身就可以做成单线程、单进单出的系统
+
+1、异步处理、应用解耦、分布式
+场景：主业务对子业务的处理结果并不关心时。
+案例：电商系统中通过订单系统下单成功之后将所有订单同时交给物流系统、报表系统、操作日志记录系统等
+解决两个系统深度耦合的问题,使用消息队列之后两个系统入队系统和出队系统没有直接的关系,一个系统的崩溃不会影响另一个系统正常运转
+
+通俗解释：小明是个蛋糕店员。他做好蛋糕后,放在橱窗中,在对应订单上标记『已完成』,然后继续做下一个蛋糕,并不关心蛋糕后续是怎么卖出的,也不关心啥时候卖出。
+
+实现：使用一个队列的中间件或中间系统来存放几个业务系统的共用部分,并独立进行处理。可以使用每个系统各自的独立标记,对各系统的处理进度进行记录。在所有系统均完成操作后,进行出队操作或持久化存储数据。
+
+需要考虑中间数据的容灾能力,当故障发生并恢复时保证业务流程可以恢复,保证每条数据都可以正确地完成处理。
+
+一般订单系统和库存系统是一体的,但如果一方出现问题,那么这个订单就失败了。
+订单系统：用户下单后,订单系统完成持久化处理,将消息写入消息队列,返回用户订单下单成功。
+库存系统：订阅下单的消息,采用拉/推的方式,获取下单信息,库存系统根据下单信息,进行库存操作。
+假如在下单时库存系统不能正常使用,也不影响正常下单,因为下单后订单系统写入消息队列就不再关心其他的后续操作了,实现订单系统与库存系统的应用解耦。
+
+解藕案例：队列处理"订单系统"和"配送系统"
+对于订单流程,可以设计两个系统,一个是"订单系统" 另外一个是 "配送系统",网购提交了一个订单之后,在后台可以看到货物正在配送中,这个时候就要参与进来一个"配送系统"。
+
+如果做架构的时候把订单系统和配送系统设计在一起的话就会出现一些问题,首先对于订单系统来说,因为系统的压力会比较大,但配送系统没必要为这些压力做一些即时的反应。
+
+第二个也不希望在订单系统出现故障之后导致配送系统也出现故障,这个时候就会同时影响到两个系统的正常运转,所以希望把这两个系统进行解耦。这两系统分开之后可以通过一个中间的队列表进行这两个系统的沟通。
+
+架构设计
+(1)、首先订单系统会接收用户的订单,然后进行订单的处理。
+(2)、然后会把这些订单信息写到队列表中,这个队列表是沟通这两个系统的关键。
+(3)、由配送系统定时执行的一个程序来读取队列表进行处理。
+(4)、配送系统处理之后,会把已处理的记录进行标记。
+
+</pre><textarea>
+/* order_queue.sql */
+create table order_queue(
+  id int(11) unsigned not null auto_increment commit '队列id',
+  order_id int(11) not null,
+  mobile varchar(20) not null,
+  created_at datetime not null default '0000-00-00 00:00:00' comment '订单创建时间',
+  update_at datetime not null default '0000-00-00 00:00:00' comment '处理完成时间',
+  status tinyint(2) not null comment '0未处理,1已处理,2处理中',
+  primary key(`id`)
+)engine=InnoDB default charser=utf8;
+
+/* order.php 接收用户的订单信息并写入队列 */
+include './include/DB.php';
+if(!empty($_GET['mobile'])){
+  $order_id = rand(1000,9999);  // 生成订单信息
+  $insert_data = [              // 把订单信息存入队列表中
+    'order_id' => $order_id,
+    'mobile' => $_GET['mobile'],
+    'created_at' => date('Y-m-d H:i:s'),
+    'status' => 0
+  ];
+  $db = DB::getInstance();
+  $res = $db->insert('order_queue',$insert_data);
+  $res ? echo $insert_data['order_id'] : echo '保存失败';
+}
+
+/* goods.php 配送系统处理队列中的订单并标记 */
+include './include/DB.php';
+$db = DB::getInstance();
+$where = ['status' => 0];
+$new = ['status' => 2];
+$limit = 2;
+$res_lock = $db->update('order_queue',$where,$new,$limit);  // 把要处理的记录更新为处理中
+if($res_lock){  // 选择刚刚更新的数据进行配送系统的处理,把处理过的程序更新为已完成
+  $where = ['status' => 2];
+  $res = $db->select('order_queue',$where);
+  $sucess = [
+    'status' => 1,
+    'updated_at' => date('Y-m-d H:i:s'),
+  ];
+  $res_last = $db->update('order_queue',$where,$sucess);
+  $res_last ? echo "sucess".$res_last : echo "fail".$res_last;
+}else{
+  echo "all finish";
+}
+
+/* good.sh */
+#!/bin/bash
+# 输出当前时间
+date "+%G-%m-%d %H:%M:S"
+php ./goods.php
+
+# 每分钟执行一次
+*/ * * * * /home/berlin75/sites/good.sh >> /home/berlin75/sites/log 2>&1
+
+</textarea>使用MySQL实现消息队列<textarea>
+有个生意很好的饭店,一分钟有500人下单,店家掌柜处理不过来,于是就先暂时不通知用户是否能够接单,先把所有的订单先存着,只告诉他们正在处理中,但还有一个问题就是有一些是其他饭店专门来搞事的,所以就要查看订单是否合法。
+
+实现：用户下单之后后台创建一个随机的order_id对应该订单,并且该订单的初始状态(status)为待处理(0);当商家查看该订单情况时将status改为1表示正在处理;当商家确认这个订单可以接受时就将该订单的status改为2表示成功接单。
+
+首先在数据库中创建一个order_list订单表
+mysql> desc order_list;
++----------+------------+------+-----+----------+-------+
+| Field    | Type       | Null | Key | Default  | Extra |
++----------+------------+------+-----+----------+-------+
+| order_id | int(11)    | NO   | PRI | NULL     |       |
+| mobile   | int(8)     | NO   |     | 88888888 |       |
+| status   | tinyint(1) | YES  |     | 0        |       |
++----------+------------+------+-----+----------+-------+
+
+有两个PHP程序:producer.php(用户、生产者)和consumer.php(商家、消费者)　　
+一旦有用户下单就往order_list中添加一条数据,这里方便测试,于是执行下面的PHP程序,表示用户方(producer.php),每隔2秒下一次单;
+
+$pdo=new PDO("mysql:host=localhost;dbname=test","root","root");
+$stmt=$pdo->prepare("insert into order_list (order_id,mobile,status) values (?,?,?)");
+while(1){
+  $order_id=rand(10000,99999);
+  $mobile=rand(11111111,99999999);
+  $stmt->execute(array($order_id,$mobile,0));
+  echo date("Y-m-d H:i:s",time())."添加了一条订单,订单号为{$order_id},手机号为{$mobile}\n";
+  sleep(2);
+}
+
+用户提交订单后剩下的事情就交给商家了,商家(consumer.php)生意太忙了,每4秒才能处理一个订单：
+$pdo=new PDO("mysql:host=localhost;dbname=test","root","root");
+$stmt=$pdo->prepare("update order_list set status=? where status=? limit 1");
+$stmt_select=$pdo->prepare("select order_id from order_list where status=1");//正在处理的订单号
+while(1){
+  $init=0;//初始status
+  $lock=1;//标记为正在处理
+  $success=2;//成功接单
+  //为了保证数据的一致性,处理订单之前要先锁定一个订单,将其status由0改为1,然后才可处理,处理完毕后再将status从1改为2
+  $stmt->execute(array($lock,$init));//锁定要处理的订单
+  $stmt_select->execute();
+  $result=$stmt_select->fetch(PDO::FETCH_ASSOC);//查询正在处理的订单号
+  $order_id=$result['order_id'];
+  echo date("Y-m-d H:i:s")."准备处理订单,订单号为{$order_id}\n";
+  sleep(3);//处理3秒
+  $stmt->execute(array($success,$lock));
+  echo date("Y-m-d H:i:s")."订单处理完成,订单号为{$order_id}\n";
+  sleep(1);//休息1秒
+
+</textarea><pre>
+2、峰值处理、削峰填谷
+场景：流量在各个时间点不均衡,瞬间流量剧增
+案例：秒杀、抢购,一般秒杀时订单特别多,但数据库无法一次性的处理这么多,所以可以先存在消息队列中,无论进的速度多快,出的速度都是一定的
+思路：当用户点击按钮提交购买请求时,并不直接马上执行购买请求动作,而是将请求动作存入消息列队,用户的请求到此结束,而在服务器后台,从消息列队中逐一取出请求记录,再进行数据库操作,完成处理之后将处理结果返回给用户。由于消息队列的存取是先进先出,因此所有处理将按请求顺序进行处理。由于处理是在后台一个一个完成,因此不会对服务器和数据库造成巨大压力
+
+解释：小明制作蛋糕的时间比较长,订单来到后先登记成一个清单,然后逐次按顺序制作,订单量过大时会暂时挂出『已售完』的牌子。
+
+实现：使用单线程的工具将业务需求进行排队处理,当业务请求达到阀值时给出友好提示并拒绝用户的需求。
+
+对于消峰需求,可以高峰期挂出『暂时无法购买,请稍等』等提示,防止流量对后续业务的冲击。
+对于秒杀等抢完即停的需求,需要考虑超发问题,可以添加一个名额计数器,或在秒杀名额已满员时发放一个秒杀完成标记,后续处理程序检测到完成标记后,再进行后续处理。
+
+流量削峰案例：Redis的list类型实现秒杀
+redis基于内存,速度会非常快,redis对数据库有一个非常好的补充作用,因为它是可持久化的,redis会周期性的把数据写到硬盘里,所以它不用担心断电的问题,从这方面说它比另一款缓存memcache更有优势些,另外redis提供五种数据类型(字符串,双向链表,哈希,集合,有序集合)
+
+一般情况下做秒杀案例,抢购,瞬间高并发,需要排队的案例中redis是一个很好的选择。
+redis数据类型中的list类型是一个双向链表,可以从头部或者尾部追加数据。
+LPUSH/LPUSHX :将值插入到(/存在的)列表头部
+RPUSH/RPUSHX: 将值插入到(/存在的)列表尾部
+LPOP : 移除并获取列表的第一个元素
+RPOP: 移除并获取列表的最后一个元素
+LTRIM: 保留指定区间内的元素
+LLEN: 获取列表长度
+LSET: 通过索引设置列表元素的值
+LINDEX: 通过索引获取列表中的元素
+LRANGE: 获取列表指定范围内的元素
+
+架构设计
+1、首先记录是哪一个用户参与了秒杀同时记录他的时间。
+2、将用户的id存到redis列表中,让它排队。如果规定只有前10个用户可以参与成功,如果列表中的个数已经够了就不会让它继续追加数据,这样redis的列表长度就只会是10个
+3、最后在慢慢的将redis中的数据写入到数据库中,以减少数据的压力
+
+代码级设计
+1、当用户开始秒杀时,将秒杀程序的请求写入Redis(uid,time_stamp)中。
+2、假使规定只有10人可以秒杀成功,检查Redis已经存放数据的长度,超出上限直接丢弃说明秒杀完成。
+3、最后在死循环处理存入Redis中的10条数据,然后在慢慢的取数据并存入到mysql数据库中。
+
+在秒杀这一块对于数据库的压力特别大,如果没有这样的设计会造成mysql的写入瓶颈。通过Redis的list,然后把秒杀的请求放入Redis,最后通过入库程序把数据慢慢的写入到数据库,这样的话就可以实现流量的均衡,对mysql不会造成太大的压力。　
+
+</pre>利用redis实现消息队列处理高并发请求<textarea>
+// 将请求存入redis(入队):当用户点击按钮时通过ajax将请求发给php进行处理,前台返回给用户正在处理的提示
+$redis = new Redis();
+$redis->connect('127.0.0.1',6379);
+try {
+  $redis->LPUSH('click',$user_id);
+}catch(Exception $e) {
+  echo $e->getMessage();
+}
+
+// 从redis中将请求取出(出队),在后台进行数据处理
+// 守护进程:当上述请求存入redis后就可以直接将结果返回给用户了。需要在服务端创建一个后台运行的程序,从redis中取出请求数据,并利用这些数据读取和更新数据库,但这一切都是后台运行解决的,而非用户请求触发的。
+// 通过上面的代码redis中会存储很多请求,这些请求都是准备用来处理的。这个列队已经存在了之后,服务器后台则对这些请求进行处理,第一步就是先从redis中逐一取出请求
+// 为了保证数据处理正常进行,必须和数据库之间建立长连接,因此上面采用了pconnect。mysql连接时也要采用长连接保证数据处理的有效性,同时由于在后台运行,不可能随时获取数据库操作的状态,因此最好采用innodb引擎,对数据库操作事件进行监听,如果出现了异常,要对事件结果进行检查,如果数据插入失败,应该重新执行该事件
+$redis = new Redis();
+$redis->pconnect('127.0.0.1',6379);
+while(1) {
+  try{
+    $value = $redis->LPOP('click');
+    // 利用$value进行逻辑和数据处理
+  }catch(Exception $e) {
+    echo $e->getMessage();
+  }
+}
+
+</textarea>php+redis实现消息队列<textarea>
+// php+redis消息队列是php+mysql性能不足时的一个中间间处理方案。通过这个中间的处理,保证的数据的可用性和准确性。用于服务器瞬间请求大,数据库压力大的情况。如并发量大导致的超卖、并发量大导致的数据重复情况。
+
+// 流程：php接受请求和数据 -> php把数据写入redis队列中(入队) -> shell定时调用php读取队列数据写入mysql(出队)
+
+// 入队：inqueue.php
+$redis = new redis();
+$redis->connect('127.0.0.1',6379);
+$redis -> select('1');
+$redis->auth('');
+$data = [a,b,c,d,e,f,g,h];    // get或post请求过来的数据
+$data = json_encode($data);
+$in = $redis->rpush('queue',$data);
+if($in) echo "入队成功";
+
+// 出队：outqueue.php
+$redis = new redis();
+$redis->connect('127.0.0.1',6379);
+$redis -> select('1');
+$redis->auth('');
+$value = $redis->lpop('queue');
+$value = json_decode($value,true);
+
+// process.sh
+#!/bin/bash
+php /usr/local/nginx/html/outqueue.php
+
+// shell process.sh：定时调用outqueue.php脚本
+# 进行每分钟调用一次
+* * * * * /usr/local/nginx/html/process.sh
+
+// 如果每分钟调用一次频率不够,可以执行多次调用脚本,这样就一分钟调用了多次了
+// process.sh
+#!/bin/bash
+php /usr/local/nginx/html/outqueue.php
+php /usr/local/nginx/html/outqueue.php
+php /usr/local/nginx/html/outqueue.php
+php /usr/local/nginx/html/outqueue.php
+php /usr/local/nginx/html/outqueue.php
+
+// 查看队列中的当前数据
+$redis = new redis();
+$redis->connect('127.0.0.1',6379);
+$redis -> select('1');
+$redis->auth('');
+$list = $redis->lrange('queue',0,-1);
+var_dump($list);
+
+</textarea><pre>
+3、送达保证,冗余
+场景：内容需要逐条严格执行,并保证执行成功,执行不成功或中断时可以恢复
+案例：银行、财务类系统,需提升容灾能力的系统,重点考虑容灾相关问题,如业务恢复问题、重复处理问题。
+
+解释：小明制作的蛋糕需要客户验货签收后,才可以继续制作下一个蛋糕。
+
+实现：入队系统将业务需求写入消息队列后,即进行下一次业务处理。后续处理程序对队列内容进行逐条处理,处理完成后发放『完成许可』。消息队列中的内容,只有取得『完成许可』后才可以从消息队列中删除。
+
+四：排序保证
+场景：消息队列中的内容有严格的顺序。
+案例：抢号排队等系统
+
+解释：小明制作蛋糕的顺序需要严格按下单顺序来制作。
+
+实现：入队系统将内容逐条写入消息队列,并按单线排列,按先进先出的顺序来提出数据并进行后续处理。需要使用单线程,保证只有一条生产线。
+
+4、扩展性
+场景：采用发布-订阅模式时添加新的订阅者
+案例：注册用户后发送成功短信的模型中追加一个发送email的功能
+实现：由多个消费者订阅一个消息的中间层,然后发布者将信息发布到中间层中。订阅了这个中间层的消费者均可以收到这个消息,并进行后续处理。在这个结构中,如果想添加一个消息的后续处理组件,只需要将这个组件订阅到中间层即可
+保证业务之间没有深度耦合,防止扩展时造成干扰。
+
+【 队列介质 】
+1、数据库,如mysql(可靠性高,易实现,速度慢)
+2、缓存,如redis(速度快,单个消息报包过大时效率低)
+3、消息系统,如rabbitMq(专业性强,可靠,学习成本高)
+apt install rabbitmq-server(安装之后自动运行,ps aux查看进程,rabbitmq官网查看demo)
+下载php-amqplib
+
+【 消息处理触发机制 】
+1、死循环方式读取队列并处理：易实现,服务器压力大,故障时无法及时恢复;比较适合做秒杀,比较集中,运维集中维护
+2、定时执行任务：压力均分,有处理上限;目前比较流行的处理触发机制。唯一的缺点是间隔和数据需要注意,不要等上一个任务没有完成下一个任务又开始了
+3、守护进程：类似于php-fpm和php-cgi,需要shell基础
+
+</pre>
+
+<h4>Redis实现延迟队列</h4><pre>
+Redis既能快又能慢
+Redis是一种基于内存的单进程单线程数据库,Redis6.0开始之后支持多线程,处理速度都非常快。Redis又能慢是指Redis可以设置一些参数达到慢处理的结果
+
+场景：
+在淘宝、京东等购物平台上下单,超过一定时间未付款,订单会自动取消。
+打车的时候,在规定时间没有车主接单,平台会取消单并提醒暂时没有车主接单。
+点外卖的时候,如果商家在10分钟还没接单就会自动取消订单。
+收快递的时候,如果没有点确认收货,在一段时间后程序会自动完成订单。
+在平台完成订单后,如果没有在规定时间评论商品,会自动默认买家不评论。
+.......还有很多这样的场景。
+
+为什么要这样做？
+因为这样可以保证商品的库存可以释放给其他人购买,你可以不用一直等待打车却得不到回复,你可以及时换一家店点到外卖。
+
+那么这些情况都是如何实现的呢？
+当用户发送一个消息请求给服务器后台的时候,服务器会检测这条消息是否需要进行延时处理,如果需要就放入到延时队列中,由延时任务检测器进行检测和处理,对于不需要进行延时处理的任务,服务器会立马对消息进行处理,并把处理后的结果相应返会给用户
+对于在延时任务检测器内部的话,有查询延迟任务和执行延时任务两个职能,任务检测器会先去延时任务队列进行队列中信息读取,判断当前队列中哪些任务已经时间到期并将已经到期的任务输出执行(具有实时性,会存在一定的时间误差,因为这个是定时任务)
+
+Redis的延迟队列基于有序集合,score为执行时间戳,value为任务实体或任务实体引用
+可以使用zset(sortedset)命令,用设置好的时间戳作为score进行排序,使用 zadd score1 value1 ....命令就可以一直往内存中生产消息。再利用 zrangebysocre 查询符合条件的所有待处理的任务,通过循环执行队列任务即可。也可以通过 zrangebyscore key min max withscores limit 0 1 查询最早的一条任务,来进行消费
+
+总的来说可以通过以下两种方式来实现：
+(1)使用zrangebyscore来查询当前延时队列中所有任务,找出所有需要进行处理的延时任务,在依次进行操作。
+(2)查找当前最早的一条任务,通过score值来判断任务执行的时候是否大于了当前系统的时候,比如说：最早的任务执行时间在3点,系统时间在2点58分,表示这个应该需要立马被执行啦,时间快到了
+
+Redis实现延时队列有何优势
+(1)Redis zset支持高性能的score排序。
+(2)Redis是在内存上进行操作的,速度非常快。
+(3)Redis可以搭建集群,当消息很多时候可以用集群来提高消息处理的速度,提高可用性。
+(4)Redis具有持久化机制,当出现故障的时候可以通过AOF和RDB方式来对数据进行恢复,保证了数据的可靠性
+
+其他实现延时队列的方式
+一、用消息中间件实现延时队列
+早期需要延迟处理的业务场景,更多的是通过定时任务扫表,然后执行满足条件的记录,具有频率高、命中低、资源消耗大的缺点。随着消息中间件的普及,延迟消息可以很好的处理这种场景
+
+使用场景
+1、有效期：限时活动、拼团
+2、超时处理：取消超时未支付订单、超时自动确认收货
+3、延迟处理：机器人点赞/观看数/评论/关注、等待依赖条件
+4、重试：网络异常重试、打车派单、依赖条件未满足重试
+5、定时任务：智能设备定时启动
+
+(1)通过RabbitMQ实现延时队列
+基于AMQP协议,使用Erlang编写,实现了一个Broker框架
+方法一：在MQ中可以对Queue设置x-expires过期时间或者对Message设置超时时间x-message-ttl。
+延时相同的消息要扔到同一个队列中,对于每一个延时要建立一个与之对应的队列—这是由于MQ的过期检测是惰性检测的
+
+方法二：可以用RabbitMQ的插件rabbitmq-delayed-message-exchange插件来实现延时队列。达到可投递时间时并将其通过x-delayed-type类型标记的交换机类型投递至目标队列。
+
+(2)RocketMQ实现延时队列
+来源于阿里,目前为Apache顶级开源项目,使用Java编写,基于长轮询的拉取方式,支持事务消息,并解决了顺序消息和海量堆积的问题
+rocketmq在发送延时消息时,是先把消息按照延迟时间段发送到指定的队列中(把延时时间段相同的消息放到同一个队列中,保证了消息处理的顺序性,可以让同一个队列中消息延时时间是相同的,整个RocketMQ中延时消息时按照递增顺序排序,保证信息处理的先后顺序性)。之后通过一个定时器来轮询处理这些队列里的信息,判断是否到期。对于到期的消息会发送到相应的处理队列中,进行处理。
+目前RocketMQ只支持特定的延时时间段,1s,5s,10s,...2h,不能支持任意时间段的延时设置
+
+(3)ActiveMQ
+基于JMS协议,Java编写的Apache顶级开源项目,支持点对点和发布订阅两种模式
+
+(4)Kafka实现延时队
+来源于Linkedin,目前为Apache顶级开源项目,使用Scala和Java编写,基于zookeeper协调的分布式、流处理的日志系统,升级版为Jafka
+Kafka基于时间轮自定义了一个用于实现延迟功能的定时器(SystemTimer),Kafka中的时间轮(TimingWheel)是一个存储定时任务的环形队列,可以进行相关的延时队列设置
+
+(5)Netty实现延时队列
+Netty也有基于时间轮算法来实现延时队列。Netty在构建延时队列主要用HashedWheelTimer,HashedWheelTimer底层数据结构是使用DelayedQueue,采用时间轮的算法来实现。
+
+(6)DelayQueue来实现延时队列
+Java中有自带的DelayQueue数据类型,可以用这个来实现延时队列。DelayQueue是封装了一个PriorityQueue(优先队列),在向DelayQueue队列中添加元素时,会给元素一个Delay(延迟时间)作为排序条件,队列中最小的元素会优先放在队首,对于队列中的元素只有到了Delay时间才允许从队列中取出。这种实现方式是数据保存在内存中,可能面临数据丢失的情况,同时它是无法支持分布式系统的
+
+</pre>
+</div>
+
 <div id="oop">
 <h2>PHP对象和面向对象编程OOP(object oriented programming)</h2><pre>oop遵循一条基本原则是计算机程序是由单个或多个能够起到子程序作用的单元或对象组成
 使代码更简洁,易于维护,功能更强;目标：重用性,灵活性,扩展性
@@ -46341,9 +47172,9 @@ fclose($fp);
 </textarea>
 
 <h3>PHP图形处理函数库：GD库 php_gd2.dll</h3><pre>
-imagick是一个PHP的扩展，用ImageMagick提供的API来进行图片的创建与修改，不过这些操作已经包装到扩展imagick中去了，最终调用的是ImageMagick提供的API
-ImageMagick是一套软件系列，主要用于图片的创建、编辑以及转换等，详细的解释见ImageMagick的官方网站http://www.imagemagick.org/，ImageMagick与GD的性能要高很多，如果是在处理大量的图片时更加能体现ImageMagick的性能。
-著名的图片服务提供商Flickr使用的是ImageMagick，还有Yupoo、手机之家使用的也是ImageMagick。
+imagick是一个PHP的扩展,用ImageMagick提供的API来进行图片的创建与修改,不过这些操作已经包装到扩展imagick中去了,最终调用的是ImageMagick提供的API
+ImageMagick是一套软件系列,主要用于图片的创建、编辑以及转换等,详细的解释见ImageMagick的官方网站http://www.imagemagick.org/,ImageMagick与GD的性能要高很多,如果是在处理大量的图片时更加能体现ImageMagick的性能。
+著名的图片服务提供商Flickr使用的是ImageMagick,还有Yupoo、手机之家使用的也是ImageMagick。
 
 图像处理应用场景
 1.缩略图
@@ -47746,10 +48577,8 @@ CSRF：因为是基于cookie来进行用户识别的,cookie如果被截获,用�
 2、服务端收到请求之后验证用户名与密码
 3、验证成功后服务器会签发一个Token,再把这个Token发送给客户端
 4、客户端收到Token以后可以把它存储起来,如Cookie或Web Storage
-5、客户端每次向服务端请求资源时都需要带着服务器端签发的Token
+5、客户端每次向服务端请求资源时都需要带着服务器端签发的Token,它应该保存在请求头中,服务器要支持CORS(跨来源资源共享)策略,一般在服务端Access-Control-Allow-Origin：*
 6、服务器端收到请求,验证客户端请求里面带着的Token,如果验证成功就向客户端返回请求的数据,否则返回对应的错误信息。
-
-这个token必须要在每次请求时发送给服务器,它应该保存在请求头中,另外服务器要支持CORS(跨来源资源共享)策略,一般在服务端这么做就可以了 Access-Control-Allow-Origin：*
 
 但存储在客户端的Token存在几个问题：
 1、存在泄露的风险,如果别人拿到你的Token,在Token过期之前都可以以你的身份在别的地方登录
@@ -47764,7 +48593,6 @@ CSRF：因为是基于cookie来进行用户识别的,cookie如果被截获,用�
 【 OAuth(开放授权) 】
 OAuth是一个开放标准,允许用户让第三方应用访问该用户在某一网站上存储的私密的资源,如照片、视频、联系人列表等,而无需将用户名和密码提供给第三方应用。
 OAuth允许用户提供一个令牌,而不是用户名和密码来访问他们存放在特定服务提供者的数据,每一个令牌授权一个特定的网站如视频编辑网站,在特定的时段如接下来的2小时内访问特定的资源如仅仅是某一相册中的视频。这样OAuth让用户可以授权第三方网站访问他们存储在另外服务提供者的某些特定信息,而非所有内容。
-
 现存在OAuth 1.0和OAuth 2.0两种协议,二者互不兼容。
 
 OAuth 2.0运行流程:
@@ -47777,28 +48605,39 @@ OAuth 2.0运行流程:
 
 基于OAuth的认证机制非常适用于个人消费者类的互联网应用产品如社交类等,一些大的互联网公司也都提供OAuth机制的API,如豆瓣、微信JS-SDK。
 
-</pre>
+【 restfull api身份认证和授权 】
+REST是一种现代架构风格,它定义了一种设计Web 服务的新方法。和之前的HTTP及SOA不同,它不是一个协议(即一套严格的规则),而是一些关于Web服务应该如何相互通信的一些建议和最佳实践。按照REST最佳实践开发的服务被称为RESTful Web服务
+安全性是RESTful服务的基石。启用它的方法之一是尽可能内置用户身份验证和授权机制。
+在RESTful服务中实现用户身份验证和授权的方法有很多。主要方法或标准有：
+Basic 认证
+OAuth 2.0
+OAuth 2.0 + JWT
 
-<h4>Web页面和Api接口服务登录限流</h4><pre>
-登录限流是防止恶意用户强制登录,增加了登录的难度,在一定程度上增强了系统的安全。
-通常的做法是尝试登录多次而仍未成功后,系统就会提示隔断时间再登录,或弹出验证码输入框输入验证码
+Basic 认证
+最古老也是最简单的标准。
+看起来像： 用户名 + 密码 + Base64(对用户名和密码做哈希的基础算法)。
+工作原理：假如有人尝试登录用户的Fackbook账户去访问他的消息、历史记录、群组信息,这些都是独立的服务。当用户输入用户名和密码后,系统会允许登录。但默认情况下系统不知道用户的角色和权限是什么,他们可以访问哪些服务等,所以每次用户尝试访问任何一个服务的时候,系统都应该再次验证是否允许执行这个操作,这意味着需要对身份验证进行额外的调用,现在假设每秒有3k个请求,将这请求乘以四,结果是每秒要向服务器发出12k次调用。
+总结：可伸缩性差,大量的额外流量(额外调用)没有带来业务价值,服务器的负载很大。
 
-Laravel框架实现的登录限流
-当使用登录组件时,系统首先会调用方法验证向请求地址传递的参数,其目的主要是验证用户名和密码的格式
-当参数格式验证完毕后就会判断当前请求的请求次数是否超过允许的最大尝试次数
-判断请求的次数的原理是获取当前登录的用户名和请求IP,通过PHP加密算法生成一个字符串,然后将这个字符串作为键名去cache缓存中查找对应键值即请求已经尝试的次数,然后将键值与允许的最大可尝试次数做对比,如果键值大于允许的最大可尝试次数,再判断该请求是否受限,如果受限则阻断访问,否则重置该请求的请求次数,允许该请求提交登录数据
-系统会尝试连接数据库进行登录,如果登录成功,则重置请求次数,否则就如上面一样,利用登录用户名和请求IP,通过PHP加密方法生成一个字符串,将此字符串作为键名(如$key),已尝试的登录次数为键值生成缓存。如果尝试登录的次数大于允许尝试的最大次数,还要利用此用户名和登录IP以及指定的缓存时间生成一个缓存(如$key.':timer'),作为限制登录的标识
+OAuth 2.0
+看起来像：用户名 + 密码 + 访问令牌 + 过期令牌
+工作原理：OAuth 2.0标准的核心思想是,用户使用用户名和密码登录系统后,客户端(用户访问系统的设备)会收到一对令牌,这是一个访问权限令牌和刷新令牌。
+访问令牌用于访问系统中的所有服务。到期后,系统使用刷新令牌生成一对新的令牌。所以,如果用户每天都进入系统,令牌也会每天更新,不需要每次都用用户名和密码登录系统。刷新令牌也有它的过期时间(虽然它比访问令牌长得多),如果一个用户一年没有进入系统,那么很可能会被要求再次输入用户名和密码。
+OAuth 2.0标准取代了基本的身份验证方法,它具有一定的优势,例如用户每次想要进入系统时不用输入用户名和密码。但系统仍然需要调用身份验证服务器,就像使用基本身份验证方法时一样,以检查拥有该令牌的用户有权限做什么。
+假设有效期是一天。这意味着登录服务器上的负载要少得多,因为用户每天只需要输入一次凭证,而不是每次都要进入系统。但系统仍需要验证每个令牌并检查用户角色的存储状态。所以最终还要调用身份验证服务器。
+总结：和Basic验证有相同的问题 - 可伸缩性差,身份验证服务器负载较高。
 
-Laravel实现的登录限流针对的是Web页面,但其思想逻辑也可以引入Api接口服务中。
-Api接口服务限流常用的算法有两个：漏桶算法和令牌桶算法。
+OAuth2 + JSON Web 令牌
+看起来像：用户名 + 密码 + JSON数据 + Base64 + 私钥 + 到期日期
+工作原理：当用户第一次使用用户名和密码登录系统时,系统不仅会返回一个访问令牌(只是一个字符串),而是一个包含所有用户信息的JSON对象,比如角色和权限,使用Base64进行编码并使用私钥签名。
+主要区别在于可以在令牌中存储状态,而服务保持无状态。这意味着用户自己拥有自己的信息,不需要额外的调用来检查它,因为所有的内容都在令牌里。这对于减少服务器负载方面是一个很大的优势。这个标准在世界范围内得到广泛应用
+总结：良好的可伸缩性,可以和微服务一起工作
 
-漏桶(Leaky Bucket)算法思路很简单,水(请求)先进入到漏桶里,然后漏桶以一定的速度出水(接口有响应速率),当水流入速度大于流出速度(访问频率超过接口响应速率),水会直接溢出即拒绝请求。
-漏桶算法通过强行限制数据的传输速率来达到限流目的
-因为漏桶的流出速率是固定的参数,所以即使网络中不存在资源冲突(没有发生拥塞),漏桶算法也不能使流突发到端口速率,因此漏桶算法对于存在突发特性的流量来说缺乏效率。
-
-令牌桶算法(Token Bucket)是一种和漏桶效果一样但方向相反的算法,系统会按恒定1/QPS时间间隔(QPS=100则间隔是10ms)往桶里加入Token(想象和漏洞漏水相反,有个水龙头在不断的加水),如果桶已经满了就不再加了。新请求来临时会各自拿走一个Token,如果没有Token可拿了就阻塞或拒绝服务。
-
-令牌桶算法可以方便的改变速度,一旦需要提高速率,则按需提高放入桶中的令牌的速率。一般会定时(比如100毫秒)往桶中增加一定数量的令牌,有些变种算法则实时的计算应该增加的令牌的数量
+亚马逊签名方式
+一种全新的,奇特的方法,称为HTTP签名,亚马逊是目前使用它的大厂之一。
+它的思路是,当创建亚马逊帐户的时候会生成一个永久的、非常安全的访问令牌,要非常小心地存储起来并且不要给任何人显示。当要从Amazon请求某些资源时,可以获取到所有相关的http头信息,使用这个私钥对其进行签名,然后将签名的字符串作为header发送。
+在服务器端,亚马逊也有你的访问密钥。接下来只需要使用你的http头信息和这个密钥进行签名。然后将签名字符串和作为签名的字符串进行比较；如果相同那么就知道是谁。
+最大的好处是只需要发送一次用户名和密码就可以获得令牌。至于使用私钥签名的header信息,基本上没有机会对它们进行编码。就算有人截获了信息——谁在乎呢
 
 </pre>
 </div>
@@ -47892,6 +48731,11 @@ anti csrf攻击时服务器端会对Token值进行验证,判断是否和session�
 对数据库有改动的增删改操作需要加token验证,对于查询操作一定不要加token,防止攻击者通过查询操作获取token进行csrf攻击,但并不是这样攻击者就无法获得token,只是增大攻击成本而已。
 
 【 php表单令牌防止重复提交原理 】
+主要有两类：
+第一类：由于用户误操作或者网络卡顿,可能会造成多次点击表单提交按钮或者刷新提交页面,就会造成重复提交；
+第二类：黑客或恶意用户使用postman、jmeter等工具重复恶意提交表单,攻击网站,从而造成重复提交；
+这两类严重的时候甚至会直接造成系统宕机
+
 引起表单重复提交有以下几种常见场景：
 1、重复点击提交按钮,包括恶意的连续点击提交按钮,或因为网络慢、服务器处理速度慢等引起的用户多次点击
 2、表单提交处理完后,通过浏览器的后退按钮回到原页面再次点击提交按钮
@@ -47902,13 +48746,10 @@ anti csrf攻击时服务器端会对Token值进行验证,判断是否和session�
 当网站某个接口调用缓慢时不论form提交还是ajax提交都会有可能引起表单重复提交的问题
 如果用户频繁点击或恶意攻击就需要处理表单重复提交的问题,不断的请求对服务器产生很大的压力,避免业务出错或产生脏数据,虽然可以通过前端控制,但这并不是可以完全避免,最好的方式还是前后端均进行控制,尽可能全面的去减少错误的发生。
 
-解决方案：
-1、在数据库添加唯一字段
-数据库建表时在ID字段添加主键约束,账号、名称的信息添加唯一性约束,确保数据库只可以添加一条数据,此方法从根本上的防止了数据重复提交。
-
-2、js层面
+解决方案：从前端、后端同时入手
+1、前端js层面
 (1)单击提交按钮后立刻disable禁用该按钮,但如果客户端禁用js则该方法无效
-(2)单击提交按钮后弹出屏蔽层如loading,防止用户第二次点击
+(2)通过js来屏蔽提交按钮,当用户点击提交按钮后,屏幕弹出遮罩层提示loading或数据加载中....,防止用户第二次点击,直到后端返回结果或者前端请求超时时,再将其遮罩层关闭,从而实现防止表单重复提交
 (3)定义全局变量,在form提交前判断是否已有提交过
 (4)js防抖函数
 
@@ -47937,8 +48778,8 @@ document.onclick = function doconclick() {
 }
 
 </textarea>全局锁：在调用执行方法前将锁注册好,下次调用方法时查看锁是否已释放,如果释放则照常运行,否则跳出方法不再往下执行,防止重复点击提交按钮,限制触发频率<textarea>
-<button onclick="a()">无锁</button>
-<button onclick="b()">有锁</button>
+< button onclick="a()">无锁< /button>
+< button onclick="b()">有锁< /button>
 
 const eventLockInit  = () => {
   // 复原默认值
@@ -48086,9 +48927,18 @@ function b() {
   console.log('点击了有锁--'+ Date.now())
 }
 
-</code></pre><pre>
+</textarea><pre>
+2、在数据库添加唯一字段
+数据库建表时在ID字段添加主键约束,账号、名称的信息添加唯一性约束,确保数据库只可以添加一条数据,此方法从根本上的防止了数据重复提交。
+在控制层给数据做验证,例如用户注册,当用户手机号或者邮箱已经存在,则直接提示提交失败
+
+这种方案在某些场景下是有效果的,例如请求不是非常频繁,可以采用这种方式。
+那如果请求非常频繁,而且服务层需要处理的逻辑非常多的时候,这种方案就会遇到很大的瓶颈。
+以订单支付为例,当用户支付时,首先会对订单数据做各种基础验证,接着走风控系统,鉴别是否是机器人操作,风控系统通过之后,再对接银行系统查询用户金额是否充足,如果充足就申请扣款,扣款成功之后,更新订单状态,同时将订单的数据推送给中心仓库,等待发货。
+当然这个只是一个基础的流程,实际的处理逻辑比这个要复杂的多,此时也不能像上面介绍的那样对某个关键字做唯一约束,同时整个处理逻辑所需的时间也相对比较长,假如有几个请求同时过来,其结果可想而知！
+
 3、使用Post/Redirect/Get
-简称PRG,是一种可以防止表单数据重复提交的Web设计模式,像刷新等比较典型的重复提交表单数据的问题可以使用PRG模式来避免。例如当用户提交成功之后,执行客户端重定向,跳转到提交成功页面。
+简称PRG,是一种可防止表单数据重复提交的Web设计模式,像刷新等比较典型的重复提交表单数据的问题可以使用PRG模式来避免。例如当用户提交成功之后,执行客户端重定向,跳转到提交成功页面。
 这能避免用户按F5导致的重复提交,而且也不会出现浏览器表单重复提交的警告,也能消除按浏览器前进和后退按导致的同样问题
 这样即使用户使用刷新也不会导致表单的重复提交,因为已经转向新的页面,而这个页面脚本已经不理会任何提交的数据了。
 
@@ -48134,18 +48984,33 @@ if (count > 1) {
  return resultMap;
 }
 
+</textarea>cookie方法：对比提交内容的MD5值<textarea>
+$token = $_COOKIE["token"];                  // 读取上一次设置的Cookie值
+if(count($_POST)){
+  $long = "";
+  while(list($key,$value) = each($_POST)){
+    $long .= $value;
+  }
+  $hash = md5($long);
+  setcookie("token", $hash, time()+60*60);  // post时更新设置cookie
+}
+
+if($token != $hash) {
+  // 如果两次的MD5值不一样就对数据进行进一步操作
+} else {
+  //如果两次MD5的值相同,告知用户提交失败,不能重复提交
+}
+
 </textarea><pre>
-6、使用Session设置令牌
-客户端请求页面时,服务器为每次产生的Form表单分配唯一的随机标识号,并且在form的一个隐藏字段中设置这个标识号,同时在当前用户的Session中保存这个标识号。当提交表单时服务器比较hidden和session中的标识号是否相同,相同则继续,处理完后清空Session,否则服务器忽略请求。
+6、使用Session设置令牌token机制解决,利用缓存ID防止重复提交(推荐)
+前端在请求后端的时候,先从后端缓存中获取一个唯一的ID,在请求提交数据的时候带上这个唯一的ID,后端检查缓存中是否存在这个ID,如果存在就进行业务处理,处理完毕之后,从缓存中将这个ID移除掉,如果在处理过程中,前端又再次提交,此时缓存中的ID状态还没有被移除,直接提示：数据处理中,不要重复提交
+
+客户端请求页面时,服务器为每次产生的Form表单分配唯一的随机标识号或token,并且在form的一个隐藏字段中设置这个标识号,同时在当前用户的Session中保存这个标识号。
+用户录入信息后点击提交,在服务器端获取表单中隐藏字段的值与session中的唯一标识符比较,相等说明是首次提交就处理本次请求,然后将session中的唯一标识符移除;不相等说明是重复提交就不再处理,服务器忽略请求,这使web应用有了更高级的XSRF保护
+表单提交时后端检查session中是否存在该token,存在则立即从session中remove,然后进行正常业务逻辑操作(如业务逻辑操作失败则可再添加该token到session中,方便用户修改数据后再提交),不存在该token则返回重复提交的提示。
 
 恶意用户可利用这一性质,不断重复访问页面,以致Session中保存的标识号不断增多,最终严重消耗服务器内存。可以采用在Session中记录用户发帖的时间,然后通过一个时间间隔来限制用户连续发帖的数量来解决这一问题。
 
-在session中存放一个特殊标志。
-在服务器端生成一个唯一的标识符,将它存入session,同时将它写入表单的隐藏字段中,然后将表单页面发给浏览器
-用户录入信息后点击提交,在服务器端获取表单中隐藏字段的值与session中的唯一标识符比较,相等说明是首次提交就处理本次请求,然后将session中的唯一标识符移除;不相等说明是重复提交就不再处理,这使web应用有了更高级的XSRF保护
-
-4.token机制解决
-在打开页面同时服务端生成一个token存放在session中,同时在页面的form中设置一个隐藏域,表单提交时后端检查session中是否存在该token,存在则立即从session中remove,然后进行正常业务逻辑操作(如业务逻辑操作失败则可再添加该token到session中,方便用户修改数据后再提交),不存在该token则返回重复提交的提示。
 服务端方式防止表单重复提交能解决大部分表单重复提交的问题,但也存在一些缺陷。比如针对同一个表单快速重复提交的情况并不能准确保证只有一个请求被正常处理;session中存放token只能针对一个表单,如果用户在同一个会话里同时打开多个form表单,则只能正确处理最后一个打开的form页面(可采用在数据库中保存处理过的token替换remove的方式,但该方式性能较差,不推荐采用)。
 
 1.客户端申请token
@@ -48169,23 +49034,6 @@ $_SESSION["token"] = md5(rand(1,999));   // 每生成一次表单修改一次值
   < input type="hidden" name="token" value='< ?php echo $_SESSION["token"]; ?>' />
   < input type="submit" value="提交" />
 < /form>
-
-</textarea>cookie方法：对比提交内容的MD5值<textarea>
-$token = $_COOKIE["token"];                  // 读取上一次设置的Cookie值
-if(count($_POST)){
-  $long = "";
-  while(list($key,$value) = each($_POST)){
-    $long .= $value;
-  }
-  $hash = md5($long);
-  setcookie("token", $hash, time()+60*60);  // post时更新设置cookie
-}
-
-if($token != $hash) {
-  // 如果两次的MD5值不一样就对数据进行进一步操作
-} else {
-  //如果两次MD5的值相同,告知用户提交失败,不能重复提交
-}
 
 </textarea>PHP使用token验证可有效的防止非法来源数据提交访问,增加数据操作的安全性<textarea>
 < form action="do.php" method="POST">
@@ -48274,7 +49122,7 @@ class Login{
     }
 }
 
-<textarea>
+</textarea>
 </div>
 
 <div id="oauth">
@@ -49606,7 +50454,7 @@ sessionID相同的还有一种方式就是浏览器修改sessionID,sessionID是�
 
 网站b代码需要做的就是页面每次访问都需要去请求a网站的数据判断用户是否在a网站登录。
 
-</pre><pre><code class="language-javascript">
+</pre><textarea>
 ＜if condition="!session('?member')"＞
 <!--未登录-->
 ＜script＞
@@ -49637,7 +50485,7 @@ sessionID相同的还有一种方式就是浏览器修改sessionID,sessionID是�
 ＜/script＞
 ＜/if＞
 
-</code></pre>那么网站a就要给出对应的页面来给网站b请求且返回数据<textarea>
+</textarea>那么网站a就要给出对应的页面来给网站b请求且返回数据<textarea>
 /**
  * [index 用户登录]
  * @Author:wty
@@ -51434,6 +52282,143 @@ foreach ($elements as $e) {
 }
 
 </textarea>
+
+<h3>SHDP(PHP Simple HTML DOM Parser)让php像jquery一样操作html</h3><pre>
+获取element元素
+$html = file_get_html('http://www.baidu.com/');
+foreach($html->find('img') as $element)  // Find all images 获取图片链接
+echo $element->src;
+foreach($html->find('a') as $element)  // Find all links 获取所有链接
+echo $element->href;
+
+修改element元素 属性 和值
+$html = str_get_html('< div id="hello">Hello< /div>< div id="world">World< /div>');  // Create DOM from string
+$html->find('div', 1)->class = 'bar';                //  改变第二个div的class
+$html->find('div[id=hello]', 0)->innertext = 'foo';
+echo $html;     // Output: < div id="hello">foo< /div>< div id="world" class="bar">World< /div>
+
+echo file_get_html('http://www.ycu.edu.cn/B20110603182545.html')->plaintext;  // plaintext可以取到标签的纯文本
+
+$html = file_get_html('http://tech.sina.com.cn/d/i/2015-11-10/doc-ifxkniur3014232.shtml');
+// Find all article blocks,利用网页源代码的标签页进行局部信息的采集
+foreach($html->find('div.blkContainerSblk') as $article) {
+  $item['title'] = $article->find('h1#artibodyTitle', 0)->plaintext; //
+  $item['pubinfo'] = $article->find('div.artInfo', 0)->plaintext;
+  $item['date'] = $article->find('span#pub_date', 0)->plaintext;
+  $item['details'] = $article->find('div[id=artibody]', 0)->plaintext;
+  $articles[] = $item;
+}
+print_r($articles);
+
+创建dom对象
+$html1 = str_get_html('< html>< body>Hello!< /body>< /html>');
+$html2 = file_get_html('http://www.baidu.com/');
+$html3 = file_get_html('../aj.html');
+
+面向对象的方法Object-oriented way
+$html = new simple_html_dom();
+$html->load('< html>< body>Hello!word！< /body>< /html>');
+$html->load_file('http://www.google.com/');
+$html->load_file('test.htm');
+
+How to find HTML elements
+$ret = $html->find('a');  // Find all anchors, returns a array of element objects
+$ret = $html->find('a', 0);  // Find (N)th anchor, returns element object or null if not found (zero based)
+$ret = $html->find('a', -1);  // Find lastest anchor, returns element object or null if not found (zero based)
+$ret = $html->find('div[id]');  // Find all div with the id attribute 找到所有有id的
+$ret = $html->find('div[id=foo]');  // Find all div which attribute id=foo 找到id为。。。的。
+
+$ret = $html->find('#foo');  // Find all element which id=foo
+$ret = $html->find('.foo');  // Find all element which class="foo"
+$ret = $html->find('*[id]');  // Find all element has attribute id 有id属性
+$ret = $html->find('a, img');  // Find all anchors and images 找到所有 链接 和 图片
+$ret = $html->find('a[title], img[title]');  // Find all anchors and images with the "title" attribute找到所有拥有title属性的连接和图片
+
+后代选择器
+$es = $html->find('ul li');
+$es = $html->find('div div div');
+$es = $html->find('table.hello td');
+$es = $html->find('table td[align=center]');
+  
+嵌套选择器
+foreach($html->find('ul') as $ul){
+foreach($ul->find('li') as $li){
+// do something...
+}
+}
+
+$e = $html->find('ul', 0)->find('li', 0);  // Find first li in first u
+
+
+属性选择器
+Supports these operators in attribute selectors:
+
+Filter Description
+[attribute] Matches elements that have the specified attribute.
+[!attribute] Matches elements that don't have the specified attribute.
+[attribute=value] Matches elements that have the specified attribute with a certain value.
+[attribute!=value] Matches elements that don't have the specified attribute with a certain value.
+[attribute^=value] Matches elements that have the specified attribute and it starts with a certain value. 属性值的 起始 为特定的值
+[attribute$=value] Matches elements that have the specified attribute and it ends with a certain value. 属性值的 结束 为特定的值
+[attribute*=value] Matches elements that have the specified attribute and it contains a certain value. 属性值的 包含 特定的值
+  
+查找所有文本块 评论内容
+$es = $html->find('text');  // Find all text blocks
+$es = $html->find('comment');  // Find all comment (< !--...-->) blocks
+
+How to access the HTML element's attributes? 如何访问html元素的属性
+$value = $e->href; //获得,Get a attribute ( If the attribute is non-value attribute (eg. checked, selected...), it will returns true or false)
+$e->href = 'my link'; //设置 赋值,Set a attribute(If the attribute is non-value attribute (eg. checked, selected...), set it's value as true or false)
+$e->href = null; //移除 置空,Remove a attribute, set it's value as null!
+if(isset($e->href)) echo 'href exist!';  // Determine whether a attribute exist? 判断元素是否存在
+
+魔法属性
+$html = str_get_html("< div>foo < b>bar< /b> < /div>");
+$e = $html->find("div", 0);
+
+echo $e->tag; // Returns: " div" //标签
+echo $e->outertext; // Returns: " < div>foo < b>bar< /b>< /div>" 获取到的所有 显示的只有 foo bar 但是都是带着属性的,比如颜色啊还有黑体等等
+echo $e->innertext; // Returns: " foo < b>bar< /b>" 标签内部的 只显示内部的。内部的标签属性还是可以现实的。
+echo $e->plaintext; // Returns: " foo bar" 纯文本的 不带标签属性 只是纯文本 其他的颜色 字体等等 都没了。
+
+// Attribute Name Usage
+// $e->tag Read or write the tag name of element.
+// $e->outertext Read or write the outer HTML text of element.
+// $e->innertext Read or write the inner HTML text of element.
+// $e->plaintext Read or write the plain text of element.
+
+小技巧
+echo $html->plaintext;  // Extract contents from HTML
+$e->outertext = '< div class="wrap">' . $e->outertext . '< div>';  // Wrap a element 包裹一个元素
+$e->outertext = '';  // Remove a element, set it's outertext as an empty string 移除
+$e->outertext = $e->outertext . '<div>foo<div>'; //附加元素 后面
+$e->outertext = '<div>foo<div>' . $e->outertext;  // Insert a element 插入元素(在元素前面)
+
+How to traverse the DOM tree? 遍历dom树
+echo $html->find("#div1", 0)->children(1)->children(1)->children(2)->id;
+echo $html->getElementById("div1")->childNodes(1)->childNodes(1)->childNodes(2)->getAttribute('id');
+
+Method Description
+mixed$e->children ( [int $index] ) Returns the Nth child object if index is set, otherwise return an array of children.
+element$e->parent () Returns the parent of element.
+element$e->first_child () Returns the first child of element, or null if not found.
+element$e->last_child () Returns the last child of element, or null if not found.
+element$e->next_sibling () Returns the next sibling of element, or null if not found.
+element$e->prev_sibling () Returns the previous sibling of element, or null if not found.
+  
+
+$str = $html;  //How to dump contents of DOM object? 如何转存dom对象
+echo $html;  // Print it!
+$str = $html->save();  //面向对象方式,Dumps the internal DOM tree back into string 存为字符串
+$html->save('result.htm');  // Dumps the internal DOM tree back into a file 存到文件
+
+How to customize the parsing behavior? 如何自定义解析行为
+function my_callback($element) {  // Write a function with parameter "$element"
+if ($element->tag=='b') $element->outertext = '';  // Hide all b tags
+$html->set_callback('my_callback');  // Register the callback function with it's function name
+echo $html;  // Callback function will be invoked while dumping
+
+</pre>
 
 <h3>cURL</h3><pre>
 使用url语法传输数据的命令行工具
@@ -73233,324 +74218,6 @@ print_r(quick_sort($arr));
 </textarea>
 </div>
 
-<div id="mq">
-<h3>消息队列 MQ (Message queue)</h3><pre>
-消息队列是一种进程间通信或同一进程的不同线程间的通信方式
-
-消息队列技术是分布式应用间交换信息的一种技术,消息队列可驻留在内存或磁盘上,队列存储消息直到它们被应用程序读出。通过消息队列应用程序可独立地执行,它们不需要知道彼此的位置、或在继续执行前不需要等待接收程序接收此消息
-
-消息队列本质是队列结构中间件,消息放入后可以立即返回,而不需要立即处理,由订阅者/消费者按顺序读取处理
-遇到大并发或耗时长的环节的时候,同时又不需要立即获得其返回结果就可以使用消息队列
-
-业务系统 ---入队---> 消息队列 ---出队---> 队列处理系统
-
-类似于消费者和生产者的关系,首先生产者在消息队列未满的时候才将生产的产品放进消息队列中;消费者在消息队列不为空的时候才从消息队列中取出产品进行消费。出队的那个步骤常用的方法是一直轮询和定时操作
-
-也是解耦的原理：业务系统和队列处理系统没有直接关系,一个写(业务系统),一个读(队列管理系统)
-写的只管往队列里写,别的不用操心,读的能不能读完和写的也没有关系
-读的只管从队列里往外读,来活儿就干,没活儿歇着
-
-消息队列本质是个队列,其最简单的操作就是入队和出队,既按照程序决定何时何条件入队和何时何条件出队,也就是说遇到入队系统和出队系统的业务诉求不一致时的场景就可以考虑是否用消息队列来实现了。
-
-消息队列有同步或异步实现方式,通常采用异步方式使用消息队列,远程过程调用多采用同步方式。
-
-MQ与RPC有什么不同？
-MQ通常传递无规则协议,这个协议由用户定义并且实现存储转发;而RPC通常是专用协议,调用过程返回结果。
-
-【 应用场景 】
-冗余：持久化的存储在队列中,后续由订单处理程序获取,处理完成之后再把这条记录进行删除
-解耦：入队和出队的系统没有直接的关系,其中一套蹦了,另一套系统不会受影响,因为中间隔了个队列
-流量削锋：秒杀和抢购。流量剧增,配合缓存使用消息队列来限制下,如只允许10个,队列里存10个之后就不存了,再来就提示秒杀结束
-异步通信：因为消息本身就可使入队的系统直接返回,所以说实现了程序的异步操作
-场景扩展性：如现在只有订单系统和财务系统,后续想加个配货系统,直接让配货系统订阅这个队列就可以
-排序保证：有些场景下如银行数据的处理顺序是很重要的,因为队列本身就可以做成单线程、单进单出的这种系统
-
-1、异步处理、应用解耦、分布式
-场景：主业务对子业务的处理结果并不关心时。
-案例：电商系统中通过订单系统下单成功之后将所有订单同时交给物流系统、报表系统、操作日志记录系统等
-解决两个系统深度耦合的问题,使用消息队列之后两个系统入队系统和出队系统没有直接的关系,一个系统的崩溃不会影响另一个系统正常运转
-
-通俗解释：小明是个蛋糕店员。他做好蛋糕后,放在橱窗中,在对应订单上标记『已完成』,然后继续做下一个蛋糕,并不关心蛋糕后续是怎么卖出的,也不关心啥时候卖出。
-
-实现：使用一个队列的中间件或中间系统来存放几个业务系统的共用部分,并独立进行处理。可以使用每个系统各自的独立标记,对各系统的处理进度进行记录。在所有系统均完成操作后,进行出队操作,或者持久化存储数据。
-
-需要考虑中间数据的容灾能力,当故障发生并恢复时保证业务流程可以恢复,保证每条数据都可以正确地完成处理。
-
-一般订单系统和库存系统是一体的,但如果一方出现问题,那么这个订单就失败了。
-订单系统：用户下单后,订单系统完成持久化处理,将消息写入消息队列,返回用户订单下单成功。
-库存系统：订阅下单的消息,采用拉/推的方式,获取下单信息,库存系统根据下单信息,进行库存操作。
-假如在下单时库存系统不能正常使用,也不影响正常下单,因为下单后订单系统写入消息队列就不再关心其他的后续操作了,实现订单系统与库存系统的应用解耦。
-
-解藕案例：队列处理"订单系统"和"配送系统"
-对于订单流程,可以设计两个系统,一个是"订单系统" 另外一个是 "配送系统",网购提交了一个订单之后,在后台可以看到货物正在配送中,这个时候就要参与进来一个"配送系统"。
-
-如果做架构的时候把订单系统和配送系统设计在一起的话就会出现一些问题,首先对于订单系统来说,因为系统的压力会比较大,但配送系统没必要为这些压力做一些即时的反应。
-
-第二个也不希望在订单系统出现故障之后导致配送系统也出现故障,这个时候就会同时影响到两个系统的正常运转,所以希望把这两个系统进行解耦。这两系统分开之后可以通过一个中间的队列表进行这两个系统的沟通。
-
-架构设计
-(1)、首先订单系统会接收用户的订单,然后进行订单的处理。
-(2)、然后会把这些订单信息写到队列表中,这个队列表是沟通这两个系统的关键。
-(3)、由配送系统定时执行的一个程序来读取队列表进行处理。
-(4)、配送系统处理之后,会把已处理的记录进行标记。
-
-</pre><textarea>
-/* order_queue.sql */
-create table order_queue(
-  id int(11) unsigned not null auto_increment commit '队列id',
-  order_id int(11) not null,
-  mobile varchar(20) not null,
-  created_at datetime not null default '0000-00-00 00:00:00' comment '订单创建时间',
-  update_at datetime not null default '0000-00-00 00:00:00' comment '处理完成时间',
-  status tinyint(2) not null comment '0未处理,1已处理,2处理中',
-  primary key(`id`)
-)engine=InnoDB default charser=utf8;
-
-/* order.php 接收用户的订单信息并写入队列 */
-include './include/DB.php';
-if(!empty($_GET['mobile'])){
-  $order_id = rand(1000,9999);  // 生成订单信息
-  $insert_data = [              // 把订单信息存入队列表中
-    'order_id' => $order_id,
-    'mobile' => $_GET['mobile'],
-    'created_at' => date('Y-m-d H:i:s'),
-    'status' => 0
-  ];
-  $db = DB::getInstance();
-  $res = $db->insert('order_queue',$insert_data);
-  $res ? echo $insert_data['order_id'] : echo '保存失败';
-}
-
-/* goods.php 配送系统处理队列中的订单并标记 */
-include './include/DB.php';
-$db = DB::getInstance();
-$where = ['status' => 0];
-$new = ['status' => 2];
-$limit = 2;
-$res_lock = $db->update('order_queue',$where,$new,$limit);  // 把要处理的记录更新为处理中
-if($res_lock){  // 选择刚刚更新的数据进行配送系统的处理,把处理过的程序更新为已完成
-  $where = ['status' => 2];
-  $res = $db->select('order_queue',$where);
-  $sucess = [
-    'status' => 1,
-    'updated_at' => date('Y-m-d H:i:s'),
-  ];
-  $res_last = $db->update('order_queue',$where,$sucess);
-  $res_last ? echo "sucess".$res_last : echo "fail".$res_last;
-}else{
-  echo "all finish";
-}
-
-/* good.sh */
-#!/bin/bash
-# 输出当前时间
-date "+%G-%m-%d %H:%M:S"
-php ./goods.php
-
-# 每分钟执行一次
-*/ * * * * /home/berlin75/sites/good.sh >> /home/berlin75/sites/log 2>&1
-
-</textarea>使用MySQL实现消息队列<textarea>
-有个生意很好的饭店,一分钟有500人下单,店家掌柜处理不过来,于是就先暂时不通知用户是否能够接单,先把所有的订单先存着,只告诉他们正在处理中,但还有一个问题就是有一些是其他饭店专门来搞事的,所以就要查看订单是否合法。
-
-实现：用户下单之后后台创建一个随机的order_id对应该订单,并且该订单的初始状态(status)为待处理(0);当商家查看该订单情况时将status改为1表示正在处理;当商家确认这个订单可以接受时就将该订单的status改为2表示成功接单。
-
-首先在数据库中创建一个order_list订单表
-mysql> desc order_list;
-+----------+------------+------+-----+----------+-------+
-| Field    | Type       | Null | Key | Default  | Extra |
-+----------+------------+------+-----+----------+-------+
-| order_id | int(11)    | NO   | PRI | NULL     |       |
-| mobile   | int(8)     | NO   |     | 88888888 |       |
-| status   | tinyint(1) | YES  |     | 0        |       |
-+----------+------------+------+-----+----------+-------+
-
-有两个PHP程序:producer.php(用户、生产者)和consumer.php(商家、消费者)　　
-一旦有用户下单就往order_list中添加一条数据,这里方便测试,于是执行下面的PHP程序,表示用户方(producer.php),每隔2秒下一次单;
-
-$pdo=new PDO("mysql:host=localhost;dbname=test","root","root");
-$stmt=$pdo->prepare("insert into order_list (order_id,mobile,status) values (?,?,?)");
-while(1){
-  $order_id=rand(10000,99999);
-  $mobile=rand(11111111,99999999);
-  $stmt->execute(array($order_id,$mobile,0));
-  echo date("Y-m-d H:i:s",time())."添加了一条订单,订单号为{$order_id},手机号为{$mobile}\n";
-  sleep(2);
-}
-
-用户提交订单后剩下的事情就交给商家了,商家(consumer.php)生意太忙了,每4秒才能处理一个订单：
-$pdo=new PDO("mysql:host=localhost;dbname=test","root","root");
-$stmt=$pdo->prepare("update order_list set status=? where status=? limit 1");
-$stmt_select=$pdo->prepare("select order_id from order_list where status=1");//正在处理的订单号
-while(1){
-  $init=0;//初始status
-  $lock=1;//标记为正在处理
-  $success=2;//成功接单
-  //为了保证数据的一致性,处理订单之前要先锁定一个订单,将其status由0改为1,然后才可处理,处理完毕后再将status从1改为2
-  $stmt->execute(array($lock,$init));//锁定要处理的订单
-  $stmt_select->execute();
-  $result=$stmt_select->fetch(PDO::FETCH_ASSOC);//查询正在处理的订单号
-  $order_id=$result['order_id'];
-  echo date("Y-m-d H:i:s")."准备处理订单,订单号为{$order_id}\n";
-  sleep(3);//处理3秒
-  $stmt->execute(array($success,$lock));
-  echo date("Y-m-d H:i:s")."订单处理完成,订单号为{$order_id}\n";
-  sleep(1);//休息1秒
-
-</textarea><pre>
-2、峰值处理
-场景：流量在各个时间点不均衡,瞬间流量剧增
-案例：秒杀、抢购,一般秒杀时订单特别多,但数据库无法一次性的处理这么多,所以可以先存在消息队列中,无论进的速度多快,出的速度都是一定的
-思路：当用户点击按钮提交购买请求时,并不直接马上执行购买请求动作,而是将请求动作存入消息列队,用户的请求到此结束,而在服务器后台,从消息列队中逐一取出请求记录,再进行数据库操作,完成处理之后将处理结果返回给用户。由于消息队列的存取是先进先出,因此所有处理将按请求顺序进行处理。由于处理是在后台一个一个完成,因此不会对服务器和数据库造成巨大压力
-
-解释：小明制作蛋糕的时间比较长,订单来到后先登记成一个清单,然后逐次按顺序制作,订单量过大时会暂时挂出『已售完』的牌子。
-
-实现：使用单线程的工具将业务需求进行排队处理,当业务请求达到阀值时给出友好提示并拒绝用户的需求。
-
-对于消峰需求,可以高峰期挂出『暂时无法购买,请稍等』等提示,防止流量对后续业务的冲击。
-对于秒杀等抢完即停的需求,需要考虑超发问题,可以添加一个名额计数器,或在秒杀名额已满员时发放一个秒杀完成标记,后续处理程序检测到完成标记后,再进行后续处理。
-
-流量削峰案例：Redis的list类型实现秒杀
-redis基于内存,速度会非常快,redis对数据库有一个非常好的补充作用,因为它是可持久化的,redis会周期性的把数据写到硬盘里,所以它不用担心断电的问题,从这方面说它比另一款缓存memcache更有优势些,另外redis提供五种数据类型(字符串,双向链表,哈希,集合,有序集合)
-
-一般情况下做秒杀案例,抢购,瞬间高并发,需要排队的案例中redis是一个很好的选择。
-redis数据类型中的list类型是一个双向链表,可以从头部或者尾部追加数据。
-LPUSH/LPUSHX :将值插入到(/存在的)列表头部
-RPUSH/RPUSHX: 将值插入到(/存在的)列表尾部
-LPOP : 移除并获取列表的第一个元素
-RPOP: 移除并获取列表的最后一个元素
-LTRIM: 保留指定区间内的元素
-LLEN: 获取列表长度
-LSET: 通过索引设置列表元素的值
-LINDEX: 通过索引获取列表中的元素
-LRANGE: 获取列表指定范围内的元素
-
-架构设计
-1、首先记录是哪一个用户参与了秒杀同时记录他的时间。
-2、将用户的id存到redis列表中,让它排队。如果规定只有前10个用户可以参与成功,如果列表中的个数已经够了就不会让它继续追加数据,这样redis的列表长度就只会是10个
-3、最后在慢慢的将redis中的数据写入到数据库中,以减少数据的压力
-
-代码级设计
-1、当用户开始秒杀时,将秒杀程序的请求写入Redis(uid,time_stamp)中。
-2、假使规定只有10人可以秒杀成功,检查Redis已经存放数据的长度,超出上限直接丢弃说明秒杀完成。
-3、最后在死循环处理存入Redis中的10条数据,然后在慢慢的取数据并存入到mysql数据库中。
-
-在秒杀这一块对于数据库的压力特别大,如果没有这样的设计会造成mysql的写入瓶颈。通过Redis的list,然后把秒杀的请求放入Redis,最后通过入库程序把数据慢慢的写入到数据库,这样的话就可以实现流量的均衡,对mysql不会造成太大的压力。　
-
-</pre>利用redis实现消息队列处理高并发请求<textarea>
-// 将请求存入redis(入队):当用户点击按钮时通过ajax将请求发给php进行处理,前台返回给用户正在处理的提示
-$redis = new Redis();
-$redis->connect('127.0.0.1',6379);
-try {
-  $redis->LPUSH('click',$user_id);
-}catch(Exception $e) {
-  echo $e->getMessage();
-}
-
-// 从redis中将请求取出(出队),在后台进行数据处理
-// 守护进程:当上述请求存入redis后就可以直接将结果返回给用户了。需要在服务端创建一个后台运行的程序,从redis中取出请求数据,并利用这些数据读取和更新数据库,但这一切都是后台运行解决的,而非用户请求触发的。
-// 通过上面的代码redis中会存储很多请求,这些请求都是准备用来处理的。这个列队已经存在了之后,服务器后台则对这些请求进行处理,第一步就是先从redis中逐一取出请求
-// 为了保证数据处理正常进行,必须和数据库之间建立长连接,因此上面采用了pconnect。mysql连接时也要采用长连接保证数据处理的有效性,同时由于在后台运行,不可能随时获取数据库操作的状态,因此最好采用innodb引擎,对数据库操作事件进行监听,如果出现了异常,要对事件结果进行检查,如果数据插入失败,应该重新执行该事件
-$redis = new Redis();
-$redis->pconnect('127.0.0.1',6379);
-while(1) {
-  try{
-    $value = $redis->LPOP('click');
-    // 利用$value进行逻辑和数据处理
-  }catch(Exception $e) {
-    echo $e->getMessage();
-  }
-}
-
-</textarea>php+redis实现消息队列<textarea>
-// php+redis消息队列是php+mysql性能不足时的一个中间间处理方案。通过这个中间的处理,保证的数据的可用性和准确性。用于服务器瞬间请求大,数据库压力大的情况。如并发量大导致的超卖、并发量大导致的数据重复情况。
-
-// 流程：php接受请求和数据 -> php把数据写入redis队列中(入队) -> shell定时调用php读取队列数据写入mysql(出队)
-
-// 入队：inqueue.php
-$redis = new redis();
-$redis->connect('127.0.0.1',6379);
-$redis -> select('1');
-$redis->auth('');
-$data = [a,b,c,d,e,f,g,h];    // get或post请求过来的数据
-$data = json_encode($data);
-$in = $redis->rpush('queue',$data);
-if($in) echo "入队成功";
-
-// 出队：outqueue.php
-$redis = new redis();
-$redis->connect('127.0.0.1',6379);
-$redis -> select('1');
-$redis->auth('');
-$value = $redis->lpop('queue');
-$value = json_decode($value,true);
-
-// process.sh
-#!/bin/bash
-php /usr/local/nginx/html/outqueue.php
-
-// shell process.sh：定时调用outqueue.php脚本
-# 进行每分钟调用一次
-* * * * * /usr/local/nginx/html/process.sh
-
-// 如果每分钟调用一次频率不够,可以执行多次调用脚本,这样就一分钟调用了多次了
-// process.sh
-#!/bin/bash
-php /usr/local/nginx/html/outqueue.php
-php /usr/local/nginx/html/outqueue.php
-php /usr/local/nginx/html/outqueue.php
-php /usr/local/nginx/html/outqueue.php
-php /usr/local/nginx/html/outqueue.php
-php /usr/local/nginx/html/outqueue.php
-php /usr/local/nginx/html/outqueue.php
-php /usr/local/nginx/html/outqueue.php
-
-// 查看队列中的当前数据
-$redis = new redis();
-$redis->connect('127.0.0.1',6379);
-$redis -> select('1');
-$redis->auth('');
-$list = $redis->lrange('queue',0,-1);
-var_dump($list);
-
-</textarea><pre>
-3、送达保证,冗余
-场景：内容需要逐条严格执行,并保证执行成功,执行不成功或中断时可以恢复
-案例：银行、财务类系统,需提升容灾能力的系统,重点考虑容灾相关问题,如业务恢复问题、重复处理问题。
-
-解释：小明制作的蛋糕需要客户验货签收后,才可以继续制作下一个蛋糕。
-
-实现：入队系统将业务需求写入消息队列后,即进行下一次业务处理。后续处理程序对队列内容进行逐条处理,处理完成后发放『完成许可』。消息队列中的内容,只有取得『完成许可』后,才可以从消息队列中删除。
-
-四：排序保证
-场景：消息队列中的内容有严格的顺序。
-案例：抢号排队等系统
-
-解释：小明制作蛋糕的顺序需要严格按下单顺序来制作。
-
-实现：入队系统将内容逐条写入消息队列,并按单线排列,按先进先出的顺序来提出数据并进行后续处理。需要使用单线程,保证只有一条生产线。
-
-4、扩展性
-场景：采用发布-订阅模式时添加新的订阅者
-案例：注册用户后发送成功短信的模型中追加一个发送email的功能
-实现：由多个消费者订阅一个消息的中间层,然后发布者将信息发布到中间层中。订阅了这个中间层的消费者均可以收到这个消息,并进行后续处理。在这个结构中,如果想添加一个消息的后续处理组件,只需要将这个组件订阅到中间层即可
-保证业务之间没有深度耦合,防止扩展时造成干扰。
-
-【 队列介质 】
-1、数据库,如mysql(可靠性高,易实现,速度慢)
-2、缓存,如redis(速度快,单个消息报包过大时效率低)
-3、消息系统,如rabbitMq(专业性强,可靠,学习成本高)
-apt install rabbitmq-server(安装之后自动运行,ps aux查看进程,rabbitmq官网查看demo)
-下载php-amqplib
-
-【 消息处理触发机制 】
-1、死循环方式读取队列并处理：易实现,服务器压力大,故障时无法及时恢复;比较适合做秒杀,比较集中,运维集中维护
-2、定时执行任务：压力均分,有处理上限;目前比较流行的处理触发机制。唯一的缺点是间隔和数据需要注意,不要等上一个任务没有完成下一个任务又开始了
-3、守护进程：类似于php-fpm和php-cgi,需要shell基础
-
-</pre>
-</div>
-
 <div id="erp">
 <h4>ERP(企业资源计划管理)、CRM(客户关系管理)和OA(Office Automation,办公自动化流程管理)</h4><pre>
 没有OA大家在办事的时候就会哦？(O),啊！(A)
@@ -73810,7 +74477,7 @@ CurrentQuantity：当前库存数。
 
 2、B2C：(Business To Consumer)商家对个人进行交易,商对客是电子商务的一种模式,即通常说的直接面向消费者销售产品和服务商业零售模式。
 B2c网络商城类似于现实世界中的商店,差别是利用电子商务的各种手段,达成从买到卖的过程的虚拟商店,从而减少中间环节,消除运输成本和代理中间的差价,造就对普通消费和加大市场流通带来巨大的发展空间,B2C网络商城尽可能的给消费者利益,带动公司发展和企业腾飞,引导国民经济稳定快速发展,推动国内生产总值。
-B2C网络商城开发网站的盈利点主要是由卖家在销售商品中获取一定的利润。B2C网络商城可以设置商品购买所使用的积分类型（会员系统有五种会员积分类型）,设置按商品固定积分或按订购金额动态计算积分,并设定积分的计算比例；商品发布和管理可以选择分类、选择品牌、填写商品名称和自定义参数列填写商品售价后根据预设的会员类型价格比例自动计算填写价格（可以修改）,B2C网络商城自动按预设填写市场参考价填写商品计价单位、重量、库存等数据如果启用积分并采用商品固定积分,则可填写商品积分商品简述,B2C网络商城可用于商品推荐和检索列表中的简介文字商品介绍,采用html编辑器录入商品介绍详细参数,在商品修改时可以录入商品的详细参数表,用于详情页的的商品详细参数介绍自定标签。
+B2C网络商城开发网站的盈利点主要是由卖家在销售商品中获取一定的利润。B2C网络商城可以设置商品购买所使用的积分类型(会员系统有五种会员积分类型),设置按商品固定积分或按订购金额动态计算积分,并设定积分的计算比例；商品发布和管理可以选择分类、选择品牌、填写商品名称和自定义参数列填写商品售价后根据预设的会员类型价格比例自动计算填写价格(可以修改),B2C网络商城自动按预设填写市场参考价填写商品计价单位、重量、库存等数据如果启用积分并采用商品固定积分,则可填写商品积分商品简述,B2C网络商城可用于商品推荐和检索列表中的简介文字商品介绍,采用html编辑器录入商品介绍详细参数,在商品修改时可以录入商品的详细参数表,用于详情页的的商品详细参数介绍自定标签。
 
 b2c直销商城系统功能介绍
 a、品牌管理添加和管理品牌,包括品牌名称、品牌介绍、官方网址、品牌LOGO等品牌和分类的关联,品牌可以和多个自选分类进行关联,在商品发布时选择分类时,动态显示并可选择相关的品牌；前台网站有相应的分类品牌展示的插件,可以根据各大分类下的相关品牌进行商品查询
@@ -73824,8 +74491,8 @@ B2C商城建站系统具有商品管理、商品分类、品牌管理、支付�
 
 3、B2B2C分销商城系统模式
 B2B2C网站管理软件对于网站经营采用了两种模式经营方案,如A、B。且对管理员后台可以进行设置,模式如下：
-A：供应商入驻网站发布商品分销→站长审核商品→入驻免费php分销系统是以企业独自运营该平台为主,平台以开放分销接口为模式,引入各大分销商成为其的下线分销服务商为操作模式。商家挑选商品进货并发布到店铺→买家挑选商品→买家支付货款→站长订单通知供应商（商家）发货→供应商（商家）发送货给买家→买家确认收到商品→供应商收货款→网站收取提成→供应商（商家）申请提现→交易完成。
-B：站长发布商品分销→入驻商家挑选商品进货并发布到店铺→买家挑选商品→买家支付货款→站长（商家）发货→买家确认收到商品→商家赚提成,站长收货款→商家申请提现→交易完成。
+A：供应商入驻网站发布商品分销→站长审核商品→入驻免费php分销系统是以企业独自运营该平台为主,平台以开放分销接口为模式,引入各大分销商成为其的下线分销服务商为操作模式。商家挑选商品进货并发布到店铺→买家挑选商品→买家支付货款→站长订单通知供应商(商家)发货→供应商(商家)发送货给买家→买家确认收到商品→供应商收货款→网站收取提成→供应商(商家)申请提现→交易完成。
+B：站长发布商品分销→入驻商家挑选商品进货并发布到店铺→买家挑选商品→买家支付货款→站长(商家)发货→买家确认收到商品→商家赚提成,站长收货款→商家申请提现→交易完成。
 
 4、C2C：(Consumer To Consumer)个人对个人进行交易,实际是电子商务的专业用语,是个人与个人之间的电子商务,如淘宝
 
@@ -73861,14 +74528,14 @@ B：站长发布商品分销→入驻商家挑选商品进货并发布到店铺�
 2、不开启内购: 分销商D购买商品,则C获得一级佣金,B获得二级佣金,A获得三级佣金
 
 商城会员等级与分销商等级的区别
-商城的会员等级主要两个,一是会员等级，二是分销商等级
+商城的会员等级主要两个,一是会员等级,二是分销商等级
 
 会员等级：
 1、会员等级不牵扯任何关于分销的内容
 2、会员等级主要控制会员在商城内购买商品的时的价格、可见商品、折扣率等
 
 分销商等级：
-1、分销商等级与会员等级不冲突，不共享，无任何关系
+1、分销商等级与会员等级不冲突,不共享,无任何关系
 2、分销商等级主要控制该分销商的等级以及其等级内应获取的佣金比例
 
 例子：
@@ -73876,36 +74543,36 @@ B：站长发布商品分销→入驻商家挑选商品进货并发布到店铺�
 白银分销商   1级佣金： 7%      2级佣金：5%      3级佣金：3%
 黄金分销商   1级佣金： 10%     2级佣金：7%      3级佣金：5%
 
-小明作为青铜分销商经过不懈的努力终于升级到了白银分销商，他所获得的佣金比例也随之升级，由之前的青铜分销商的1级佣金：5%, 2级佣金：3%, 3级佣金：2%提升至白银分销商1级佣金：7%, 2级佣金：5%, 3级佣金：3%
+小明作为青铜分销商经过不懈的努力终于升级到了白银分销商,他所获得的佣金比例也随之升级,由之前的青铜分销商的1级佣金：5%, 2级佣金：3%, 3级佣金：2%提升至白银分销商1级佣金：7%, 2级佣金：5%, 3级佣金：3%
 
 分销系统—分销商等级
-设立多个分销商等级分别设置相应的佣金获取比例及升级条件，分销商获取的佣金达到哪个等级即可直接跳跃其它等级直接升级及获取相应佣金，没有设置等级的分销商将按系统默认设置计算提成，商品指定的佣金金额的优先级仍是最高的，也就是说只要商品指定了佣金金额就按商品的佣金金额来计算，不收等级影响
-分销商的等级设置是无论分销商是几级，只要达到升级的条件，就会享受升级后所在等级的佣金比例。
-例如：分销商A是一级分销商且在普通等级，佣金比例为10%，达到商城VIP等级条件后，会自动升级到VIP等级，一级佣金比例为20%，则享受VIP等级下的一级分销佣金比例20%
+设立多个分销商等级分别设置相应的佣金获取比例及升级条件,分销商获取的佣金达到哪个等级即可直接跳跃其它等级直接升级及获取相应佣金,没有设置等级的分销商将按系统默认设置计算提成,商品指定的佣金金额的优先级仍是最高的,也就是说只要商品指定了佣金金额就按商品的佣金金额来计算,不收等级影响
+分销商的等级设置是无论分销商是几级,只要达到升级的条件,就会享受升级后所在等级的佣金比例。
+例如：分销商A是一级分销商且在普通等级,佣金比例为10%,达到商城VIP等级条件后,会自动升级到VIP等级,一级佣金比例为20%,则享受VIP等级下的一级分销佣金比例20%
 
 分销商提交佣金提现申请
-审核通过的佣金申请事项会自动到“待打款”中，打款的方式会根据分销商申请时选择的为准，比如分销商选择的是打款到余额，则商家在给分销商处理待打款的事项直接就是打款到余额，如果选择分销商选择的是打款到微信，则就会将款项打到微信钱包中
+审核通过的佣金申请事项会自动到“待打款”中,打款的方式会根据分销商申请时选择的为准,比如分销商选择的是打款到余额,则商家在给分销商处理待打款的事项直接就是打款到余额,如果选择分销商选择的是打款到微信,则就会将款项打到微信钱包中
 打款成功后事项自动到“已打款”中
 
 ***************************************************************
-三级分销是指，分销商只能获取三级分销所得的佣金，超过三级的部分不能获得佣金
+三级分销是指,分销商只能获取三级分销所得的佣金,超过三级的部分不能获得佣金
 三级分销Three level distribution是将传统代理商制度搬到线上厂商、品牌商、代理商零售商、微商等商家可以将产品放到线上,拥有自己微分销商城和微官网,对接公众号,把会员和消费者变成分销商,通过分享+信任经济模式,发展三级分销商,每一级分销商均可以往下再发展两级分销商,通过二维码自动绑定上下级关系。谁卖出谁拿销售佣金,分销商可以无限裂变,分销商销售佣金可设置每个级别获取不同；每一个分销商的下级卖出商品,上级分销商可以拿到推广佣金,推广佣金最多三级。
 
-（一）：三级分销简介
-三级分销，指的是品牌商可以发展三级分销商,每一级分销商均可以往下再发展两级分销商。
-一：谁卖出谁拿销售佣金，无论分销商等级产品销售佣金比例一致。分销商可以无限裂变，分销商销售佣金可设置每个级别获取不同。
-二：每一个分销商的下级卖出商品，上级分销商可以拿到推广佣金。推广佣金最多三级。
-三：分销等级是三级，由于销售产生关系的最多只有三级。每个人都可能成为推广中的一级分销商，拿一级推广佣金。
-（二）：免费的三级分销系统
-目前大部分平台的三级分销都收费，有部分的平台采取免费的形式。
-企业可以使用三级分销制系统，让用户就可以加入企业，成为企业的分销商，企业给分销商的返利由企业自主决定。建立外围渠道销售系统，零营销费用或低营销费用实现主动营销、口碑营销，让大众既来消费又是企业的业务人员，又不用支付底薪，降低营销成本。
-（三）：三级分销的机制
-目前的三级分销实行的是末尾三级返佣机制，即能带来购买行为的分销为一级分销商，是直接产生利益的分销，我们记做分销商F。F的上一级分销E为二级分销商，同理，D为三级分销商。商家发展了N多分销，客户小明从分销商F那里购买了商品，那么F获得一级佣金，E二级佣金，D三级佣金，D前面的分销商C,B,A就与此没有关系，也无法获得佣金。
-（四）：三级分销佣金的分配
-通俗的来讲，末尾三级分佣，一级分销商获得佣金最多，因为是能直接为商家带来订单的分销商，发展一级分销商的二级，三级分销商会获得二级、三级佣金。
-假设一个商品，价格100，成本60元。商家通过三级分销平台卖出这个商品，商家利润40元，把20元作为推广佣金给他的分销商，其中设定一级佣金为20元的百分之50%，二级佣金设定为20元的百分之30%、三级佣金设定为20元的百分之20%，那么交易一次一级分销就会获得10元佣金，二级获得6元佣金、三级会获得4元佣金。客户有多次交易，有多个客户完成了交易，商家的三个分销商每次都会获得返佣。
-（五）：三级分销的优势
-近几年来，随着网络的普及，越来越多的品牌商，也在纷纷借助于微分销系统的帮助，让商品的销路更广泛。利用三级分销能够树立品牌产品的良好形象，增强产品的信息的传递，让商品有更多机会出现在人们的视野里面，就会给商家带来意想不到的惊喜，从而商品就能够在消费者的心目中树立良好的形象，商品只要是能够让消费者认可，就能够促进商品的销售，企业在进行产品宣传的时候，都是通过微信朋友圈进行商品的宣传，利用这种产品宣传的方式，更容易让人们接受。
+(一)：三级分销简介
+三级分销,指的是品牌商可以发展三级分销商,每一级分销商均可以往下再发展两级分销商。
+一：谁卖出谁拿销售佣金,无论分销商等级产品销售佣金比例一致。分销商可以无限裂变,分销商销售佣金可设置每个级别获取不同。
+二：每一个分销商的下级卖出商品,上级分销商可以拿到推广佣金。推广佣金最多三级。
+三：分销等级是三级,由于销售产生关系的最多只有三级。每个人都可能成为推广中的一级分销商,拿一级推广佣金。
+(二)：免费的三级分销系统
+目前大部分平台的三级分销都收费,有部分的平台采取免费的形式。
+企业可以使用三级分销制系统,让用户就可以加入企业,成为企业的分销商,企业给分销商的返利由企业自主决定。建立外围渠道销售系统,零营销费用或低营销费用实现主动营销、口碑营销,让大众既来消费又是企业的业务人员,又不用支付底薪,降低营销成本。
+(三)：三级分销的机制
+目前的三级分销实行的是末尾三级返佣机制,即能带来购买行为的分销为一级分销商,是直接产生利益的分销,我们记做分销商F。F的上一级分销E为二级分销商,同理,D为三级分销商。商家发展了N多分销,客户小明从分销商F那里购买了商品,那么F获得一级佣金,E二级佣金,D三级佣金,D前面的分销商C,B,A就与此没有关系,也无法获得佣金。
+(四)：三级分销佣金的分配
+通俗的来讲,末尾三级分佣,一级分销商获得佣金最多,因为是能直接为商家带来订单的分销商,发展一级分销商的二级,三级分销商会获得二级、三级佣金。
+假设一个商品,价格100,成本60元。商家通过三级分销平台卖出这个商品,商家利润40元,把20元作为推广佣金给他的分销商,其中设定一级佣金为20元的百分之50%,二级佣金设定为20元的百分之30%、三级佣金设定为20元的百分之20%,那么交易一次一级分销就会获得10元佣金,二级获得6元佣金、三级会获得4元佣金。客户有多次交易,有多个客户完成了交易,商家的三个分销商每次都会获得返佣。
+(五)：三级分销的优势
+近几年来,随着网络的普及,越来越多的品牌商,也在纷纷借助于微分销系统的帮助,让商品的销路更广泛。利用三级分销能够树立品牌产品的良好形象,增强产品的信息的传递,让商品有更多机会出现在人们的视野里面,就会给商家带来意想不到的惊喜,从而商品就能够在消费者的心目中树立良好的形象,商品只要是能够让消费者认可,就能够促进商品的销售,企业在进行产品宣传的时候,都是通过微信朋友圈进行商品的宣传,利用这种产品宣传的方式,更容易让人们接受。
 
 php如何实现三级分销
 create table user{

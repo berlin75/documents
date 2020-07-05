@@ -600,6 +600,94 @@ var vm = new Vue({
 vm.a = 2                         // new: 2, old: 1
 
 </textarea><pre>
+【 this.$set()和Vue.set() 】  
+this.$set()和Vue.set()本质方法一样，前者可以用在methods中使用。
+set方法调用时，可以触发页面全部重新渲染。
+
+data () {
+  return {
+      student: { name: '', age: '' }
+  }
+},
+mounted () {
+  this.student.age = 24
+}
+
+直接给student赋值操作，虽然可以新增属性，但是不会触发视图( 页面 )更新
+原因是：vue.js的属性必须在 data 对象上才能让 Vue.js 转换它，才能让它是响应的。这里就可以使用this.$set了
+
+mounted () {
+  this.$set(this.student,"age", 24)
+}
+第一个参数：改变的对象
+第二个参数：改变的对象中的属性
+第三个参数：改变的属性值
+
+比如在vue中有个data数组arr：
+//arr=[1,2,3]
+arr[1]='b'
+console.log(arr) // [1,2,3]
+Vue.set(arr,2,'c')
+console.log(arr) // [1,b,c]
+可以看出set触发了整个页面的重新渲染，连arr[1]='b'的效果也被重新渲染了。
+
+使用set添加数据
+Vue.set()不光能修改数据，还能添加数据，弥补了Vue数组变异方法的不足。
+
+可以使用set添加数据这一特性，解决一些常见问题。
+例如循环出的元素点击应用选中样式，再点击取消选中样式。
+< section v-for="item in list">
+  < div :class="['xxclass',item.checked?'checked':'']">< /div>
+< /section>
+< !--这里通过判断item的**本身不存在的checked属性**来决定是否增加checked样式类-->
+点击方法如下：
+
+clickHandle: function(item){
+  if(typeof item.checked === 'undefined'){
+    this.$set(item, 'checked', true)
+  } else {
+    item.checked = !item.checked
+  }
+}
+// 如果item没有checked属性就用set方法添加，有则取反
+这就利用set使用了对象中本身不存在的checked属性来实现想要的功能
+
+</pre>当vue的data里边声明或者已经赋值过的对象或者数组（数组里边的值是对象）时，向对象中添加新的属性，如果更新此属性的值，是不会更新视图的。<textarea>
+<template>
+    <div id="app2">
+        <p v-for="item in items" :key="item.id">{{item.message}}</p>
+        <button class="btn" @click="handClick()">更改数据</button>    
+    </div>
+</template>
+
+export default {
+    data() {
+        return {
+            items: [
+                { message: "one", id: "1" },
+                { message: "two", id: "2" },
+                { message: "three", id: "3" }
+            ]
+        };
+    },
+    mounted(){
+        this.items[0]={message:"测试",id:"4"};  //此时对象的值更改了，但是视图没有更新
+        this.$set(this.items,0,{message:"测试",id:"4"})； //$set可以触发更新视图
+        console.log(this.items)
+    },
+    methods: {
+        // 调用方法：Vue.set( target, key, value )
+        // target：要更改的数据源(可以是对象或者数组)
+        // key：要更改的具体数据
+        // value ：重新赋的值
+        handClick() {
+            //Vue methods中的this指向的是Vue的实例，这里可以直接在this中找到items
+            this.$set(this.items, 0, { message: "更改one的值", id: "0" });
+        },
+    }
+};
+
+</textarea><pre>  
 【 Vue实例的生命周期 】
 Vue实例有一个完整的从创建到销毁的生命周期,从开始创建、初始化数据、编译模板、挂载Dom→渲染、更新→渲染、卸载等一系列过程称Vue的生命周期,它提供了一些生命周期钩子给予执行自定义逻辑的机会
 
@@ -1815,10 +1903,32 @@ v-for="(value, key, index) in obj"
 v-for="(item, index) of arr"               // 可以使用of代替
 v-for="(value, key, index) of obj"
 
-遍历对象是按Object.keys()的结���遍历,但是不能保证它的结果在不同的JS引擎下是一致的
+< li v-for="(movie, index) in [ 'Lion King', 'Frozen', 'The Princess Bride' ]"> {{ index + 1 }} - {{ movie }} < /li>
+< li v-for="(value, key) in { name: 'Lion King', released: 2019, director: 'Jon Favreau',}">{{ key }}: {{ value }}< /li>
+< li v-for="(value, key, index) in {name: 'Lion King', released: 2019, director: 'Jon Favreau'}"> #{{ index + 1 }}. {{ key }}: {{ value }}< /li>
+
+遍历对象是按Object.keys()的结构遍历,但不能保证它的结果在不同的JS引擎下是一致的
+
+使用v-for遍历字符串
+< p v-for="character in 'Hello, World'">{{ character }}< /p>
 
 在组件上总是必须用key配合v-for,以便维护内部组件及其子树的状态。甚至在元素上维护可预测的行为,比如动画中的对象固化(object constancy),也是一种好的做法
 < li v-for="todo in todos" :key="todo.id" > {{ todo.text }} < /li>
+
+使用v-for进行解构,放在函数中括号中的任何有效js也可以放在v-for中
+< li v-for="{
+  radius = 20,      // Set a default
+  point: { x, y },  // Destructure nested objects
+} in circles">
+
+Vue确实支持对Map和Set对象进行迭代，但由于它们在Vue2.x中不具有响应性，因此其用途非常有限。还可以在此处使用任何Iterable，包括生成器。
+有时使用Map或Set，但通常仅作为中间对象来进行计算,例如如果需要在列表中查找所有唯一的字符串，则可以这样做：
+computed() {
+  uniqueItems() {
+    const unique = new Set(this.items);  // 从数组创建一个Set，删除所有重复项
+    return Array.from(unique);           // 将该Set转换回可用于Vue的数组
+  }
+}
 
 不要把v-if和v-for同时用在同一个元素上,一般在两种常见的情况下会倾向于这样做：
 1、为了过滤一个列表中的项目,比如v-for="user in users" v-if="user.isActive",在这种情形下请将users替换为一个计算属性如activeUsers,让其返回过滤后的列表。
