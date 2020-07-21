@@ -9204,6 +9204,12 @@ this和event.target都是dom对象
 < !-- JS 控制文本框只能输入中文、英文、数字、空格 -->
 <input onkeyup="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5\ ]/g,'')" onpaste="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5\ ]/g,'')" oncontextmenu="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5\ ]/g,'')">
 
+利用正则表达式限制网页表单里的文本框输入内容:
+用正则表达式限制只能输入中文: onkeyup="value=value.replace(/[^u4E00-u9FA5]/g,'')" onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^u4E00-u9FA5]/g,''))"
+用正则表达式限制只能输入全角字符:  onkeyup="value=value.replace(/[^uFF00-uFFFF]/g,'')" onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^uFF00-uFFFF]/g,''))"
+用正则表达式限制只能输入数字: onkeyup="value=value.replace(/[^d]/g,'') "onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^d]/g,''))"
+用正则表达式限制只能输入数字和英文: onkeyup="value=value.replace(/[W]/g,'') "onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^d]/g,''))"
+
 <form action="/deleteblog" method="post" onsubmit="return confirm('确定要删除吗？')" > </form>
 <a href="/deleteblog" onclick="return confirm('确定要删除该博文吗？')">删除</a>
 
