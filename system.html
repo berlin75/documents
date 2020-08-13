@@ -30,6 +30,34 @@ ODBC(数据源)是一种应用程序编程接口API,连接到某个数据源(如
 </div>
 
 <div id="IDEA">
+<h3>chrome devtool</h3><pre>
+Ctrl + P 快速的寻找和打开工程中的任意文件
+Ctrl + Shift + F 在所有已加载的文件中查找一个特定的字符串,支持正则表达式
+Ctrl + G  跳到特定行
+Ctrl + O 另一个跳转的方法,输入:和行数,而不用去寻找一个文件
+Ctrl + click 点击想让光标停留的位置,设置多个光标,这样就可以同时在多个位置输入同一文本了
+preserve log 要研究在页面还没加载完之前出现的bug时会是一个很方便的方法
+
+在控制台中选择元素
+DevTools控制台支持一些变量和函数来选择DOM元素：
+$() : document.querySelector()的缩写,返回第一个与之匹配的CSS选择器的元素,例如$('div')返回本页的第一个div元素
+$$() : document.querySelectorAll()的缩写,返回一个数组,里面是与之匹配的CSS选择器的元素。
+$0–$4 : 依次返回五个最近你在元素面板选择过的DOM元素的历史记录,$0是最新的记录,以此类推。
+
+颜色选择器
+在样式编辑器中选择一种颜色时可以点击颜色预览,颜色选择器就会弹出。当颜色选择器开启时,如果停留在某一页面,鼠标指针就会转换成一个放大镜,选择像素精度的颜色。
+
+强制元素状态
+DevTools有一个功能是模拟CSS的状态,如在元素中的hover和focus,这能够能容易的设计他们的样式。该功能来自css编辑器右上角
+
+选择下一个匹配项
+Sources标签下编辑文件时,选中单词,如果按下Ctrl+D,下一个匹配项也会被选中,可重复按,这能够同时编辑他们
+
+改变颜色格式
+在颜色预览中使用Shift + Click,可以在rgba、hsl和hexadecimal这三种格式中改变
+
+</pre>
+
 <h3>phpstorm</h3><pre>
 设置快捷键：File -> Settings -> IDE Settings -> Keymap -> eclipse -> 然后Copy一份 -> 再个性化设置快捷键
 
@@ -62,6 +90,7 @@ CTRL+ALT+T  把选中的代码放在 TRY{} IF{} ELSE{} 里
 ALT+INSERT  生成代码(如GET,SET方法,构造函数等)
 
 编辑
+CTRL+W   选中连续的字符,再按选中整行,再按选全部
 CTRL+C   复制
 CTRL+V   粘贴
 CTRL+X   剪切,删除行
@@ -69,7 +98,7 @@ CTRL+D   复制行
 CTRL+SHIFT+V  打开粘贴板,可以复制多个文本
 CTRL+Z        倒退(代码后悔)
 CTRL+SHIFT+Z  向前
-Ctrl+Shift+U  选中的字符大小写转换
+Ctrl+Shift+U  Toggle case,选中的字符大小写转换
 Ctrl + Q      快速文档查询
 ALT + INSERT  生成的代码器（getter,setter方法,构造函数）
 Ctrl + O      覆盖方法
@@ -77,7 +106,7 @@ Ctrl + I      实现方法
 Alt + Enter   显示意图的行动和快速修复
 Shift + Tab   键缩进/取消缩进选中的行
 ALT+click     同时编辑多行
-ctrl+shift+up/down 移动行,代码选中区域向上/下移动
+ALT+shift+up/down 移动行,代码选中区域向上/下移动
 Ctrl + Shift + J  join lines,合并选中行,智能线连接（仅适用于HTML和JavaScript）
 Ctrl + Enter      智能线分割（HTML和JavaScript）
 Shift + Enter     开始新的生产线
@@ -86,23 +115,21 @@ Ctrl + Backspace  删除字开始
 Ctrl +小键盘+ / -       展开/折叠代码块
 Ctrl + Shift +小键盘+   展开全部
 Ctrl + Shift +数字键盘-  关闭全部
+CTRL+/        注释/取消注释
+CTRL+SHIFT+/  注释/*...*/
 
 其他
 CTRL+H        显示类结构图,父类继承关系
 Ctrl +F12     文件结构弹出
 Ctrl+Shift+H  方法的层次结构
 Ctrl+Alt+H    呼叫层次
-CTRL+Q        显示代码注释
-CTRL+W        选中代码,连续按会有其他效果
+CTRL+Q        显示代码注释弹窗
 Ctrl+Shift+W  减少当前选择到以前的状态
 CTRL+B        转到声明,快速打开光标处的类或方法说明注释(CTRL + 鼠标单击 也可以)
 CTRL+O        魔术方法
-CTRL+/        注释/取消注释
-CTRL+SHIFT+/  注释/*...*/
 CTRL+ []      光标移动到 {}[]开头或结尾位置
 CTRL+SHIFT+[]  选中块代码,可以快速复制
 ctrl + '-/+':  可以折叠项目中的任何代码块,包括htm中的任意nodetype=3的元素,function,或对象直接量等等。它不是选中折叠,而是自动识别折叠。
-ctrl + '.':    折叠选中的代码的代码
 ctrl+shift+i   快速查看变量或方法定义源
 SHIFT+ALT+INSERT 竖编辑模式
 CTRL+ALT ←/→     返回上次编辑的位置
@@ -40595,6 +40622,329 @@ Web缓存可以根据不同等级进行配置:
 </pre>
 </div>
 
+<div id="fastadmin">
+<h3>fastadmin</h3><pre>
+图标库：http://www.fontawesome.com.cn/faicons/
+
+php think crud -t complain -c complain/complain -u 1
+
+php think crud -t test -u 1
+E:\wendao\5g/application/admin\model\Test.php
+E:\wendao\5g/application/admin\validate\Test.php
+E:\wendao\5g\application\admin\view\test\add.html
+E:\wendao\5g\application\admin\view\test\edit.html
+E:\wendao\5g\application\admin\view\test\index.html
+E:\wendao\5g\application\admin\view\test\recyclebin.html
+E:\wendao\5g\application\admin\lang\zh-cn\test.php
+E:\wendao\5g\public\assets\js\backend\test.js
+
+php think crud -t test -d 1    删除crud
+php think menu -c test -d 1 删除后台菜单
+
+1、增加操作按钮
+在fastadmin中,默认是自带三个操作按钮,分别是拖拽、编辑和删除,如果想要自定义菜单按钮的话,也挺简单,在“一张图解析fastadmin表格列表的功能”文章中有提过,一般是有三种形式：弹出窗口、ajax和新选项卡,就是在classname中增加不同的样式,弹窗："btn-dialog",ajax："btn-magic btn-ajax",新选项卡："btn-addtabs",通过不同的样式绑定了不同的事件,下面一个示例是弹窗的,而且只是数据展示,还没有数据处理
+
+</pre><textarea>
+table.bootstrapTable({
+    url: $.fn.bootstrapTable.defaults.extend.index_url,
+    pk: 'id',
+    sortName: 'id',     // 排序字段
+    columns: [
+        [
+            {checkbox: true},
+            {field: 'id', title: __('Id')},
+            {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate,
+                buttons:[
+                    {
+                        name: 'cow_list',
+                        hidden:false,
+                        title: '可用牛牛',            // 鼠标悬停的提示文字
+                        classname: 'btn btn-xs btn-success btn-dialog',
+                        icon: 'fa fa-github-alt',
+                        url: 'farm/log/index',      // farm控制器
+                        extend:'data-area=\'["60%","70%"]\'',
+                    },
+                    12
+                ],
+                formatter: Table.api.formatter.operate
+            },
+            {field: 'operate', title: __('Operate'), table: table,
+                buttons: [
+                    {name:'detail',text: __('Login'),icon:'',classname:'btn btn-xs btn-primary', url:'buyer/user/login',extend:' target="_blank"'},
+                    {name:'detail',text: __('查看买家号'),icon:'',classname:'btn btn-xs btn-primary btn-dialog', url:'buyer/account/index'},
+                    {name:'detail',text: __('查看团队'),icon:'',classname:'btn btn-xs btn-primary btn-dialog', url:'buyer/grading/index'},
+                ],
+                events: Table.api.events.operate,
+                formatter: Table.api.formatter.operate
+            },
+            {field: 'operate', title: __('Operate'), table: table,
+                events: Table.api.events.operate,
+                buttons: [{
+                    name: 'detail',
+                    text: __('Detail'),  // 管理员日志,详情按钮
+                    icon: 'fa fa-list',
+                    classname: 'btn btn-info btn-xs btn-detail btn-dialog',
+                    url: 'auth/adminlog/detail'
+                }],
+                formatter: Table.api.formatter.operate
+            }
+        ]
+    ]
+});
+
+</textarea><pre>
+如果是要操作数据的话,比如自带的edit和add,需要再增加
+cow_list: function () {
+Controller.api.bindevent();
+},
+因为是index,要特殊一些,因为index方法包含了get和ajax两步操作,get渲染出主页模板,然后再用ajax请求数据,所以还得修改js中index对应的URL地址,比如直接获取参数,或者直接自定义查询条件,两者区别在于后者直接修改了在弹窗出现的index页面中通用搜索显示时候的相应字段的默认值,比如user_id默认为空,自定义之后,直接user_id为指定值了
+
+3、渲染数据
+fastadmin底层自带了很多渲染数据的格式,比如
+> `Table.api.formatter.icon` 快速将字段渲染成一个按钮,仅支持Fontawesome按钮
+> `Table.api.formatter.image` 快速将字段渲染成图片展示的形式
+> `Table.api.formatter.images` 快速将字段渲染成多图片展示的形式,字段数据请以`,`进行分隔
+> `Table.api.formatter.status` 快速将字段渲染成状态,默认`normal/hidden/deleted/locked`这四个状态
+> `Table.api.formatter.url` 快速将字段渲染成URL框
+> `Table.api.formatter.search` 快速将字段渲染成可搜索的链接,点击后将执行搜索
+> `Table.api.formatter.addtabs` 快速将字段渲染成可添加到选项卡的链接,点击后将把链接添加到选项卡
+> `Table.api.formatter.flag` 快速将字段渲染成标志,仅支持`index/hot/recommend/new`这四种标志
+> `Table.api.formatter.label` 快速将字段渲染Label标签
+> `Table.api.formatter.datetime` 快速时间戳数据渲染成日期时间数据
+> `Table.api.formatter.operate` 操作栏固定按钮
+> `Table.api.formatter.buttons` 快速生成多个按钮
+> `Table.api.formatter.toggle` 快速生成切换按钮
+
+可以自定义渲染数据,比如订单查询的时候,一个订单可能会对应多条商品数据,这在index页面显示的时候,就不好显示了,所以可以把每个订单对应的商品数据,都放在一个字段里,示例如下图所示,此处goods字段是控制器中with的一对多的goods模型
+
+可以自定义渲染数据,比如订单查询的时候,一个订单可能会对应多条商品数据,这在index页面显示的时候,就不好显示了,所以可以把每个订单对应的商品数据,都放在一个字段里,示例如下图所示,此处goods字段是控制器中with的一对多的goods模型
+
+</pre><textarea>
+{field: 'goods',title:'商品',formatter:function (value,data,key) {
+    var content = '';
+    value.forEach((value,key)=>{
+        content += value.title+'-';
+        content += value.attr_name+'*';
+        content += value.num+',';
+    });
+    return content;
+}},
+// {field: 'address_address', title: __('Address_address')},
+
+</textarea><pre>
+4、js中使用控制器中的数据
+如果想在js中调用控制器中的方法,就不能使用$this->view->assign()了,得使用$this->assignconfig("total", $total),然后在js中调用Config.total
+
+5、自定义配置
+在fast中自带这很多类型的配置信息,类型比较丰富,有字符、文本、数组、单图、多图等,在做一下配置项的时候非常方便,比如一些比例设置、开关设置等
+如果想自定义配置的话,首先在application/common/model/config.php中获取配置类型的方法,可以追加自己想要的类型,比如：
+
+</pre><textarea>
+'radio'    => __('Radio'),
+'array'    => __('Array'),
+'custom'   => __('Custom'),
+'rank'     =>'名次规则',
+];
+return $typeList;
+}
+然后在application/admin/view/general/config/index.html文件中,增加自定义配置的格式就行了,比如借用一下数组的格式设置不同等级的不同佣金比例
+{case rank}
+<dl class="fieldlist" data-name="row[{$item.name}]">
+    <dd>
+        <ins>名次</ins>
+        <ins>分红比例</ins>
+    </dd>
+    <dd><a href="javascript:;" class="btn btn-sm btn-success btn-append"><i class="fa fa-plus"></i> {:__('Append')}</a></dd>
+    < textarea name="row[{$item.name}]" class="form-control hide" cols="30" rows="5">{$item.value}< /textarea>
+</dl>
+{/case}
+
+</textarea><pre>
+6、自定义表格上方工具栏按钮
+a标签的title属性一定要有,否则在弹出框中没有顶部的标题
+
+</pre><textarea>
+<a href="javascript:;" class="btn btn-default" style="font-size:14px;color:dodgerblue;">
+    <i class="fa fa-dollar"></i>
+    <span class="extend">账户余额：<span id="price">0</span></span>
+</a>
+<a class="btn btn-info btn-dialog btn-withdraw" href="shop/log/withdraw" data-name="withdraw" title="申请提现">
+    <i class="fa fa-leaf"></i>申请提现
+</a>
+
+在js中增加事件：这段代码很重要,自定义什么方法就给什么方法绑定event事件
+withdraw: function () {
+    Controller.api.bindevent();
+},
+api: {
+    bindevent: function () {
+        Form.api.bindevent($("form[role=form]"));
+    }
+}
+
+</textarea><pre>
+7、二级分类
+有时需要有多级类别,比如添加商品的时候,需要先选择父类,再选择子类,有点像三级联动,自己写起来麻烦,在fast中有已经写好了,详情请见插件中的开发实例中
+父类是“心理”,然后下面有“心理测试”,“心理暗示”,两个子类,这样就能实现效果了
+
+</pre><textarea>
+<div class="form-group">
+    <label class="control-label col-xs-12 col-sm-2">{:__('Category_id')}:</label>
+    <div class="col-xs-12 col-sm-8">
+        <div class="form-inline" data-toggle="cxselect" data-selects="first,second">
+            <select data-rule="required" style="width: 50%" class="first form-control" name="row[category_pid]" data-url="ajax/category?type=science&pid=0"></select>
+            <select data-rule="required" style="width: 50%" class="second form-control" name="row[category_id]" data-url="ajax/category" data-query-name="pid"></select>
+        </div>
+    </div>
+</div>
+
+<select class="first form-control" style="width: 50%" data-rule="required" name="row[jq_category_id]" data-url="jq/ajax/category" >
+    <option selected="selected" value="{$row.jq_category_id|htmlentities}">{$row.jq_category_name|htmlentities}</option>
+</select>
+<select class="second form-control" style="width:50%" data-rule="required"
+        name="row[jq_category_child_id]" data-url="jq/ajax/category"
+        data-query-name="pid" value="{$row.jq_category_child_id|htmlentities}">
+    <option selected="selected" value="{$row.jq_category_child_id|htmlentities}">{$row.jq_category_child_name|htmlentities}</option>
+</select>
+
+<select class="first form-control" style="width: 50%" data-rule="required"
+        name="row[jq_insurance_company_id]" data-url="jq/ajax/company?type=1"  data-value="{$row.jq_insurance_company_id|htmlentities}">
+</select>
+<select class="second form-control" style="width: 50%" data-rule="required"
+        name="row[jq_insurance_child_company_id]"  data-value="{$row.jq_insurance_child_company_id|htmlentities}"
+        data-url="jq/ajax/company?type=3" data-query-name="pid">
+</select>
+
+</textarea><pre>
+8、详情内自定义审核按钮
+查看详情时默认就是确定及重置操作,其中确定是提交到form表单指定的action地址上,已经满足了日常修改的需求
+但有时只有一个提交是不够的,特别是用到审核的时候,既有审核通过,也有审核拒绝,都是提交,其实就是动态的修改form表单action指定的地址
+
+</pre><textarea>
+<div class="form-group layer-footer">
+    <label class="control-label col-xs-12 col-sm-2"></label>
+    <div class="col-xs-12 col-sm-8">
+        {if condition="$row['admin_status'] eq 0"}
+        <button onclick="on_sub(true);" class="btn btn-success">取消咨询</button>
+        {/if}
+        {if condition="$row['admin_refund_status'] eq 0"}
+        <button onclick="on_sub(false);" class="btn btn-warning">同意退款</button>
+        {/if}
+        <!-- <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>-->
+        <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+    </div>
+    <input type="hidden" id="is_true" name="is_true" value="0">
+    <script>
+        var on_sub = function (on) {
+            var url = on ? 'Consult/cancel' : 'Consult/refund';
+            url = url + '?ids={:input("ids")}';
+            $('#edit-form').attr('action',url);
+        }
+    </script>
+</div>
+
+</textarea><pre>
+9、手动增加软删除
+在最开始设计表用命令生成增删改查的时候,如果一开始没有设计delete_time字段就不能实现软删除,所以在后来想要再添加的时候,稍微有点麻烦,其实完全可以重新生成一个测试表,仿照新生成的model改一下就行了,强烈建议一开始就把软删除加上,不然如果已经写了接口再添加的话就麻烦
+
+use traits\model\SoftDelete;
+class Product extends Model{
+use SoftDelete;
+protected $autoWriteTimestamp = 'int';  // 自动写入时间戳字段
+protected $createTime = 'createtime';  // 定义时间戳字段名
+protected $updateTime = 'updatetime';
+protected $deleteTime = 'delete_time'; //默认就是deleteTime,所以此处直接可以省略可以不写
+}
+
+10、手动更改toggle
+一般toggle开关针对的是status字段,而且默认值是0或1,但系统用户与后台管理员的status是字符串normal与hidden,所以要是也想实现toggle开关,可以添加yes:'normal',no:'hidden'
+
+</pre><textarea>
+{
+field: 'status', title: __("Status"),
+    searchList: {'hidden': __('Hidden'), 'normal': __('Normal')},
+    formatter: function (value, row, index) {
+        if(row.id == Config.admin.id) return '';
+        return Table.api.formatter.toggle.call(this, value, row, index);
+    },
+    yes: 'normal',
+    no: 'hidden'
+},
+
+// 处理事件,批量更新
+public function multi($ids = ""){
+    // 管理员禁止批量操作,暂不考虑ids 是多个的情况下
+    if ($ids > 1) {
+        $status = $this->model->where('id',$ids)->value('status');
+        $new_status = $status == 'normal' ? 'hidden' : 'normal' ;
+        $this->model->save(['status'=>$new_status],['id'=>$ids]);
+        $this->success('操作成功');
+    } else {
+        $this->error('超级管理员不能隐藏');
+    }
+}
+
+</textarea><pre>
+11、设置某字段正序或倒序按钮
+{field: 'id', title: __('Id'),operate:false,sortable: true},
+
+12、控制table中字段的长度
+在列表展示中,如果像一些字段比如简介或备注之类的东西,内容太长,全部显示有点不友好,这里是限制长度,给个width(百分比或ps都行),字符过长显示...,鼠标放上去,显示全部
+通过cssStyle自定义样式,然后再自定义formatter即可
+
+</pre><textarea>
+{field: 'des', title: __('Des'), operate:false,cellStyle:function (value,row,index,field) {
+    return {css: {"min-width": "150px","white-space": "nowrap","text-overflow": "ellipsis","overflow": "hidden","max-width":"300px"}};
+    },formatter:function (value,row,index,field) {
+    var span=document.createElement('span');
+    span.setAttribute('title',value);
+    span.innerHTML = value;
+    return span.outerHTML;
+}},
+
+</textarea><pre>
+13、data_rule 验证规则
+常用的data_rule就是required了,表示该字段不能为空,常用的还有 mobile,tel,email,url,range(0~),length(1~5)等,多个验证用空格连接,或使用竖杠|。
+< input id="c-claim_mobile" data-rule="required mobile|tel" class="form-control" name="row[data][claim_mobile]" type="text" value="">
+
+14、关于table的搜索问题
+关闭表格中左侧的导出等按钮：
+
+<table
+    id="table"
+    class="table table-striped table-bordered table-hover table-nowrap"
+    data-show-export="false"
+    data-show-toggle="false"
+    data-show-columns="false"
+    width="100%">
+</table>
+
+search:false,//隐藏快速搜索
+searchFormVisible: true,//默认打开通用搜索
+showSearch: false,//隐藏通用搜索按钮
+
+自定义table上的搜索输入框
+控制器属性
+// 快速搜索默认只会搜索主键id字段,设置搜索id、operating、remarks字段
+protected $searchFields = 'id,operating,member_id,remarks';
+
+15、表格中隐藏某个字段
+找到控制器所对应的js,然后把要隐藏的列加上visible:false即可
+
+</pre>16、去掉删除按钮<textarea>
+{field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: function (value, row, index) {
+var that = this;
+if([1,2,3,4].indexOf(row.id) > -1){
+that = $.extend({}, this);
+var table = $(that.table).clone(true);
+$(table).data("operate-del", null);
+that.table = table;
+}
+return Table.api.formatter.operate.call(that, value, row, index);
+}}
+
+</textarea>
+</div>
 
 <p><a href="http://www.cnblogs.com/qq350760546/p/6638588.html">web攻击参考资料</a></p>
 </main>
@@ -40711,6 +41061,7 @@ Web缓存可以根据不同等级进行配置:
         <li><a href="#architecture">architecture架构</a></li>
         <li><a href="#separation">前后端分离</a></li>
         <li><a href="#miaosha">秒杀架构</a></li>
+        <li><a href="#fastadmin">fastadmin</a></li>
     </ol>
 
     <script src="vendors/jquery-3.3.1.min.js"></script>

@@ -40140,6 +40140,9 @@ byte(str) {
 /^150$|^(?:\d|[1-9]\d|1[0-4]\d)(?:.5)?$/
 例如: 150, 100.5
 
+金钱、金额正则(数字会自动去掉前后的0,而字符串则不会,123,123.45,0.12)
+"/(^[1-9]\d*$)|(^(0|([1-9]\d*))\.\d{1,2}$)/"
+
 数字/货币金额(支持负数、千分位分隔符、精确到2位小数)
 /^-?\d+(,\d{3})*(\.\d{1,2})?$/
 例如: 100, -0.99, 3, 234.32, -1, 900, 235.09, 12,345,678.90
@@ -43451,8 +43454,8 @@ Z = closepath
 实例：path d="M250 150 L150 350 L350 350 Z"  三角形
 
 实例：螺旋
-<svg width="100%" height="100%" version="1.1" xmlns="http://www.w3.org/2000/svg">
-<path d="M153 334
+< svg width="100%" height="100%" version="1.1" xmlns="http://www.w3.org/2000/svg">
+<  d="M153 334
 C153 334 151 334 151 334
 C151 339 153 344 156 344
 C164 344 171 339 171 334
@@ -43466,7 +43469,7 @@ C111 361 131 384 156 384
 C186 384 211 361 211 334
 C211 300 186 274 156 274"
 style="fill:white;stroke:red;stroke-width:2"/>
-</svg>
+< /svg>
 
 【 SVG滤镜向形状和文本添加特效 】
 可用的滤镜有：
@@ -43604,6 +43607,25 @@ linearGradient标签可定义SVG的线性渐变,必须嵌套在defs的内部,def
   </text>
   </g>
 </svg>
+
+</textarea>svg动画<textarea>
+// 将鼠标悬停在“hover”指令上时，边框会平滑地围绕文本形成
+<div class="svg-wrapper">
+  <svg height="60" width="320" xmlns="http://www.w3.org/2000/svg">
+    <rect class="shape" height="60" width="320" />
+  </svg>
+   <div class="text">HOVER</div>
+</div>
+
+html, body {background: #333;height: 100%;overflow: hidden;text-align: center; }
+.svg-wrapper {height: 60px;margin: 0 auto;position: relative;top: 50%;transform: translateY(-50%);width: 320px; }
+.shape {fill: transparent;stroke-dasharray: 140 540;stroke-dashoffset: -474;stroke-width: 8px;stroke: #19f6e8; }
+.text {color: #fff;font-family: 'Roboto Condensed';font-size: 22px;letter-spacing: 8px;line-height: 32px;position: relative;top: -48px; }
+@keyframes draw {
+  0% {stroke-dasharray: 140 540;stroke-dashoffset: -474;stroke-width: 8px;}
+  100% {stroke-dasharray: 760;stroke-dashoffset: 0;stroke-width: 2px;}
+}
+.svg-wrapper:hover .shape {animation: 0.5s draw linear forwards; }
 
 </textarea>
 

@@ -11,6 +11,155 @@
 <h1 name="top">THINKPHP <small>百度传课职坐标,W3C</small></h1>
 <p><b><a href="https://www.kancloud.cn/manual/thinkphp5/118003" target="_blank">thinkphp5.0开发手册</a></b></p>
 
+<pre>
+Db::startTrans();
+try {
+    Db::commit();
+}catch (Exception $e){
+    Db::rollback();
+    $this->error('失败,请稍后重试', config('app_debug') ? $e->getMessage() : null);
+}
+
+\think\Env::get('app.debug')
+</pre>
+
+<p>fastadmin auth和关联模型</p><textarea>
+如果是create，除非是主键长度溢出返回FALSE， 其他情况是返回数据对象
+用if($res)即可判断
+如果是update 属于次要语句，更新成功会返回影响行数（数据相同行数是0）
+失败返回false
+用if(false !== $res)判断
+
+namespace app\common\model;
+class User extends \think\Model{
+    protected $autoWriteTimestamp = 'int';
+    // 定义时间戳字段名
+    protected $createTime = 'createtime';
+    protected $updateTime = false;
+    // 追加属性
+    protected $append = [
+        'url',
+    ];
+
+    public function level(){
+        return $this->belongsTo('app\api\model\Level');
+    }
+
+    public function tasks(){
+        return $this->hasMany('app\api\model\Task');
+    }
+
+    // 获取个人URL
+    public function getUrlAttr($value, $data){
+        return "/u/" . $data['id'];
+    }
+}
+
+namespace app\api\model;
+class Level extends \think\Model{
+    public function users(){
+        return $this->hasMany('app\common\model\User');
+    }
+}
+
+namespace app\api\model;
+class Task extends \think\Model{
+    protected $autoWriteTimestamp = true;
+    protected $createTime = 'createtime';
+    protected $updateTime = 'updatetime';
+
+    public function userTasks(){
+        return $this->hasMany('UserTask');
+    }
+}
+
+namespace app\api\controller;
+use app\common\controller\Api;
+class Task extends APi{
+    protected $noNeedLogin = [''];
+    protected $noNeedRight = '*';
+
+    public function test(){
+        $user = $this->auth->getUser();
+        $level_name = $this->auth->level ? $this->auth->level->name : '普通用户';
+        $tasks = $this->auth->tasks;
+
+        // 关联预载入
+        $tasksList = TaskModel::where('status', 1)->order($order)->with(['user'=>function($query){
+            $query->field('id,avatar,mobile,nickname');  // 指定关联表的字段,必须添加外键
+        }])->select();
+
+        $this->success('test', [$user, $level_name, $tasks, $tasksList]);
+    }
+}
+
+{
+	"code": 1,
+	"msg": "test",
+	"time": "1595942613",
+	"data": [
+		{
+			"id": 42,
+			"status": 1,
+			"code": "AbX3NWfP1Z",
+			"unionid": "1234568912",
+			"avatar": "sdsd",
+			"mobile": "",
+			"nickname": "berlin",
+			"money": "5.00",
+			"isreal": 0,
+			"level_id": 1,
+			"experience": 0,
+			"createtime": 1595931716,
+			"ip": "113.240.167.250",
+			"level": null,
+			"tasks": [
+				{"id": 1,"title": "测试标题","task_type_id": 1,"user_id": 42,"submit_time": 2,"review_time": 12,"repeat": 3,"unit_price": "0.50","total_price": "50.00","num": 100,"tags": "测试tags","content": "测试content","success_num": null,"fail_num": null,"left_num": 100,"status": 2,"recommend_time": 0,"createtime": 1595932795,"updatetime": 0},
+				{"id": 2,"title": "测试标题2","task_type_id": 1,"user_id": 42,"submit_time": 2,"review_time": 12,"repeat": 3,"unit_price": "0.50","total_price": "15.00","num": 30,"tags": "测试tags","content": "测试content","success_num": null,"fail_num": null,"left_num": 30,"status": 4,"recommend_time": 0,"createtime": 1595932962,"updatetime": 1595933648},
+			],
+			"url": "/u/42"
+		},
+		"普通用户",
+		[
+			{"id": 1,"title": "测试标题","task_type_id": 1,"user_id": 42,"submit_time": 2,"review_time": 12,"repeat": 3,"unit_price": "0.50","total_price": "50.00","num": 100,"tags": "测试tags","content": "测试content","success_num": null,"fail_num": null,"left_num": 100,"status": 2,"recommend_time": 0,"createtime": 1595932795,"updatetime": 0},
+			{"id": 2,"title": "测试标题2","task_type_id": 1,"user_id": 42,"submit_time": 2,"review_time": 12,"repeat": 3,"unit_price": "0.50","total_price": "15.00","num": 30,"tags": "测试tags","content": "测试content","success_num": null,"fail_num": null,"left_num": 30,"status": 4,"recommend_time": 0,"createtime": 1595932962,"updatetime": 1595933648},
+		]
+	]
+}
+
+</textarea>获取器 修改器 自动完成<textarea>
+// 根据replay字段值来更新status字段
+protected $update = ['status'];
+protected function setStatusAttr($value,$data){
+    if(strlen($data['replay'])){
+        return 2;
+    }else{
+        return 1;
+    }
+}
+
+</textarea>分页<textarea>
+$page = $this->request->param('page') ?: 1;
+$pagesize = $this->request->param('pagesize') ?: 10;
+$bills = BillModel::where($where)->whereTime('createtime', 'between', [$starttime, $endtime])->paginate($pagesize, false, ['page' => $page]);
+
+// paginate分页后无法修改分页数据的方法
+// 查询需要的数据 并且每页显示10条数据
+$list = db('user')->order('id desc')->paginate(10);
+// 获取分页显示
+$page = $list->render();
+$list = $list->all(); //这是关键
+// 模板变量赋值,改变数据
+foreach ($list as $k => $v) {
+$list[$k]['username'] = lishuai;
+}
+$this->assign('list', $list);
+$this->assign('page', $page);
+// 渲染模板输出
+return $this->fetch();
+
+</textarea>
+
 <h2>Thinkphp v5.0.20</h2><pre>
 【 常用常量 】
 查看已部署的thinkphp版本：echo THINK_VERSION;
