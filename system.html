@@ -23876,6 +23876,40 @@ crontab使用最小纬度为分钟,如果要精确到秒可以用添加多个cro
 0 4 1 jan * /usr/local/etc/rc.d/lighttpd restart       # 一月一号的4点重启apache
 
 </textarea><pre>
+【 crontab实现每N秒执行一次 】
+linux中的crontab 命令，最小的执行时间是一分钟。如需要在小于一分钟内重复执行，可以有两个方法实现。
+
+一. 直接在crontab -e中
+* * * * * 执行命令绝对路径  文件绝对路径
+* * * * * sleep 10; 执行命令绝对路径  文件绝对路径
+* * * * * sleep 20; 执行命令绝对路径  文件绝对路径
+* * * * * sleep 30; 执行命令绝对路径  文件绝对路径
+* * * * * sleep 40; 执行命令绝对路径  文件绝对路径
+* * * * * sleep 50; 执行命令绝对路径  文件绝对路径
+上面，是每隔10秒执行一次，且，sleep的秒数必须能被60整除，不能有余数。
+
+二. 使用sh脚本
+
+#!/bin/bash
+step=2 #间隔的秒数，不能大于60
+ 
+for (( i = 0; i < 60; i=(i+step) )); do
+    $(命令绝对路径 '文件绝对路径')
+    sleep $step
+done
+ 
+exit 0
+crontab -e
+
+* * * * * /bin/bash  sh脚本绝对路径
+
+需要注意的是，如果设置的间隔秒数不能被60整除，例如7，那么，就需要找到间隔与60的公倍数，即420， 那么上面的脚本中,
+i < 60;
+就要改成
+i < 420
+同时，crontab -e 中也要改成
+*/7 * * * * /bin/bash  sh脚本绝对路径
+
 【 Cron配置类型 】
 Cron有两种配置文件类型用于调度自动化任务。
 
@@ -40692,6 +40726,46 @@ table.bootstrapTable({
     ]
 });
 
+</textarea><textarea>
+js文件里添加以下代码：
+{field: 'uid', title: __('解绑'), table: table, buttons: [
+    {
+        name: 'ajax',
+        text: __('解绑'),
+        title: __('解绑'),
+        classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+        icon: 'fa fa-magic',
+        url: 'player/player/unbundling?',
+        confirm: '确认是否要解绑',
+        success: function (data, ret) {
+            if(ret["msg"]["code"]==200){
+                Layer.alert("解绑"+ret["msg"]["msg"]);
+            }
+            else {
+                Layer.alert('< span id="" style="color: red;">'+ret["msg"]["msg"]+'< /span>');
+            }
+        },
+        error: function (data, ret) {
+            console.log(data, ret);
+            Layer.alert(ret.msg);
+            return false;
+        }
+    }
+], operate:false, formatter: Table.api.formatter.buttons},
+
+后台代码如下：
+public function addRoomCardSave(){
+    $uid = $_POST["uid"];
+    $num = $_POST["num"];
+    $result = $this->commonFun($uid,$num);
+    if(!$result){
+        return $this->success("请求失败，服务器error");
+    }else{
+        $res = json_decode($result,true);
+        return $this->success($res);
+    }
+}
+
 </textarea><pre>
 如果是要操作数据的话,比如自带的edit和add,需要再增加
 cow_list: function () {
@@ -40910,14 +40984,14 @@ public function multi($ids = ""){
 14、关于table的搜索问题
 关闭表格中左侧的导出等按钮：
 
-<table
+< table
     id="table"
     class="table table-striped table-bordered table-hover table-nowrap"
     data-show-export="false"
     data-show-toggle="false"
     data-show-columns="false"
     width="100%">
-</table>
+< /table>
 
 search:false,//隐藏快速搜索
 searchFormVisible: true,//默认打开通用搜索
@@ -40931,17 +41005,16 @@ protected $searchFields = 'id,operating,member_id,remarks';
 15、表格中隐藏某个字段
 找到控制器所对应的js,然后把要隐藏的列加上visible:false即可
 
-</pre>16、去掉删除按钮<textarea>
-{field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: function (value, row, index) {
-var that = this;
-if([1,2,3,4].indexOf(row.id) > -1){
-that = $.extend({}, this);
-var table = $(that.table).clone(true);
-$(table).data("operate-del", null);
-that.table = table;
+</pre>16、去掉记录后面的删除按钮<textarea>
+{field: 'operate', title: __('Operate'), table: table,events: Table.api.events.operate, formatter: function (value, row, index) {
+        var that = $.extend({}, this);
+        var table = $(that.table).clone(true);
+        // $(table).data("operate-edit", null);
+        $(table).data("operate-del", null);
+        that.table = table;
+        return Table.api.formatter.operate.call(that, value, row, index);
+    }
 }
-return Table.api.formatter.operate.call(that, value, row, index);
-}}
 
 </textarea>
 </div>

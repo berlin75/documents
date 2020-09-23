@@ -5411,6 +5411,11 @@ var start = dateToStr('yyyy-MM-dd', dateAdd('d', -7))
 获取当前时间戳
 console.log(Date.now ? Date.now() : new Date().getTime()) // 老版本IE没有now()方法
 
+秒级时间戳
+parseInt(new Date().getTime()/1000);
+Date.parse(new Date())/1000;
+Date.parse( new Date() ).toString().substr(0,10)
+
 date对象转数字
 const timestamp = +new Date("2019-03-31");  // 1553990400000
 

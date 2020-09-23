@@ -17,29 +17,40 @@ try {
     Db::commit();
 }catch (Exception $e){
     Db::rollback();
-    $this->error('失败,请稍后重试', config('app_debug') ? $e->getMessage() : null);
+    $this->error('申请失败,请稍后重试', config('app_debug') ? "[{$e->getFile()} {$e->getLine()}] {$e->getMessage()}" : null);
 }
 
 \think\Env::get('app.debug')
-</pre>
 
-<p>fastadmin auth和关联模型</p><textarea>
-如果是create，除非是主键长度溢出返回FALSE， 其他情况是返回数据对象
+$type = $this->request->param('type');
+不传type参数时$type为null,apipost上不填写type参数时为空字符串
+
+过滤数据表中不存在的字段
+方法一
+在你的模型类定义中，设置 field 属性为 true，如下：
+class User extend Model {
+    protected $field = true;
+}
+
+方法二
+如果需要过滤非数据表字段的数据，可以使用：
+$user = new User($_POST);
+$user->allowField(true)->save();  // 过滤post数组中的非数据表字段数据
+$user->allowField(true)->isUpdata(ture)->save();
+
+</pre><p>fastadmin auth和关联模型</p><textarea>
+如果是create,除非是主键长度溢出返回FALSE,其他情况是返回数据对象
 用if($res)即可判断
-如果是update 属于次要语句，更新成功会返回影响行数（数据相同行数是0）
+如果是update属于次要语句,更新成功会返回影响行数（数据相同行数是0）
 失败返回false
 用if(false !== $res)判断
 
 namespace app\common\model;
 class User extends \think\Model{
     protected $autoWriteTimestamp = 'int';
-    // 定义时间戳字段名
-    protected $createTime = 'createtime';
+    protected $createTime = 'createtime';  // 定义时间戳字段名
     protected $updateTime = false;
-    // 追加属性
-    protected $append = [
-        'url',
-    ];
+    protected $append = [ 'url', ];        // 追加属性
 
     public function level(){
         return $this->belongsTo('app\api\model\Level');
@@ -49,8 +60,7 @@ class User extends \think\Model{
         return $this->hasMany('app\api\model\Task');
     }
 
-    // 获取个人URL
-    public function getUrlAttr($value, $data){
+    public function getUrlAttr($value, $data){   // 获取个人URL
         return "/u/" . $data['id'];
     }
 }
@@ -4306,7 +4316,28 @@ ORM的基本特性就是表映射到类,记录映射到对象,字段映射到对
 Db和模型的存在只是TP5.0架构设计中的职责和定位不同,Db负责的只是数据(表)访问,模型负责的是数据处理和业务逻辑,业务逻辑应当封装到具体模型中,并由控制器来调用,模型的数据底层操作仍然是数据库抽象访问层,而且是自动的
 Db和模型最明显的一个区别就是Db查询返回的数据类型为数组(没有业务逻辑的数据数组已经足够),而模型的查询返回类型的是模型对象实例
 
-模型类实现了ArrayAccess接口,因此一样可以使用数组方式操作对象
+模型和Db更新方法的最大区别是模型的更新方法只会更新有变化的数据，没有变化的数据是不会更新到数据库的，如果所有数据都没变化，那么根本就不会去执行数据库的更新操作。
+
+模型类实现了ArrayAccess接口,因此一样可以使用数组方式操作对象,使用数组和对象的方式save()都是可以的
+对象化操作的神奇是可以级联读取或设置
+// 查询操作
+$user = User::get(1);
+// 取值操作
+echo $user->name;
+echo $user->email;
+// 关联取值
+echo $user->role->name;
+echo $user->contact->phone;
+// 设置操作
+$user->name  = 'topthink';
+$user->email = 'thinkphp@qq.com';
+// 更新操作
+$user->save();
+// 关联设置
+$user->role->name = 'admin';
+$user->role->save();
+$user->contact->phone = '123456789';
+$user->contact->save();
 
 数据表字段(不需要,会自动获取,并支持缓存机制)
 数据表前缀(不支持,模型不关心前缀)
@@ -4356,6 +4387,97 @@ class User extends Model	{
 	];
 }
 
+</pre><pre>
+添加业务逻辑
+模型的优势不是用来做基础的CURD操作的，虽然CURD操作也是一种最常见的业务逻辑，只是这些基本逻辑无需再定义额外的方法了，系统已经内置实现了。但实际的应用中，一般都需要根据业务需求来增加额外的业务逻辑方法。
+
+业务逻辑应当封装到具体模型中，并由控制器来调用；
+register和login方法获取用户主键的方法区别；
+可以设置模型的错误信息，并且用getError方法获取
+
+</pre><pre class="php">
+namespace app\index\model;
+use think\Model;
+class User extends Model{
+    /**
+     * 注册一个新用户
+     * @param  array $data 用户注册信息
+     * @return integer|bool  注册成功返回主键，注册失败-返回false
+     */
+    public function register($data = []){
+        $result = $this->validate(true)->allowField(true)->save($data);
+        if ($result) {
+            return $this->getData('id');
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * 用户登录认证
+     * @param  string  $username 用户名
+     * @param  string  $password 用户密码
+     * @return integer 登录成功-用户ID，登录失败-返回0或-1
+     */
+    public function login($username, $password){
+        $where['username'] = $username;
+        $where['status']   = 1;
+        /* 获取用户数据 */
+        $user = $this->where($where)->find();
+        if ($user) {
+            if (md5($password) != $user->password) {
+                $this->error = '密码错误';
+                return 0;
+            } else {
+                return $user->id;
+            }
+        } else {
+            $this->error = '用户不存在或被禁用';
+            return -1;
+        }
+    }
+
+    /**
+     * 获取用户信息
+     * @param  integer  $uid 用户主键
+     * @return array|integer 成功返回数组，失败-返回-1
+     */
+    public function info($uid){
+        $user = $this->where('id', $uid)->field('id,username,email,mobile,status')->find();
+        if ($user && 1 == $user->status) {
+            // 返回用户数据
+            return $user->hidden('status')->toArray();
+        } else {
+            $this->error = '用户不存在或被禁用';
+            return -1;
+        }
+    }
+
+    /**
+     * 获取用户角色
+     * @return integer 返回角色信息或者返回-1
+     */
+    public function role(){
+        $uid = $this->getData('id');
+        if ($uid) {
+            $role = $this->getUserRole($uid);
+            if ($role) {
+                return $role;
+            } else {
+                $this->error = '用户未授权';
+                return 0;
+            }
+        } else {
+            $this->error = '请先登录';
+            return -1;
+        }
+    }
+
+    protected function getUserRole($uid){
+        return $this->table('role')->where('uid', $uid)->find();
+    }
+}
+
 </pre>
 
 <h3>模型的调用</h3><pre>
@@ -4385,7 +4507,7 @@ getData和getAttr方法的区别:前者是原始数据,后者是经过读取器�
 
 对应的设置模型数据的方式也有三种：
 模型外部设置模型数据              $model->name='thinkphp'
-模型内部设置模型数据(经过修改器) $this->setAttr('name','thinkphp')
+模型内部设置模型数据(经过修改器)   $this->setAttr('name','thinkphp')
 模型内部设置模型数据              $this->data('name','thinkphp')
 data和setAttr方法的区别:前者是赋值最终数据,后者赋值的数据还会经过修改器处理,如果没有定义修改器则两个方法的结果相同
 
@@ -4415,6 +4537,17 @@ class User extends \think\Model	{
 </pre>
 
 <h3>模型增删改查操作</h3><pre>
+数据写入的自动处理规则及优先顺序如下：
+时间字段自动格式化写入
+修改器
+类型转换
+模型事件
+
+数据读取的自动处理规则及优先顺序如下：
+获取器
+类型转换
+时间字段自动格式化输出
+
 【 TP5数据库的访问有三种方法 】
 1、原生sql语句
 Db::query('select * from think_user where id=?',[8]);
@@ -4450,6 +4583,8 @@ echo $user->data('email', '123@qq.com');
 查询构造器的用法在模型类中没有变化,并且还做了一些增强来支持模型的CURD封装方法。
 所有的链式方法都可以直接被模型类静态调用,而且一样不分先后次序,而且模型类不需要调用table方法来指定数据表名称,因为模型已经有自己的对应数据表规则
 
+get、all以及destroy方法的参数用法记住一个原则，如果是数字、字符串或普通数组都表示一个或多个主键，如果是索引数组则表示查询条件，闭包则支持查询条件以外的其它链式操作方法
+
 1、创建
 Db用法：
 Db::table('user')->insert(['name' => 'spawn','email' => '123@qq.com']);
@@ -4470,6 +4605,20 @@ $user = Db::table('user')->where('id > 1')->select(); // 根据条件查询多�
 模型：
 $user = User::get(1);  // 查询单个记录,模型对象实例
 $user = User::all();   // 根据主键查询多个记录,包含模型对象实例的数组或者数据集
+
+all方法如果传入索引数组，即表示查询条件，如果是不带索引的数组，表示查询多个主键
+$users = User::all([1,2,3]);
+$users = User::all([
+    'name' => 'thinkphp',
+    'id'   => ['>', 1],
+]);
+
+$users = User::all(function ($query) {
+    $query->where('name', 'like', '%think')
+        ->where('id', 'between', [1, 5])
+        ->order('id desc')
+        ->limit(5);
+});
 
 3、更新
 模型的更新操作是只更新有变化的数据,性能比较好
@@ -4798,25 +4947,6 @@ value 和 column 方法返回的不再是一个模型对象实例,而是单纯�
 
 如果是在模型内部不要使用$this->name的方式来获取数据,而要使用$this->getAttr('name')替代
 
-【 自定义数据集对象 】
-支持在模型中单独设置查询数据集的返回对象的名称(默认是数组)
-resultSetType字段为空则使用数组作为数据集返回类型,设置为collection则表示使用think\Collection作为返回对象名,也可以设置自定义的数据集对象名称(使用完整的命名空间定义)
-
-数据集的优势：
-数据更对象化
-关联操作更方便
-数据集本身可以单独定义独立的业务方法
-
-// database.php中设置数据集返回类型
-'resultset_type'  => 'collection',
-
-// 模型中设置模型的数据集返回类型
-namespace app\index\model;
-use think\Model;
-class User extends Model{
-  protected $resultSetType = 'collection';  // 设置返回数据集的对象名
-}
-
 【 查询操作 】
 1.获取单个数据
 模型的get方法用于获取数据表的数据并返回当前的模型对象实例,通常只需要传入主键作为参数,如果没有传入任何值的话则表示获取第一条数据
@@ -4825,7 +4955,7 @@ class User extends Model{
 
 public static function get($data, $with = [], $cache = false)
 
-$user = User::get(1);						             //根据主键查询
+$user = User::get(1);                        //根据主键查询
 echo $user->name;
 
 $user = User::get(['name' => 'thinkphp']);   // 使用数组查询
@@ -4868,10 +4998,24 @@ User::where('id','>',10)->select();
 User::where('name','thinkphp')->find();
 
 6.数据分批处理
+模型也可以支持对返回的数据分批处理，并且由于返回的是模型对象，更方便进行业务操作
 User::chunk(100, function($users){
 	foreach($users as $user){
 		// 处理user模型对象
 	}
+});
+
+$count = 0;
+User::chunk(100, function ($users) use ($event,$count) {
+    foreach ($users as $user) {  // 用户活动报名
+        if ($user->age > 18) {
+            $user->sign($event);
+            $count++;
+            if ($count >= 300) {  // 超过300则不再接受报名
+                return false;
+            }
+        }
+    }
 });
 
 7.查询缓存,get方法和all方法的第二个参数表示是否使用查询缓存或设置缓存标识。
@@ -4991,6 +5135,11 @@ class User{
 读取器方法的命名规范是：get + 属性名的驼峰命名+ Attr
 getBirthdayAttr读取器读取的是birthday属性,而getUserBirthdayAttr读取器读取的则是user_birthday属性
 
+定义了获取器之后会在下列情况自动触发：
+模型的数据对象取值操作（$model->field_name）；
+模型的序列化输出操作（$model->toArray()）；
+显式调用getAttr方法（$this->getAttr('field_name')）；
+
 场景包括：
 时间日期字段的格式化输出;
 集合或枚举类型的输出;
@@ -5016,10 +5165,15 @@ class User extends \think\Model{
     return date('Y-m-d', $data['birthday']);
   }
 
+  // 如果获取器方法需要根据其它字段的值来组合，可以给获取器方法添加第二个参数
   public function getStatusTextAttr($value,$data){
     $status = [-1=>'删除',0=>'禁用',1=>'正常',2=>'待审核'];
     return $status[$data['status']];
   }
+
+  protected function getCreateTimeAttr($value){
+    return date('Y-m-d H:i:s', $value);
+  }  
 }
 
 $user = User::get(1);
@@ -5031,6 +5185,12 @@ dump($user->toArray());          // 获取全部获取器数据
 echo $user->status;              // 通过获取器获取字段
 echo $user->getData('status');   // 获取原始字段数据
 dump($user->getData());          // 获取全部原始数据
+
+获取模型的对象属性的时候驼峰法和小写命名方式都可以取到值,获取create_time字段值的时候使用
+echo $user->create_time;
+// 或者
+echo $user->createTime;
+
 
 </pre>
 
@@ -5165,7 +5325,8 @@ echo $user->birthday;   // 2015/5/1
 <h4>时间戳 - 自动时间字段create_time和update_time</h4><pre>
 对于固定的时间戳和时间日期型的字段,比如文章的创建时间、修改时间等字段,还有比设置类型转换更简单的方法,尤其是所有的数据表统一处理的话,只需要配置开启自动写入时间戳字段即可
 
-系统支持自动写入创建和更新的时间戳字段,字段名默认创建时间字段为create_time,更新时间字段为update_time,支持的字段类型包括timestamp/datetime/int。
+系统支持自动写入创建和更新的时间戳字段,字段名默认创建时间字段为create_time,更新时间字段为update_time,支持的字段类型包括timestamp/datetime/int
+autoWriteTimestamp属性支持设置的时间字段类型包括：整型（设置为true的时候使用该类型）、时间（datetime）和时间戳（timestamp）
 
 数据表中create_time和update_time字段类型必须和auto_timestamp设置相同
 mysql> alter table `news` add `create_time` timestamp not null default current_timestamp after `delete_time`;
@@ -5290,6 +5451,8 @@ class User extends \think\Model{
 <h4>逻辑删除 软删除</h4><pre>
 在实际项目中,对数据频繁使用删除操作会导致性能问题,因此不推荐直接物理删除数据,而是用逻辑删除替代(软删除)
 软删除的作用就是把数据加上删除标记,而不是真正的删除,同时也便于需要的时候进行数据的恢复。
+
+在模型的删除功能设计的时候，应该尽量用软删除替代实际的删除，一方面是为了避免数据丢失，一方面也是为了性能考虑,数据库的删除操作会导致重建索引，数据量越大影响越大
 
 软删除功能需要在数据表中添加delete_time字段,deleteTime属性用于定义软删除标记字段,TP5的软删除功能使用时间戳类型(数据表默认值为Null),用于记录数据的删除时间,格式为2018-08-15 23:30:10。
 mysql> alter table `news` add `delete_time` timestamp null default null after `author_id`;
@@ -5462,6 +5625,57 @@ class User extends Model{
 
 </pre>
 
+<h4>自定义数据集对象</h4><pre>
+支持在模型中单独设置查询数据集的返回对象的名称(默认是数组)
+resultSetType字段为空则使用数组作为数据集返回类型,设置为collection则表示使用think\Collection作为返回对象名,也可以设置自定义的数据集对象名称(使用完整的命名空间定义)
+
+数据集的优势：
+数据更对象化
+关联操作更方便
+数据集本身可以单独定义独立的业务方法
+
+// database.php中设置数据集返回类型,会影响所有的查询,包括Db类和模型类
+'resultset_type'  => 'collection',
+
+// 模型中设置模型的数据集返回类型,仅仅影响设置的模型中的查询结果，如果需要多个模型或者全部模型支持，可以使用继承或者使用第一种数据库配置方式
+namespace app\index\model;
+use think\Model;
+class User extends Model{
+  protected $resultSetType = 'collection';  // 设置返回数据集的对象名
+}
+
+数据集对象和普通的二维数组在使用上的一个最大的区别就是数据是否为空的判断，二维数组的数据集判断数据为空直接使用
+$resultSet = User::all();
+if (empty($resultSet)) { echo '数据集为空'; }
+
+如果使用数据集对象的话，需要改成：
+$resultSet = User::all();
+if ($resultSet->isEmpty()) { echo '数据集为空'; }
+
+通用的判断数据是否为空的方式可以用
+$resultSet = User::all();
+if (0 == count($resultSet)) { echo '数据集为空'; }
+
+其它操作的区别就是一个是对象的方法操作，一个是数组函数的操作，下面是数据集对象的方法和数组函数的对应关系：
+合并数据	merge	array_merge
+比较数据差集	diff	array_diff
+交换数组中的键和值	flip	array_flip
+比较数组交集	intersect	array_intersect
+返回键名	keys	array_keys
+最后元素出栈	pop	array_pop
+数组迭代简化	reduce	array_reduce
+数据反序	reverse	array_reverse
+首个元素出栈	shift	array_shift
+开头插入元素	unshift	array_unshift
+元素回调	each	---
+过滤元素	filter	array_filter
+返回指定列	column	array_column
+元素排序	sort	array_sort
+打乱元素	shuffle	shuffle
+截取部分元素	slice	array_slice
+元素分割	chunk	array_chunk
+转换数组	toArray	---
+
 <h4>模型输出 数组访问和转换 - toArray方法</h4><pre>
 模型对象支持数组方式访问
 
@@ -5512,18 +5726,105 @@ dump($user->hidden(['profile'=>['email']])->toArray());
 // 或使用
 dump($user->hidden(['profile.email'])->toArray());
 
-</pre>
-
-<h4>模型输出 JSON序列化 - toJson方法</h4><pre>
-可调用模型的toJson方法对模型对象进行JSON序列化,使用方法和toArray类似,并且调用toJson序列化之前同样支持hidden、visible、append和appendRelationAttr方法
+【 数组转换 】
+模型的查询返回数据都是模型的对象实例，其实模型对象在数据存取方面和数组几乎没什么差异,由于模型类think\Model实现了ArrayAccess接口，所以对象可采用数组的方式访问
 
 $user = User::get(1);
-echo $user->toJson();
-echo json_encode(User::get(1));  // 模型对象可以直接被JSON序列化
-echo User::get(1);               // 直接echo 一个模型对象,输出结果同上
-echo $user->hidden(['create_time','update_time'])->toJson();  // 设置无需输出的字段
-echo $user->visible(['id','name','email'])->toJson();         // 设置允许输出的属性
-echo $user->append(['status_text'])->toJson();                // 追加其它的字段
+echo $user->name;
+echo $user['name'];
+$user->name = 'test';
+$user->save();
+echo $user->name;
+$user['name'] = 'test2';
+$user->save();
+echo $user['name'];
+
+如果是数据集查询，也是和数组一样foreach遍历后使用
+$list = User::all();
+foreach ($list as $user) { echo $user->name . ':' . $user['name']; }
+当然如果需要也可以直接
+echo $list[0]->name . ':' . $list[0]['name'];
+
+如果因为某种原因，必须要转换为数组的话，可以使用模型类提供的toArray方法，用法如下：
+$user = User::get(1);
+if($user) { $data = $user->toArray(); }
+
+如果是数据集查询的话有两种情况，由于默认的数据集返回结果的类型是一个数组，因此无法调用toArray方法，必须先转成数据集对象然后再使用toArray方法，系统提供了一个collection助手函数实现数据集对象的转换，代码如下：
+$list = User::all();
+if($list) { $list = collection($list)->toArray(); }
+
+如果设置了模型的数据集返回类型的话，则可以简化使用
+namespace app\index\model;
+use think\Model;
+class User extends Model{
+    protected $resultSetType = 'collection';
+}
+
+设置后，模型所有的数据集查询返回结果的类型都是think\model\Collection对象实例。
+
+下面的事情就简单了，直接使用：
+$list = User::all();
+$list = $list->toArray();
+
+当然toArray方法不仅仅只是转换一个数组这么简单，可以在转换数据的时候进行个别字段的隐藏和追加，涉及到四个方法：
+hidden	设置隐藏的属性
+visible	设置输出的属性
+append	追加额外的（获取器）属性
+appendRelationAttr	追加额外的关联属性,用于追加关联对象中的某个属性到当前模型对象属性中
+
+这几个方法都是针对模型对象示例的（数据集对象无法使用），前三个方法的参数都是数组，而且默认会和模型类的hidden、visible以及append属性合并。下面是一个代码示例：
+$user = User::get(1);
+$data = $user->hidden(['id'])->toArray();
+dump($data);
+$data = $user->visible(['name', 'email'])->toArray();
+dump($data);
+$data = $user->append(['status_text'])->toArray();
+dump($data);
+
+hidden和visible方法设置的是当前模型对应的数据表中的字段列表中需要隐藏或者显示的属性，如果不在数据表字段列表中，但设置过获取器的话，可以通过append方法追加。如果不在字段列表中，也没有设置过任何的获取器，则只能手动赋值，例如：
+$user        = User::get(1);
+$user->hello = 'thinkphp';
+$data        = $user->toArray();
+dump($data);
+
+如果已经在模型中设置了hidden、visible或者append属性，但临时不需要输出，可以在方法中传入第二个参数true设置为覆盖而不是合并。
+namespace app\index\model;
+use think\Model;
+class User extends Model{
+    protected $hidden  = ['id'];
+    protected $visible = ['name', 'email'];
+    protected $append  = ['level'];
+
+    protected function getLevelAttr($value, $data){
+        $score = $data['score'];
+        if ($score < 100) {
+            $level = 1;
+        } elseif ($score < 500) {
+            $level = 2;
+        } elseif ($score < 2000) {
+            $level = 3;
+        } elseif ($score < 5000) {
+            $level = 4;
+        } else {
+            $level = 5;
+        }
+        return $level;
+    }
+}
+
+下面是测试代码：
+$user = User::get(1);
+$data = $user->hidden(['email'], true)->toArray();
+dump($data);
+$data = $user->visible(['name'], true)->toArray();
+dump($data);
+$data = $user->append(['level'], true)->toArray();
+dump($data);
+
+如果是数据集查询的话，只能通过在模型类中设置属性的方式来设置需要输出的属性，同样是上面的User模型类，用下面的代码测试：
+$list = User::all();
+$data = $list->toArray();
+dump($data);
 
 【 追加关联模型的属性 】
 支持追加一对一关联模型的属性到当前模型
@@ -5534,12 +5835,42 @@ profile是关联定义方法名,email和nickname是Profile模型的属性。
 
 </pre>
 
+<h4>模型输出 JSON序列化 - toJson方法</h4><pre>
+除了转换为数组数据外，还支持对模型对象进行JSON序列化，序列化方法为toJson
+可调用模型的toJson方法对模型对象进行JSON序列化,使用方法和toArray类似,并且调用toJson序列化之前同样支持hidden、visible、append和appendRelationAttr方法
+
+$user = User::get(1);
+echo $user->toJson();
+echo json_encode(User::get(1));  // 模型对象可以直接被JSON序列化
+echo User::get(1);               // 直接echo 一个模型对象,输出结果同上
+echo $user->hidden(['create_time','update_time'])->toJson();  // 设置无需输出的字段
+echo $user->visible(['id','name','email'])->toJson();         // 设置允许输出的属性
+echo $user->append(['status_text'])->toJson();                // 追加其它的字段
+
+</pre>
+
 <h3>模型事件</h3><pre>
+虽然说模型的数据自动完成和修改器可以很方便的进行数据处理，但也有自身的不足，而模型事件功能则提供了更灵活和强大的模型数据处理机制。
+模型事件可以看成是模型层的钩子和行为，只不过钩子的位置主要针对模型数据的写入操作
+
 模型事件指在进行模型的写入操作时触发的操作行为,包括模型的save方法和delete方法。
 模型事件只可以在调用模型的方法才能生效,使用查询构造器通过Db类操作是无效的
 支持before_delete、after_delete、before_write、after_write、before_update、after_update、before_insert、after_insert事件行为
+before_write和after_write表示无论是新增还是更新都会执行的钩子
+
+钩子	对应操作	快捷注册方法
+before_insert	新增前	beforeInsert
+after_insert	新增后	afterInsert
+before_update	更新前	beforeUpdate
+after_update	更新后	afterUpdate
+before_write	写入前	beforeWrite
+after_write	    写入后	afterWrite
+before_delete	删除前	beforeDelete
+after_delete	删除后	afterDelete
 
 使用方法
+要使用模型事件功能，就必须先给模型注册事件，我们建议在模型类的init方法中统一注册模型事件,init静态方法会在实例化模型的时候调用，并且仅会执行一次
+
 User::event('before_insert', function ($user) {
   if ($user->status != 1) {
     return false;
@@ -5557,6 +5888,15 @@ User::event('before_insert', function ($user) {
 // 注册回调到beforeInsert函数
 User::event('before_insert', 'beforeInsert');
 
+当同一个钩子注册了多个模型事件的话，在特殊的情况下，你可以传入第二个参数为true覆盖之前注册的其它模型事件。
+User::event('before_insert', function ($user) {
+    if ($user->status != 1) {
+        return false;
+    }
+});
+// 注册回调到beforeInsert函数 并覆盖前面的
+User::event('before_insert', 'beforeInsert',true);
+
 可以在模型类的init方法里面统一注册模型事件
 namespace app\index\model;
 use think\Model;
@@ -5566,6 +5906,13 @@ class User extends Model{
       if ($user->status != 1) {
         return false;
       }
+      $user->reg_ip = request()->ip();
+    });
+    User::event('before_write', function ($user) {
+        $user->name = strtolower($user->name);
+    });
+    User::event('before_write', function ($user) {
+        return $user->isValid();
     });
     self::event('before_insert', function ($user) {  // 调用当前模型
 
@@ -5588,6 +5935,13 @@ class User extends Model{
   }
 }
 
+在事件方法中可以对当前模型实例做任何的操作，所以理论上来说，修改器和自动完成可以做的事情，模型的事件方法都可以完成，而且具备修改器和自动完成没有的优势，包括：
+批量完成（修改器只能针对某个字段进行修改）；
+支持判断并自动终止模型数据写入操作；
+便于统一管理模型数据操作；
+
+不要对一个模型数据同时使用修改器和模型事件
+
 </pre>
 
 <h3>关联模型</h3><pre>
@@ -5600,6 +5954,187 @@ TP5.0的关联采用了对象化的操作模式,无需继承不同的模型类,�
 关联关系必然有一个参照表
 
 要进行模型的关联操作,必须同时定义好当前模型和关联模型
+
+关联关系通常有一个参照模型，这个参照模型我们一般称为主模型（或者当前模型），关联关系对应的模型就是关联模型，关联关系是指定义在主模型中的关联，有些关联关系还会设计到一个中间表的概念，但中间表不一定需要存在具体的模型。
+
+主模型和关联模型之间通常是通过某个外键进行关联，而这个外键的命名系统会有一个约定规则，通常是主模型名称+_id，尽量遵循这个约定会给关联定义带来很大简化
+
+关联操作经常会涉及到几个重要的方法，也是关联操作的基础，掌握了这几个方法对于掌握关联（尤其是关联查询）有很大的帮助，包括：
+relation	关联查询
+with	关联预载入
+withCount	关联统计（V5.0.5+）
+load	关联延迟预载入（V5.0.5+）
+together	关联自动写入（V5.0.5+）
+load方法是数据集对象的方法，together方法是模型类提供的方法，其它几个都是Query类提供的链式方法，在查询方法之前调用。
+
+relation和with方法的主要区别在于relation是单纯的关联查询，比如你查询一个用户列表，然后需要关联查询用户的档案数据，使用relation方法的话就是，我先查询用户列表数据，然后每个每个用户再单纯查询档案数据。如果用户列表数据有10个，那么就会产生11次查询。如果使用with方法的话，虽然最终查询出来的关联数据是一样的，但由于with查询使用的是预载入查询，因此实际只会产生2次查询。而load方法则更先进，先查询出用户列表，然后在需要关联数据的时候使用load方法获取关联数据，尤其适合动态关联的情况，最终也是两次查询，因此称为延迟预载入
+
+由于模型关联的对象化封装机制的优势，其实relation方法基本上很少被用到，而是使用关联惰性查询及关联方法的自定义查询来替代了（会在下一节给你讲解）。最常用的莫过于with方法，因为最常用因此被内置到模型类的get和all方法的第二个参数了，我们后面对with方法的用法说明也均适用于get和all方法的第二个参数。withCount用于在不获取关联数据的情况下提供关联数据的统计，在查询一对多或者多对多关联的时候才需要使用。load方法则适用于在数据集的延迟预载入关联查询（对于默认的数据集查询类型系统提供了一个load_relation助手函数，作用是等效的）。together方法用于一对一的关联自动写入操作（包括新增、更新和删除），提供了更简单的关联写入机制
+
+虽然作用不尽相同，但这几个方法的使用方法都是类似的，这四个方法都只有一个参数，参数类型包括字符串和数组，并且数组方式还支持索引数组以方便完成关联的自定义查询
+
+// 查询用户的Profile关联数据
+$users = $user->relation('profile')->select();
+// 查询用户的Book关联数据
+$users = $user->relation('books')->select();
+
+关联查询的方法返回的依然是包含User对象实例的数据集，relation方法设定的关联查询结果只是数据集中的User模型对象实例的某个关联属性
+
+relation方法传入的字符串就是关联定义的方法名而不是关联模型的名称，由于模型方法名使用的都是驼峰法规范，假设定义了一个名为userBooks的关联方法的话，relation方法可以使用两种方式的关联查询：
+
+// 驼峰法的关联方法定义
+$users = $user->relation('userBooks')->select();
+// 或者使用下面的方式等效
+$users = $user->relation('user_books')->select();
+
+第一种传入的是实际的驼峰法关联方法名userBooks，第二种是传入小写和下划线的转化名称user_books，两种关联查询用法都会实际定位到关联方法名称userBooks，所以关联方法定义必须使用驼峰法。
+
+默认情况下，关联方法获取的是满足关联条件的所有数据，如果需要自定义关联查询条件的话，可以使用
+$user->relation(['books' => function ($query) {
+    $query->where('title', 'like', '%thinkphp%');
+}])->select();
+
+表示查询该用户写的标题中包含thinkphp的书籍，闭包中不仅仅可以使用查询条件，还可以支持其它的链式方法，比如对关联数据进行排序和指定字段：
+$user->relation(['books' => function ($query) {
+    $query
+        ->field('id,name,title,pub_time,user_id')
+        ->order('pub_time desc')
+        ->whereTime('pub_time', 'year');
+}])->select();
+
+如果使用field方法指定查询字段，务必包含当前模型的主键以及关联模型的关键键，否则会导致关联查询失败
+
+关联方法可以同时指定多个关联，即使是不同的关联类型，使用：
+// 查询用户的Profile和Book关联数据
+$users = $user->relation('profile,books')->select();
+下面的数组方式是等效的
+// 查询用户的Profile和Book关联数据
+$users = $user->relation(['profile','books'])->select();
+
+一般使用数组的话，主要需要使用闭包进行自定义关联查询的情况，否则用逗号分割的字符串就可以了。
+
+together方法不支持闭包，但可以支持数组方式定义多个关联方法
+
+【 关联查询 】
+通常有两种方式进行关联的数据获取：关联预查询和关联延迟查询。
+
+关联预查询方式就是使用relation方法，使用
+// 指定User模型的profile关联
+$user = User::relation('profile')->find(1);
+// profile关联属性也是一个模型对象实例
+dump($user->profile);
+
+relation方法中传入关联（方法）名称即可（多个可以使用逗号分割的字符串或者数组）。这种方式，无论是否最终获取profile属性都会事先进行关联查询，因此称为关联预查询。
+如果关联数据不存在，一对一关联返回的是null，一对多关联的话返回的是空数组或空数据集对象。
+
+出于性能考虑，通常选择关联延迟查询的方式。
+// 不需要指定关联
+$user = User::get(1);
+// 获取profile属性的时候自动进行关联查询
+dump($user->profile);
+这种方式下的关联查询是惰性的，只有在获取关联属性的时候才会实际进行关联查询，因此称之为关联延迟查询。
+
+关联属性的名称一般就是关联（定义）方法的名称，但同时也支持驼峰关联方法的小写+下划线转化名称。
+
+【 关联自定义查询 】
+模型的关联方法除了会自动在关联获取的时候自动调用外，仍然可以作为查询构造器的链式操作来对待，以完成额外的附加条件或者其它自定义查询（一对多的关联关系时候比较多见类似场景），例如User模型定义了一个articles的hasMany关联：
+
+namespace app\index\model;
+use think\Model;
+class User extends Model{
+    public function articles(){
+        return $this->hasMany('Article');
+    }
+}
+
+普通的关联查询获取的是全部的关联数据，例如：
+
+$user = User::get(1);
+$articles = $user->articles;
+
+articles返回的类型根据Article模型的数据集返回类型设定，如果Article模型返回的数据集类型是Collection，那么关联数据集返回的也是Collection对象。
+
+如果需要对关联数据进行筛选，例如需要查询用户发表的标题里面包含think的文章，并且按照create_time倒序排序，则可以使用下面的方式：
+
+$user     = User::get(1);
+$articles = $user->articles()
+    ->where('title', 'like', '%think%')
+    ->order('create_time desc')
+    ->select();
+
+调用articles()关联方法的动作有下面几个：
+
+相当于切换当前模型到关联模型对象（Article）；
+并且会自动传入关联条件（user_id = 1）；
+如果是一对多或者多对多关联，并且希望自主条件查询关联数据的话请参考该方式
+
+如果你希望改变默认的关联查询条件而不是在外部查询的时候指定，可以直接在定义关联的时候添加额外条件，例如上面的查询条件可以写成：
+
+<?php
+
+namespace app\index\model;
+
+use think\Model;
+
+class User extends Model
+{
+    public function articles()
+    {
+        return $this->hasMany('Article')
+          ->where('title', 'like', '%think%')
+          ->order('create_time desc');
+    }
+}
+
+关联方法里面的查询条件会自动作为关联查询的条件带入，下面的关联查询出来的数据就是包含额外条件的：
+
+$user = User::get(1);
+$articles = $user->articles;
+
+如果需要你仍然可以在外部调用的时候追加额外条件，例如下面的关联查询就包含了关联方法里面定义的和额外追加的条件：
+
+$user     = User::get(1);
+$articles = $user->articles()
+    ->where('name', 'thinkphp')
+    ->field('id,name,title')
+    ->select();
+
+如果你担心基础的关联条件定义影响你的其它查询，你可以像下面一样单独定义多个关联关系，各自独立使用互不影响。
+
+<?php
+
+namespace app\index\model;
+
+use think\Model;
+
+class User extends Model
+{
+    public function articles()
+    {
+        return $this->hasMany('Article');
+    }
+
+    public function articlesLike($title)
+    {
+        return $this->hasMany('Article')
+                    ->where('title', 'like', '%' . $title . '%')
+                    ->field('id,name,title')
+                    ->order('create_time desc');
+    }    
+}
+
+articlesLike方法就作为自定义关联查询专用，并且需要传入title参数，用法如下：
+
+$user = User::get(1);
+$articles = $user->articlesLike('think')
+    ->select();
+
+下面的用法则是错误的：
+
+$user = User::get(1);
+$articles = $user->articlesLike;
+
+带有参数的关联定义方法不能直接用于关联属性获取，只能用于链式关联自定义查询。
 
 </pre>
 
@@ -5655,6 +6190,13 @@ class User extends \think\Model{
 }
 
 </pre><pre>
+访问User模型对象实例的profile属性的时候，其实就是调用了profile方法来完成关联查询。当获取一个模型的属性的时候会触发模型的获取器，而当获取器在没有检测到模型有对应属性的时候就会检查是否存在关联方法定义（对于关联方法的判断很简单，关联方法返回的是一个think\model\Relation对象），如果存在则调用对应关联类的getRelation方法。
+
+模型的方法名都是驼峰命名的，所以系统做了一个兼容处理，当定义了一个userProfile的关联方法的时候，在获取关联属性的时候，下面两种方式都是有效的：
+$user->userProfile;
+$user->user_profile;
+推荐关联属性统一使用后者，和数据表的字段命名规范一致，因此在很多时候系统自动获取关联属性的时候采用的也是后者
+
 通常关联模型和当前模型都是相同的命名空间,如果关联模型在不同的命名空间需要指定完整的类名
 return $this->hasOne('\app\admin\Profile');   // 关联admin模块下面的模型对象
 
@@ -7276,6 +7818,25 @@ PHP标签内不能嵌套其他tp标签
 TP5.0内置分页实现,要给数据添加分页输出功能可以直接在Db类查询的时候调用paginate方法
 分页功能会自动生成带有总分页数据和上下页码,如要简洁分页只有上下页功能只需paginate(10,true)
 
+paginate方法之后不需要调用任何的查询方法，该方法本身就是一个查询数据集的方法，而且返回结果是一个think\Paginator对象，该对象具有数据集对象的类似特性
+
+分页后数据处理 （V5.0.9）
+V5.0.9版本开始支持分页类后数据直接each遍历处理，方便修改分页后的数据，而不是只能通过模型的获取器来补充字段。
+$list = User::where('status',1)->paginate()->each(function($item, $key){
+    $item->nickname = 'think';
+});
+如果是Db类操作分页数据的话，each方法的闭包函数中需要使用返回值，例如：
+$list = Db::name('user')->where('status',1)->paginate()->each(function($item, $key){
+    $item['nickname'] = 'think';
+    return $item;
+});
+
+大部分情况，可能只需要传入每页的记录数，直接传入数字就表示设置分页的每页记录数。
+$list = User::where('status', 1) ->paginate(20);
+对于一些复杂的查询条件，尤其是使用了join、group之类的，可能需要单独查询记录总数：
+$total = User::where('status', 1)->count();
+$list  = User::where('status', 1) ->paginate(20, $total);
+
 </pre>分页实例1<pre class="php">
 $users = Db::name('user')->where('status',1)->paginate(10);   // 查询状态为1的用户数据 并且每页显示10条数据
 $this->assign('users', $usesr);                               // 把分页数据赋值给模板变量list
@@ -7726,6 +8287,85 @@ Console::call方法的第一个参数就是指令名称,后面的第二个参数
 再次刷新页面的话,会看到页面输出Model already exists!表示模型已经创建过了,无需再次创建。
 
 使用 Console::call 方法调用指令执行不会看到最终的输出结果,需要使用fetch方法获取输出信息,一旦发生错误,则会抛出异常。
+
+</pre>
+
+<h4>Linux下ThinkPHP5实现定时器任务 - 结合crontab</h4><pre>
+1.在/application/command创建要配置的PHP类文件，需要继承Command类，并重写configure和execute两个方法，例如:
+
+namespace app\command;
+use think\console\Command;
+use think\console\Input;
+use think\console\Output;
+use think\Db;
+class Test extends Command{
+    // 配置定时器的信息
+    protected function configure(){
+        $this->setName('test')->setDescription('Command Test');
+    }
+    protected function execute(Input $input, Output $output){
+        $output->writeln("TestCommand:");  // 输出到日志文件
+        // 定时器需要执行的内容.....
+        $output->writeln("end....");
+    }
+}
+
+2.修改application/command.php内容，加入上述的定时器内容
+
+return [
+    'application\command\Test', // 加入需要cmd运行的PHP文件
+];
+
+3.添加shell执行文件
+在项目根目录下创建shell脚本，例如crond.sh
+#!/bin/sh
+PATH=/usr/local/php/bin:/opt/someApp/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin # 将php路径加入都临时变量中
+cd /home/wwwroot/域名/  # 进入项目的根目录下保证可以运行php think的命令
+php think test # 执行在Test.php设定的名称
+
+注意：test可执行命令是ThinkPHP自带的，可以通过连接服务器，到/home/wwwroot/域名/目录下，输入php think查询可以被执行的命令，如下：
+
+4.使用crontab设置定时器
+有两种方式，效果是一样的：
+
+1.连接到服务器，输入crontab -e，写入：
+0 0 * * * /home/wwwroot/域名/crond.sh
+
+1).0 0 * * * 是crontab的定时表达式，表示每天的0点0分执行该文件，具体详情可以访问《crontab定时写法》进行学习。
+2).可以使用crontab -l 的命令查看已登录的账户有几个定时器。
+3).可以到 /var/log/cron 文件查看日志文件，便于追踪错误。
+
+2.连接到服务器，输入 vim /etc/crontab， 初始化内容为：
+在该文件写入
+0 0 * * * root /home/wwwroot/域名/crond.sh
+最后保存该文件
+
+5.重启crond服务
+service crond restart
+如果该命令无法重启，请使用systemctl restart crond 进行重启
+
+6、第二种方法符合API引用的思维，觉得比较容易被接受，第一种有点引用插件的感觉，对于刚接触项目的用户友好一点，可以知道项目的定时器；因此这两种都可以
+1).新增Controller类，并编写相对应的方法，例如：以下是Test Controller类，还有一个简单的test方法。
+
+namespace app\demo\controller;
+use think\Controller;
+use think\Log;
+class Test extends Controller{
+    public function test(){
+        Log::error('start test  crond demo.....');
+        Log::error('end test  crond demo.....');
+    }
+
+}
+访问test方法的路由：demo/test/test
+
+2).添加shell执行文件
+在项目根目录下创建shell脚本，例如crond.sh
+#!/bin/sh
+PATH=/usr/local/php/bin:/opt/someApp/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+# 1.执行php命令不需要到thinkphp项目的目录下 2.index.php为入口文件 3.第三个参数为需要执行方法的路由
+php /home/wwwroot/域名/index.php demo/test/test
+后面的步骤从本文第4步开始，就可以完成定时功能。
 
 </pre>
 </div>
