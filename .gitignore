@@ -5,3 +5,4 @@
 .vscode/
 .env
 /application/common/library/token/driver/Redis.php
+test.get
