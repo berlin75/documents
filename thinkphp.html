@@ -12,6 +12,11 @@
 <p><b><a href="https://www.kancloud.cn/manual/thinkphp5/118003" target="_blank">thinkphp5.0开发手册</a></b></p>
 
 <pre>
+ThinkPHP调用其他控制器的方法,助手函数action()
+$a = action('admin/user/detail',['id'=>10]);
+var_dump($a)
+表示在其他控制器调用user控制器的detail方法,传了一个参数id
+
 Db::startTrans();
 try {
     Db::commit();

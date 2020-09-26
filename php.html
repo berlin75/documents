@@ -80222,7 +80222,19 @@ app_id=2021001186684336&method=alipay.trade.app.pay&format=JSON&charset=UTF-8&si
 
 支付宝app支付接口文档
 https://opendocs.alipay.com/open/204/105303
-https://opendocs.alipay.com/apis/api_1/alipay.trade.app.pay
+https://opendocs.alipay.com/apis/api_1/alipay.trade.app.pay 支付
+https://opendocs.alipay.com/apis/api_28/alipay.fund.trans.toaccount.transfer 转账
+
+String msgCode = aliResponse.getSubCode();
+if (msgCode.equals("SYSTEM_ERROR")) {
+    return "系统错误";
+} else if (msgCode.equalsIgnoreCase("PAYEE_NOT_EXIST")) {
+    return "收款账户不存在";
+} else if (msgCode.equalsIgnoreCase("PAYER_BALANCE_NOT_ENOUGH")) {
+    return "付款方余额不足";
+} else {
+    return "提现失败" + aliResponse.getBody();
+}
 
 yansongda
 文档: https://pay.yanda.net.cn/docs/2.x/alipay/pay

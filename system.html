@@ -11049,6 +11049,15 @@ $ git rm -r --cached .
 
 如果已经把不想上传的文件上传到了git仓库,那么必须先从远程仓库删了它,可以从远程仓库直接删除然后pull代码到本地仓库,这些文件就会被删除,或者从本地删除这些文件并且在.gitignore文件中添加这些想忽略的文件,然后再push到远程仓库
 
+已经提交的文件需要忽略
+1)删除已经commit的target文件 
+$ git rm -r --cached */target/  
+$ git rm -r --cached .env
+2)提交
+$ git commit -m '删除target和.env文件'
+3)push到远程
+$ git push origin master
+
 【 .gitignor忽略规则验证 】
 如果发现.gitignore写得有问题,需要找出来到底哪个规则写错了,可以用git check-ignore命令检查:
 $ git check-ignore -v HelloWorld.class
@@ -11524,6 +11533,10 @@ $ git checkout HEAD readme.txt # 将最后一次commit提交中的readme.txt文�
 实质上能将删除的文件恢复是因为在.git目录中有备份,Git会将暂存区或历史提交中内容来恢复。
 
 【 远程同步 】
+commit与pull的先后
+git提交记录可以看到四次merge的提交，实际上这四次都是没有冲突的merge，这是commit->pull->push中，git自动生成的merge。 
+如果这里采用pull->commit->push呈现出来的就会是一条没有merge、没有多余commit的一条完美分支。 
+
 $ git remote                              # 查看远程库的信息
 $ git remote -v                           # 显示所有远程仓库详细信息可抓取和推送的origin的地址,没有推送权限就看不到push的地址
 $ git remote show [remote]                # 显示某个远程仓库的信息
@@ -11536,7 +11549,7 @@ $ git push [remote] [branch]              # 上传本地指定分支到远程仓
 $ git push [remote] --force               # 强制推送当前分支到远程仓库即使有冲突
 $ git push [remote] --all                 # 推送所有分支到所有远程仓库
 
-git push <远程主机名> <本地分支名> <远程分支名>
+git push < 远程主机名> < 本地分支名> < 远程分支名>
 git push origin master:refs/for/master
 将本地的master分支推送到远程主机origin上的对应master分支,origin是远程主机名,第一个master是本地分支名,第二个master是远程分支名
 
