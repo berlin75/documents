@@ -1,0 +1,7 @@
+/thinkphp/
+/vendor/
+/runtime/
+.idea/
+.vscode/
+.env
+/application/common/library/token/driver/Redis.php
