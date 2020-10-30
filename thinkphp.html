@@ -163,7 +163,7 @@ $bills = BillModel::where($where)->whereTime('createtime', 'between', [$starttim
 $list = db('user')->order('id desc')->paginate(10);
 // 获取分页显示
 $page = $list->render();
-$list = $list->all(); //这是关键
+$list = $list->all(); //这是关键,paginate() 对象转数组 $list->all() 或者 $list->items(), 数组再转成对象 collection($list->all())
 // 模板变量赋值,改变数据
 foreach ($list as $k => $v) {
 $list[$k]['username'] = lishuai;
@@ -172,6 +172,24 @@ $this->assign('list', $list);
 $this->assign('page', $page);
 // 渲染模板输出
 return $this->fetch();
+
+// paginate对象转换成普通对象
+$current_page = $this->request->param('current_page') ?: 1;
+$per_page = $this->request->param('per_page') ?: 10;
+$free_goods = FreeGoods::where(['switch' => 1])
+    ->where('left_num', '>', 0)
+    ->order('createtime desc')
+    ->paginate($per_page, false, ['page' => $current_page]);
+$free_goods = json_decode(json_encode($free_goods),TRUE);
+$share = [
+    'nine_share_type' => config('site.nine_share_type'),
+    'nine_share_title' => config('site.nine_share_title'),
+    'nine_share_content' => config('site.nine_share_content'),
+    'nine_share_img' => config('site.nine_share_img'),
+];
+$result = array_merge($free_goods, $share);
+
+$result=Db::name(‘fsdz’)->where($map)->paginate(25)->toarray();
 
 </textarea>
 
