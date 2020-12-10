@@ -652,6 +652,94 @@ location ~ \.php {
 
 </pre>
 
+<h4>ThinkPHP重写规则优化URL及Rewrite规则</h4><pre>
+http://www.topstack.cn/Article/detail/id/198.html 优化为 http://www.topstack.cn/article-198.html
+http://www.topstack.cn/Article/index/pid/3/cid/14.html 优化为 http://www.topstack.cn/index-3-14.html
+
+Apache中的rewrite规则如下：
+RewriteEngine on
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^article-(.*)$ index.php/Home/Article/detail/id/$1 [L,NC]
+RewriteRule ^index-(.*)-(.*).html$ index.php/Home/Article/index/pid/$1/cid/$2 [L,NC]
+RewriteRule ^index-(.*).html$ index.php/Home/Article/index/cid/$1 [L,NC]
+RewriteRule ^page-(.*).html$ index.php/Home/Article/page/cid/$1 [L,NC]
+RewriteRule ^Article/(.*)$ index.php/Article/$1 [L,NC]
+RewriteRule ^Admin$ index.php?m=Admin&c=Public&a=index [L,NC]
+
+Nginx中的rewrite规则如下：
+# 使用方法：将此文件上传至nginx的Conf文件夹下，在nginx配置文件的server段中引入此文件即可
+# include rewrite.conf
+location / {
+    if (!-e $request_filename) {
+        rewrite ^/article-(.*).html$ /index.php?m=Home&c=Article&a=detail&id=$1 last;
+        rewrite ^/index-(.*)-(.*).html$ /index.php?m=Home&c=Article&a=index&pid=$1&cid=$2 last;
+        rewrite ^/index-(.*).html$ /index.php?m=Home&c=Article&a=index&cid=$1 last;
+        rewrite ^/page-(.*).html$ /index.php?m=Home&c=Article&a=page&cid=$1 last;
+        rewrite ^(.*)$ /index.php?s=/$1 last;
+        break;
+    }
+}
+
+Rewrite是一种服务器的重写脉冲技术，它可以使得服务器可以支持 URL 重写，是一种最新流行的服务器技术。它还可以实现限制特定IP访问网站的功能。
+
+Rewrite标志
+R[=code](force redirect) 强制外部重定向
+G(force URL to be gone) 强制URL为GONE，返回410HTTP状态码。
+P(force proxy) 强制使用代理转发。
+L(last rule) 表明当前规则是最后一条规则，停止分析以后规则的重写。
+N(next round) 重新从第一条规则开始运行重写过程。
+C(chained with next rule) 与下一条规则关联,如果规则匹配则正常处理，该标志无效，如果不匹配，那么下面所有关联的规则都跳过
+T=MIME-type(force MIME type) 强制MIME类型
+NS (used only if no internal sub-request) 只用于不是内部子请求
+NC(no case) 不区分大小写
+QSA(query string append) 追加请求字符串
+NE(no URI escaping of output) 不在输出转义特殊字符,例如RewriteRule /foo/(.*) /bar?arg=P1%3d$1 [R,NE] 将能正确的将/foo/zoo转换成/bar?arg=P1=zed
+PT(pass through to next handler) 传递给下一个处理,例如RewriteRule ^/abc(.*) /def$1 [PT] # 将会交给/def规则处理
+Alias /def /ghi
+S=num(skip next rule(s)) 跳过num条规则
+E=VAR:VAL(set environment variable) 设置环境变量
+
+RewriteCond标志符
+'nocase|NC'(no case)忽略大小
+'ornext|OR' (or next condition)逻辑或，可以同时匹配多个RewriteCond条件RewriteRule适用的标志符
+'redirect|R [=code]' (force redirect)强迫重写为基于http开头的外部转向(注意URL的变化) 如：[R=301,L]
+'forbidden|F' (force URL to be forbidden)重写为禁止访问
+'proxy|P' (force proxy)重写为通过代理访问的http路径
+'last|L' (last rule)最后的重写规则标志，如果匹配，不再执行以后的规则
+'next|N' (next round)循环同一个规则，直到不能满足匹配
+'chain|C' (chained with next rule)如果匹配该规则，则继续下面的有Chain标志的规则。
+'type|T=MIME-type' (force MIME type)指定MIME类型
+'nosubreq|NS' (used only if no internal sub-request)如果是内部子请求则跳过
+'nocase|NC' (no case)忽略大小
+'qsappend|QSA' (query string append)附加查询字符串
+'noescape|NE' (no URI escaping of output)禁止URL中的字符自动转义成%[0-9]+的形式。
+'passthrough|PT' (pass through to next handler)将重写结果运用于mod_alias
+'skip|S=num' (skip next rule(s))跳过下面几个规则
+'env|E=VAR:VAL' (set environment variable)添加环境变量
+
+Rewrite时服务器变量：
+HTTP headers:HTTP_USER_AGENT, HTTP_REFERER, HTTP_COOKIE, HTTP_HOST, HTTP_ACCEPT
+connection & request: REMOTE_ADDR, QUERY_STRING
+server internals: DOCUMENT_ROOT, SERVER_PORT, SERVER_PROTOCOL
+system stuff: TIME_YEAR, TIME_MON, TIME_DAY
+
+Rewrite规则表达式的说明：
+. 匹配任何单字符
+[chars] 匹配字符串:chars
+[^chars] 不匹配字符串:chars
+text1|text2 可选择的字符串:text1或text2
+? 匹配0到1个字符
+* 匹配0到多个字符
++ 匹配1到多个字符
+^ 字符串开始标志
+$ 字符串结束标志
+n 转义符标志
+反向引用 $N 用于 RewriteRule 中匹配的变量调用(0 <= N <= 9)
+反向引用 %N 用于 RewriteCond 中最后一个匹配的变量调用(1 <= N <= 9)
+
+</pre>
+
 <h3>TP5.0应用请求的生命周期及整个执行流程</h3><pre>
 tp5生命周期：入口文件->引导文件->注册自动加载->注册错误和异常机制->应用初始化->URL访问检测->路由检测->分发请求->响应输出->应用结束
 
@@ -3620,10 +3708,35 @@ db('user')->where('id','<',10)->delete();
 </pre>
 
 <h3>条件查询方法</h3><pre>
-$map['id'] = ['>',1];                               //表达式查询
-$map['mail'] = ['like','%thinkphp@qq.com%'];
+$map['id'] = ['>',1];                               // 表达式查询
+$map['mail'] = ['like','%thinkphp@qq.com%'];        // 模糊查询
 db('user')->where($map)->select();
 
+$where=[
+    'switch'=>['eq',1],
+    'id'=>['gt',2],
+];
+var_dump(\app\common\model\User::where($where)->select());
+var_dump(\app\common\model\User::getLastSql());  // SELECT * FROM `xxkb_user` WHERE  `switch` = 1  AND `id` > 2
+    
+$where=[
+    'switch'=>1,
+    'id'=>['gt',2],
+];
+var_dump(\app\common\model\User::where($where)->select());
+var_dump(\app\common\model\User::getLastSql()); // SELECT * FROM `xxkb_user` WHERE  `switch` = 1  AND `id` > 2
+
+// 查询表达式错误:switch
+$where=[
+    ['switch','eq',1],
+    ['id','gt',2],
+];
+// 查询表达式错误:switch
+$where = [];
+$where[]=['switch','eq',1];
+$where[]=['id','gt',2];
+
+db('user') ->where('id',1) ->where('name','user') ->select();  // 同时满足多个条件的查询可以使用where的链式调用
 db('user')->where('type=1 AND status=1')->select();          //字符串条件
 db('user')->where("id=:id and name=:name")->bind(['id'=>[1,\PDO::PARAM_INT],'name'=>'thinkphp'])->select();//配合预处理机制
 
@@ -3641,6 +3754,8 @@ Db::table('think_user')
 SELECT * FROM `think_user` WHERE ( `name` LIKE 'thinkphp%' OR `title` LIKE 'thinkphp%' ) AND ( `create_time` > 0 AND `update_time` > 0 ) LIMIT 1
 
 【 where whereOr混合查询 】
+Db::table('user')->where('uname','ee')->whereOr('uid=2')->select();
+
 $result = db('user')->where(function ($query) {
   $query->where('id', 1)->whereor('id', 2);
 })->whereOr(function ($query) {
@@ -5015,6 +5130,7 @@ User::where('status',1)->column('*', 'id');    // 返回以主键为索引的数
 4.动态查询方法
 $user = User::getByName('thinkphp');           // 根据name字段查询用户
 $user = User::getByEmail('thinkphp@qq.com');   // 根据email字段查询用户
+$user_id = \app\common\model\User::getFieldByNickname('手机4437','id');  // 根据昵称查询id字段值,只返回第一个值
 
 5.通过Query类查询或使用数据库的查询方法进行更复杂的查询,返回的查询结果是当前模型对应的对象或包含模型对象的数据集
 User::where('id','>',10)->select();
@@ -7284,6 +7400,13 @@ XML标签 主要完成一些逻辑判断、控制和循环输出,并且可扩展
 默认的模板文件定义规则是：
 视图目录/控制器名(小写)/操作名(小写)+模板后缀
 默认的视图目录是模块的view目录,框架的默认视图文件后缀是.html
+
+{volist name="row" id="vo" }
+< tr>
+    < td>{:__($key)}< /td>
+    < td>{if $key=='createtime'}{$vo|datetime}{else/}{$vo|htmlentities}{/if}< /td>
+< /tr>
+{/volist}
 
 【 模板标签 】
 模板文件可以包含普通标签和标签库标签,标签的定界符都可以重新配置

@@ -792,6 +792,14 @@ h1:before {content:"";}
 h1:before {content:"h1后插入内容";}
 h1:before { content:"\2605";color: red;}    // 特殊字符或形状,2605表示☆
 
+css实现追踪用户访问单页的停留数据
+#header{height:200px;width:100%;background:black}
+#header:hover::after{content: url('index.php?id=1')}
+#content{height:200px;width:100%;background:#ccc}
+#content:hover::after{content: url('index.php?id=2')}
+#footer{height:200px;width:100%;background:red}
+#footer:hover::after{content: url('index.php?id=3')}
+
 /*利用元素的quotes属性指定文字符号,给h1内容添加左右括号*/
 h1{ quotes:"(" ")";  }
 h1::before{ content:open-quote; }
