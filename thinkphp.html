@@ -191,6 +191,49 @@ $result = array_merge($free_goods, $share);
 
 $result=Db::name(‘fsdz’)->where($map)->paginate(25)->toarray();
 
+// 团队成员列表
+// 邀请人数 累计收益
+public function list(){
+    $user = $this->auth->getUser();
+
+    $pages = WGrading::where('upid', $user['id'])
+        ->whereOr('uupid', $user['id'])
+        ->field('upid,uupid,user_id,is_ok')
+        ->paginate($this->request->param('per_page') ?: 10, false, ['page' => $this->request->param('current_page') ?: 1]);
+
+    foreach ($pages as $vo) {
+        if($userData = WUser::get(['id'=>$vo['user_id']])){
+            $list[] = [
+                'user_id' => $vo['user_id'],
+                'is_ok' => $vo['is_ok'],
+                'mobile' => starStr($userData['mobile'], 3, 4),
+                'headimgurl' => $userData['headimgurl'],
+                'name' => $userData['isreal'] ? WRealname::where(['user_id'=>$vo['user_id']])->value('name') : '未实名',
+                'grade' => $vo['upid'] == $user['id'] ? 1 : 2,
+                'orders_num' => 0, // TaskModel::getCount($vo['user_id']);  //接单数
+            ];
+        }
+    }
+
+    $pages = $pages->toArray();
+
+    $data['total'] = $pages['total'];
+    $data['per_page'] = $pages['per_page'];
+    $data['current_page'] = $pages['current_page'];
+    $data['last_page'] = $pages['last_page'];
+    $data['list'] = $list;
+    $data['invite_code'] = $user['invite_state'] == 1 ? $user['invite_code'] : '';
+    $data['invite_state'] = $user['invite_state'];
+    $data['isreal'] = $user['isreal'];
+    $data['share_url'] = config('site.user_share_url') . "?code=".$user['invite_code'];
+    $data['level'] = $user['level'];
+    $level = WLevel::where(['level'=>$user['level']])->field('one_distribution_ratio,two_distribution_ratio')->find();
+    $data['one_ratio'] = isset($level['one_distribution_ratio'])?$level['one_distribution_ratio'] : 0;
+    $data['two_ratio'] = isset($level['two_distribution_ratio'])?$level['two_distribution_ratio'] : 0;
+    $data['total_income'] = 0;   // 累计收益
+    $this->success('团队成员列表', $data);
+}
+
 </textarea>
 
 <h2>Thinkphp v5.0.20</h2><pre>

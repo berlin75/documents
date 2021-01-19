@@ -41,9 +41,10 @@ window.addEventListener('load', () => {
 	// 侧边导航与内容联动
 
 	// textarea高度自适应
-  document.querySelectorAll('textarea').forEach(textarea => {
-    // textarea.scrollTop = 0; //防抖动
-    textarea.style.height = textarea.scrollHeight + 'px';
+    document.querySelectorAll('textarea').forEach(textarea => {
+        textarea.value.replace(/(\r\n\r\n|\n\n|\r\r|)+$/gm, "");
+        // textarea.scrollTop = 0; //防抖动
+        textarea.style.height = textarea.scrollHeight + 'px';
 	})
 })
 

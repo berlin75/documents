@@ -12339,6 +12339,95 @@ $ git push origin :refs/tags/v0.9
 GitHub就是一个免费托管开源代码的远程仓库,但对于某些视源代码如生命的商业公司来说,既不想公开源代码,又舍不得给GitHub交保护费,那就只能自己搭建一台Git服务器作为私有仓库使用,搭建Git服务器需要准备一台运行Linux的机器
 
 </pre>
+
+<h4>使用git生成patch和打入patch 打包 补丁</h4><pre>
+平时在使用git管理项目时会遇到这样一种情况，那就是客户使用git生成patch给我们，需要把客户给到patch打入到project
+
+生成patch 的方法：(这里描述的生成patch是根据commit记录生成的)
+1.例如首先先通过git log 查看有哪一些commit
+
+2.把第一次commit 提交以后的（不包括第一次提交）都生成patch 
+git format-patch e795fefabc
+
+打入patch的方法：
+把生成的patch文件copy到一个patch文件夹中来
+由于这些patch显然是用git format-patch来生成的，所以用git的工具应该就可以很好的做好,git am就是作这件事情。
+在使用git am之前要首先git am --abort一次，来放弃掉以前的am信息，这样才可以进行一次全新的am。
+不然会遇到这样的错误 .git/rebase-apply still exists but mbox given.
+git am 可以一次合并一个文件，或者一个目录下所有的patch
+git am patch/*.patch
+git log 查看
+
+1 使用git format-patch生成所需要的patch:
+git format-patch -M master  当前分支所有超前master的提交
+git format-patch 4e16       某次提交以后的所有patch,4e16指的是commit名
+git format-patch --root 4e16  从根到指定提交的所有patch
+git format-patch 365a..4e16  某两次提交之间的所有patch,365a和4e16分别对应两次提交的名称
+git format-patch –n 07fe  某次提交（含）之前的几次提交,-n指patch数，07fe对应提交的名称
+git format-patch -1 07fe  所以单次提交
+git format-patch生成的补丁文件默认从1开始顺序编号，并使用对应提交信息中的第一行作为文件名。如果使用了-- numbered-files选项，则文件名只有编号，不包含提交信息；如果指定了--stdout选项，可指定输出位置，如当所有patch输出到一个文件；可指定-o dirname指定patch的存放目录；
+
+2 应用patch：
+先检查patch文件：git apply --stat newpatch.patch
+检查能否应用成功：git apply --check newpatch.patch
+打补丁：git am --signoff < newpatch.patch
+(使用-s或--signoff选项，可以commit信息中加入Signed-off-by信息)
+
+如果应用patch出现问题：
+比如，一个典型的git am失败，可能是这样的：
+$ git am PATCH
+Applying: PACTH DESCRIPTION
+error: patch failed: file.c:137
+error: file.c: patch does not apply
+error: patch failed: Makefile:24
+error: libavfilter/Makefile: patch does not apply
+Patch failed at 0001 PATCH DESCRIPTION
+When you have resolved this problem run "git am --resolved".
+If you would prefer to skip this patch, instead run "git am --skip".
+To restore the original branch and stop patching run "git am --abort".
+
+如果冲突发生，git只是输出上述信息，然后就停下来。一个小冲突会导致整个patch都不会被集成。
+
+处理这种问题的最简单方法是先使用 git am --abort，然后手动的添加此patch, patch -p1 < PATCH，手动解决掉代码冲突，最后使用 git commit -a 提交代码。但是这样做有个问题就是你会失去PATCH中原本包含的commit信息（比如From，Date，Subject，Signed-off-by等）。应该有一种更聪明的方法。
+
+在 .git/rebase-apply 目录下，存放着相应的补丁文件，名字是“0001” （在更新的git版本中，存放补丁文件的目录名有所改变，这里使用的git版本是 1.7.4.1）。
+
+事实上可以使用 git apply 命令打patch（git apply 是git中的patch命令）。如同使用 patch -p1 命令时一样，然后手动解决代码冲突（检视生成的 .rej 文件，与冲突文件比较，修改冲突内容，并最终把文件加入到index中）：
+
+$ git apply PATCH --reject
+$ edit edit edit
+（译注：根据.rej文件手动解决所有冲突）
+$ git add FIXED_FILES
+$ git am --resolved
+
+git am 并不改变index，需要使用 git apply --reject 打patch（保存在 .git/rebase-apply），手动解决代码冲突，（译注：使用 git status 列出所有涉及文件），把所有文件（不仅仅是引起冲突的文件）添加到（git add）index，最后告诉 git am 你已经解决（--resolved）了问题。这样做的好处是你不需要重新编辑commit信息。而且，如果你正在打的是一系列patch（就是说你在打的是多个patch，比如 git am *.patch）你不需要使用 git am --abort，然后又 git am。
+
+参考资料：
+Git-format-patch(1) - Linux man page http://linux.die.net/man/1/git-format-patch
+How to create and apply a patch with Git http://ariejan.net/2009/10/26/how-to-create-and-apply-a-patch-with-git
+
+【 两种patch方法对比 】
+patch一般可以分为两种，一种是UNIX下的patch，可以使用git diff或其他UNIX的diff命令生成，一种是git工具生成的patch，是git专用的patch，使用git format-patch命令生成
+
+git diff生成patch的过程一般常用命令如下：
+git diff  > patch
+git diff  --cached > patch
+git diff  branchname --cached > patch
+这时当前目录下就会有一个patch文件，这是一个非git环境也可以使用的patch。对于这种patch，在git上使用要用git apply命令，如下：
+git apply patch
+由于这是一个类似UNIX下更新文件的操作，所以执行完上述操作之后实际上是等于手动修改了文件，还要做一些git commit之类的操作。注意git apply是一个事务性操作的命令，要么所有补丁都打上去，要么全部放弃。可以先用git apply --check 查看补丁是否能够干净顺利地应用到当前分支中：git apply --check patch，执行完该命令之后没有任何输出表示可以顺利采纳该补丁，接下来就是git上的提交了。
+
+git format-patch生成的补丁是git专用的，也是日常工作中最常接触到的补丁类型。常用命令如下：
+1)两个节点之间的提交： git format-patch  节点A   节点B
+2)单个节点： git format-patch -1 节点A （-n就表示要生成几个节点的提交）
+3)最近一次提交节点的patch ：git format-patch HEAD^ 依次类推……
+使用git format-patch命令生成的patch文件，包含了提交的附加信息如作者，时间等。再次基础上使用git am命令即可将此补丁应用到当前分支。应用完之后当前分支多了一次提交记录，并且有完整的信息，而不是简单的修改文件。
+
+在对比一下，git diff 和git format-patch生成的patch一个重要不同之处，实际使用中会发现git diff一次只会生成一个patch文件，不管差别了多少个提交都是一个；而git format-patch是根据提交的节点来的，一个节点一个patch。
+
+小技巧：如果有额外信息需要补充，但又不想放在提交消息中说明以免搞乱了提交说明,可以编辑这些补丁文件，在第一个“---” 行之前添加说明即可。这样的信息能阅读，但在执行完git am命令之后该节点的提交信息不回包含上述信息。
+
+</pre>
 </div>
 
 <div id="virtualbox">
@@ -31727,7 +31816,34 @@ $_SERVER['PATH_INFO'] = $_SERVER['REQUEST_URI' ];
   }
 }
 
-</textarea><textarea>server {
+</textarea>fastadmin nginx配置,同时支持api和admin<textarea>
+server {
+    listen       8025;
+    server_name  127.0.0.1;
+    root         "E:/wendao/demo/public";
+    location / {
+        index  index.html index.htm index.php;
+        #主要是这一段一定要确保存在
+        if (!-e $request_filename) {
+            rewrite  ^(.*)$  /index.php?s=/$1  last;
+            break;
+        }
+        #结束
+        #autoindex  on;
+    }
+    location ~ \.php(.*)$ {
+        fastcgi_pass   127.0.0.1:9000;
+        fastcgi_index  index.php;
+        fastcgi_split_path_info  ^((?U).+\.php)(/?.+)$;
+        fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+        fastcgi_param  PATH_INFO  $fastcgi_path_info;
+        fastcgi_param  PATH_TRANSLATED  $document_root$fastcgi_path_info;
+        include        fastcgi_params;
+    }
+}
+
+</textarea><textarea>
+server {
   listen       80;
   server_name  thinkphp.lo;
   root /var/www;
@@ -31865,24 +31981,19 @@ Apache默认设置PATHINFO原理分析
 Apache都接受,都会认为是对index.php的访问,并会设置PATH_INFO为'/login/index'
 print_r($_SERVER["PATH_INFO"]);  // login/index
 
-</pre>nginx模拟PATH_INFO<textarea>Nginx是通过对文件名的扩展名匹配决定是否要交给php cgi服务器去解释的,在nginx.conf中一般都有如下的默认配置段:
-
+</pre>nginx模拟PATH_INFO<textarea>
+Nginx是通过对文件名的扩展名匹配决定是否要交给php cgi服务器去解释的,在nginx.conf中一般都有如下的默认配置段:
 location ~ .php$ {
   fastcgi_index index.php;
   fastcgi_pass 127.0.0.1:9000;
   include fastcgi_params;
 }
 
-对于形如tools/index.php/login/index的文件路径,Nginx正则匹配为路径而不是php文件,所以需要去掉($)改写这段配置匹配扩展名:
+对于形如tools/index.php/login/index的文件路径,Nginx正则匹配为路径而不是php文件,所以需要去掉($)改写这段配置匹配扩展名: location ~ .php
 
-location ~ .php {
-  fastcgi_index index.php;
-  fastcgi_pass 127.0.0.1:9000;
-  include fastcgi_params;
-}
-
-</textarea>现在脚本路径已经交由PHP自己处理了,那怎么增加PATH_INFO呢?<textarea>方案一：php内置解析
-需要打开PHP中cgi.fix_pathinfo配置项,打开这个配置项以后PHP会去根据CGI规范来检查SCRIPT_FILENAME中那部分是访问脚本和PATH_INFO(ini配置解释),并根据SCRIPT_NAME来修改PATH_INFO(和PATH_TRANSLATED)为正确的值,然后就只要添加一个FASTCGI_PARAM项就好了:
+</textarea>现在脚本路径已经交由PHP自己处理了,那怎么增加PATH_INFO呢?<textarea>
+方案一：php内置解析
+需要打开PHP中cgi.fix_pathinfo配置项,打开这个配置项以后PHP会根据CGI规范检查SCRIPT_FILENAME中那部分是访问脚本和PATH_INFO(ini配置解释),并根据SCRIPT_NAME来修改PATH_INFO(和PATH_TRANSLATED)为正确的值,然后就只要添加一个FASTCGI_PARAM项就好了:
 
 location ~ .php {
   fastcgi_index index.php;
@@ -31892,14 +32003,14 @@ location ~ .php {
 }
 
 方案二：nginx正则解析
-上面的解决方法,把对路径的分析交给了PHP去处理,下面是由Nginx来分析路径(也就不需要fix_pathinfo),两种配置方案
+上面的解决方法把对路径的分析交给了PHP去处理,下面是由Nginx来分析路径(也就不需要fix_pathinfo),两种配置方案
 配置方案 使用nginx模块fastcgi_split_path_info (nginx版本>0.7.31)
 
 location ~ \.php {
   fastcgi_pass   127.0.0.1:9000;
   fastcgi_index  index.php;
   include        fastcgi_params;  # 先加载默认后解析赋值
-  fastcgi_split_path_info ^((?U).+\.php)(/?.+)$;  #正则解析路径
+  fastcgi_split_path_info         ^((?U).+\.php)(/?.+)$;  #正则解析路径
   fastcgi_param  PATH_INFO        $fastcgi_path_info;
   fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
 }
@@ -31916,7 +32027,7 @@ fastcgi_split_path_info
 */
 location ~ ^.+\.php {
   (...)
-  fastcgi_split_path_info ^(.+\.php)(.*)$;
+  fastcgi_split_path_info       ^(.+\.php)(.*)$;
   fastcgi_param PATH_INFO       $fastcgi_path_info;
   fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
   fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
@@ -40828,7 +40939,35 @@ php think menu -c test -d 1 删除后台菜单
 
 刷新页面： top.window.location.reload();
 
-</pre>配置数据格式<textarea>
+</pre>\fast\Http<textarea>
+$url = "https://dm-53.data.aliyun.com/rest/160601/ocr/ocr_vehicle.json";
+$appcode = "f87c4abc5e634fd4bcd14d7ec0eb7010";
+$params = ['image' => base64_encode($file), "configure" => json_encode(["side" => "face"])];
+$options = [CURLOPT_HTTPHEADER => [
+    "Authorization:APPCODE " . $appcode,
+    "Content-Type".":"."application/json; charset=UTF-8"
+], CURLOPT_TIMEOUT => 10];
+$resp = \fast\Http::post($url, json_encode($params), $options);
+if(!$resp) $this->error('暂无相关信息');
+$resp = json_decode($resp, true);
+if(!isset($resp["owner"]) || !$resp["owner"]) $this->error('暂无相关信息');
+
+$url = 'https://service-1wfx5rhh-1256187078.ap-beijing.apigateway.myqcloud.com/release/lundroid/idcard';
+$secretId = 'AKID5PajQa40t1Bo23sjegctbt79v5jlzm46b2qm';  // 云市场分配的密钥Id
+$secretKey = '7e7xC9bl85lvpH3lgyhm699q6ksqyfbxfzbd9nry';  // 云市场分配的密钥Key
+$source = 'market';
+$datetime = gmdate('D, d M Y H:i:s T');  // 签名
+$signStr = sprintf("x-date: %s\nx-source: %s", $datetime, $source);
+$sign = base64_encode(hash_hmac('sha1', $signStr, $secretKey, true));
+$auth = sprintf('hmac id="%s", algorithm="hmac-sha1", headers="x-date x-source", signature="%s"', $secretId, $sign);
+$params = ['cardno' => $cardId, 'name' => $name];
+$options = [CURLOPT_HTTPHEADER => [ "X-Source: {$source}", "X-Date: {$datetime}", "Authorization: {$auth}" ]];
+$res = \fast\Http::get($url, $params, $options);
+if (!$res) $this->error('实名认证失败');
+$res = json_decode($res, true);
+if ($res['resp']['code'] != 0) $this->error($res['resp']['desc']);
+
+</textarea>配置数据格式<textarea>
 public function index(){
     $siteList = [
         [
