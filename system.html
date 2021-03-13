@@ -12341,7 +12341,7 @@ GitHub就是一个免费托管开源代码的远程仓库,但对于某些视源�
 </pre>
 
 <h4>使用git生成patch和打入patch 打包 补丁</h4><pre>
-平时在使用git管理项目时会遇到这样一种情况，那就是客户使用git生成patch给我们，需要把客户给到patch打入到project
+平时在使用git管理项目时会遇到这样一种情况,那就是客户使用git生成patch给我们,需要把客户给到patch打入到project
 
 生成patch 的方法：(这里描述的生成patch是根据commit记录生成的)
 1.例如首先先通过git log 查看有哪一些commit
@@ -12351,10 +12351,10 @@ git format-patch e795fefabc
 
 打入patch的方法：
 把生成的patch文件copy到一个patch文件夹中来
-由于这些patch显然是用git format-patch来生成的，所以用git的工具应该就可以很好的做好,git am就是作这件事情。
-在使用git am之前要首先git am --abort一次，来放弃掉以前的am信息，这样才可以进行一次全新的am。
+由于这些patch显然是用git format-patch来生成的,所以用git的工具应该就可以很好的做好,git am就是作这件事情。
+在使用git am之前要首先git am --abort一次,来放弃掉以前的am信息,这样才可以进行一次全新的am。
 不然会遇到这样的错误 .git/rebase-apply still exists but mbox given.
-git am 可以一次合并一个文件，或者一个目录下所有的patch
+git am 可以一次合并一个文件,或者一个目录下所有的patch
 git am patch/*.patch
 git log 查看
 
@@ -12363,18 +12363,18 @@ git format-patch -M master  当前分支所有超前master的提交
 git format-patch 4e16       某次提交以后的所有patch,4e16指的是commit名
 git format-patch --root 4e16  从根到指定提交的所有patch
 git format-patch 365a..4e16  某两次提交之间的所有patch,365a和4e16分别对应两次提交的名称
-git format-patch –n 07fe  某次提交（含）之前的几次提交,-n指patch数，07fe对应提交的名称
+git format-patch –n 07fe  某次提交（含）之前的几次提交,-n指patch数,07fe对应提交的名称
 git format-patch -1 07fe  所以单次提交
-git format-patch生成的补丁文件默认从1开始顺序编号，并使用对应提交信息中的第一行作为文件名。如果使用了-- numbered-files选项，则文件名只有编号，不包含提交信息；如果指定了--stdout选项，可指定输出位置，如当所有patch输出到一个文件；可指定-o dirname指定patch的存放目录；
+git format-patch生成的补丁文件默认从1开始顺序编号,并使用对应提交信息中的第一行作为文件名。如果使用了-- numbered-files选项,则文件名只有编号,不包含提交信息；如果指定了--stdout选项,可指定输出位置,如当所有patch输出到一个文件；可指定-o dirname指定patch的存放目录；
 
 2 应用patch：
 先检查patch文件：git apply --stat newpatch.patch
 检查能否应用成功：git apply --check newpatch.patch
 打补丁：git am --signoff < newpatch.patch
-(使用-s或--signoff选项，可以commit信息中加入Signed-off-by信息)
+(使用-s或--signoff选项,可以commit信息中加入Signed-off-by信息)
 
 如果应用patch出现问题：
-比如，一个典型的git am失败，可能是这样的：
+比如,一个典型的git am失败,可能是这样的：
 $ git am PATCH
 Applying: PACTH DESCRIPTION
 error: patch failed: file.c:137
@@ -12386,13 +12386,13 @@ When you have resolved this problem run "git am --resolved".
 If you would prefer to skip this patch, instead run "git am --skip".
 To restore the original branch and stop patching run "git am --abort".
 
-如果冲突发生，git只是输出上述信息，然后就停下来。一个小冲突会导致整个patch都不会被集成。
+如果冲突发生,git只是输出上述信息,然后就停下来。一个小冲突会导致整个patch都不会被集成。
 
-处理这种问题的最简单方法是先使用 git am --abort，然后手动的添加此patch, patch -p1 < PATCH，手动解决掉代码冲突，最后使用 git commit -a 提交代码。但是这样做有个问题就是你会失去PATCH中原本包含的commit信息（比如From，Date，Subject，Signed-off-by等）。应该有一种更聪明的方法。
+处理这种问题的最简单方法是先使用 git am --abort,然后手动的添加此patch, patch -p1 < PATCH,手动解决掉代码冲突,最后使用 git commit -a 提交代码。但是这样做有个问题就是你会失去PATCH中原本包含的commit信息（比如From,Date,Subject,Signed-off-by等）。应该有一种更聪明的方法。
 
-在 .git/rebase-apply 目录下，存放着相应的补丁文件，名字是“0001” （在更新的git版本中，存放补丁文件的目录名有所改变，这里使用的git版本是 1.7.4.1）。
+在 .git/rebase-apply 目录下,存放着相应的补丁文件,名字是“0001” （在更新的git版本中,存放补丁文件的目录名有所改变,这里使用的git版本是 1.7.4.1）。
 
-事实上可以使用 git apply 命令打patch（git apply 是git中的patch命令）。如同使用 patch -p1 命令时一样，然后手动解决代码冲突（检视生成的 .rej 文件，与冲突文件比较，修改冲突内容，并最终把文件加入到index中）：
+事实上可以使用 git apply 命令打patch（git apply 是git中的patch命令）。如同使用 patch -p1 命令时一样,然后手动解决代码冲突（检视生成的 .rej 文件,与冲突文件比较,修改冲突内容,并最终把文件加入到index中）：
 
 $ git apply PATCH --reject
 $ edit edit edit
@@ -12400,32 +12400,32 @@ $ edit edit edit
 $ git add FIXED_FILES
 $ git am --resolved
 
-git am 并不改变index，需要使用 git apply --reject 打patch（保存在 .git/rebase-apply），手动解决代码冲突，（译注：使用 git status 列出所有涉及文件），把所有文件（不仅仅是引起冲突的文件）添加到（git add）index，最后告诉 git am 你已经解决（--resolved）了问题。这样做的好处是你不需要重新编辑commit信息。而且，如果你正在打的是一系列patch（就是说你在打的是多个patch，比如 git am *.patch）你不需要使用 git am --abort，然后又 git am。
+git am 并不改变index,需要使用 git apply --reject 打patch（保存在 .git/rebase-apply）,手动解决代码冲突,（译注：使用 git status 列出所有涉及文件）,把所有文件（不仅仅是引起冲突的文件）添加到（git add）index,最后告诉 git am 你已经解决（--resolved）了问题。这样做的好处是你不需要重新编辑commit信息。而且,如果你正在打的是一系列patch（就是说你在打的是多个patch,比如 git am *.patch）你不需要使用 git am --abort,然后又 git am。
 
 参考资料：
 Git-format-patch(1) - Linux man page http://linux.die.net/man/1/git-format-patch
 How to create and apply a patch with Git http://ariejan.net/2009/10/26/how-to-create-and-apply-a-patch-with-git
 
 【 两种patch方法对比 】
-patch一般可以分为两种，一种是UNIX下的patch，可以使用git diff或其他UNIX的diff命令生成，一种是git工具生成的patch，是git专用的patch，使用git format-patch命令生成
+patch一般可以分为两种,一种是UNIX下的patch,可以使用git diff或其他UNIX的diff命令生成,一种是git工具生成的patch,是git专用的patch,使用git format-patch命令生成
 
 git diff生成patch的过程一般常用命令如下：
 git diff  > patch
 git diff  --cached > patch
 git diff  branchname --cached > patch
-这时当前目录下就会有一个patch文件，这是一个非git环境也可以使用的patch。对于这种patch，在git上使用要用git apply命令，如下：
+这时当前目录下就会有一个patch文件,这是一个非git环境也可以使用的patch。对于这种patch,在git上使用要用git apply命令,如下：
 git apply patch
-由于这是一个类似UNIX下更新文件的操作，所以执行完上述操作之后实际上是等于手动修改了文件，还要做一些git commit之类的操作。注意git apply是一个事务性操作的命令，要么所有补丁都打上去，要么全部放弃。可以先用git apply --check 查看补丁是否能够干净顺利地应用到当前分支中：git apply --check patch，执行完该命令之后没有任何输出表示可以顺利采纳该补丁，接下来就是git上的提交了。
+由于这是一个类似UNIX下更新文件的操作,所以执行完上述操作之后实际上是等于手动修改了文件,还要做一些git commit之类的操作。注意git apply是一个事务性操作的命令,要么所有补丁都打上去,要么全部放弃。可以先用git apply --check 查看补丁是否能够干净顺利地应用到当前分支中：git apply --check patch,执行完该命令之后没有任何输出表示可以顺利采纳该补丁,接下来就是git上的提交了。
 
-git format-patch生成的补丁是git专用的，也是日常工作中最常接触到的补丁类型。常用命令如下：
+git format-patch生成的补丁是git专用的,也是日常工作中最常接触到的补丁类型。常用命令如下：
 1)两个节点之间的提交： git format-patch  节点A   节点B
 2)单个节点： git format-patch -1 节点A （-n就表示要生成几个节点的提交）
 3)最近一次提交节点的patch ：git format-patch HEAD^ 依次类推……
-使用git format-patch命令生成的patch文件，包含了提交的附加信息如作者，时间等。再次基础上使用git am命令即可将此补丁应用到当前分支。应用完之后当前分支多了一次提交记录，并且有完整的信息，而不是简单的修改文件。
+使用git format-patch命令生成的patch文件,包含了提交的附加信息如作者,时间等。再次基础上使用git am命令即可将此补丁应用到当前分支。应用完之后当前分支多了一次提交记录,并且有完整的信息,而不是简单的修改文件。
 
-在对比一下，git diff 和git format-patch生成的patch一个重要不同之处，实际使用中会发现git diff一次只会生成一个patch文件，不管差别了多少个提交都是一个；而git format-patch是根据提交的节点来的，一个节点一个patch。
+在对比一下,git diff 和git format-patch生成的patch一个重要不同之处,实际使用中会发现git diff一次只会生成一个patch文件,不管差别了多少个提交都是一个；而git format-patch是根据提交的节点来的,一个节点一个patch。
 
-小技巧：如果有额外信息需要补充，但又不想放在提交消息中说明以免搞乱了提交说明,可以编辑这些补丁文件，在第一个“---” 行之前添加说明即可。这样的信息能阅读，但在执行完git am命令之后该节点的提交信息不回包含上述信息。
+小技巧：如果有额外信息需要补充,但又不想放在提交消息中说明以免搞乱了提交说明,可以编辑这些补丁文件,在第一个“---” 行之前添加说明即可。这样的信息能阅读,但在执行完git am命令之后该节点的提交信息不回包含上述信息。
 
 </pre>
 </div>
@@ -40937,7 +40937,15 @@ E:\wendao\5g\public\assets\js\backend\test.js
 php think crud -t test -d 1    删除crud
 php think menu -c test -d 1 删除后台菜单
 
-刷新页面： top.window.location.reload();
+刷新页面： 
+window.parent.location.reload();   //刷新父级页面
+top.window.location.reload();
+$(".btn-refresh").trigger("click");
+table.bootstrapTable('refresh', {});  //刷新当前页面
+
+var ids = Table.api.selectedids(table);
+
+Fast.api.close(data);              //关闭弹出框
 
 </pre>\fast\Http<textarea>
 $url = "https://dm-53.data.aliyun.com/rest/160601/ocr/ocr_vehicle.json";
@@ -40974,9 +40982,9 @@ public function index(){
             'name'=>'gongxiang', 
             'title'=>'共享运营商配置', 
             'list'=>[
-                ['name'=>'tb_adzone_id', 'title'=>'淘宝推广位id', 'tip'=>'', 'type'=>'string', 'value'=>'', 'content'=>NULL, 'rule'=>''],
-                ['name'=>'tb_inviter_code', 'title'=>'淘宝私域用户邀请码', 'tip'=>'', 'type'=>'string', 'value'=>'', 'content'=>NULL, 'rule'=>''],
-                ['name'=>'extract_auto', 'title'=>'自动提现:0=否,1=是', 'tip'=>'', 'type'=>'radio', 'value'=>['0'], 'content'=>['0'=>'否', '1'=>'是'], 'rule'=>''],
+                ['name'=>'tb_adzone_id','title'=>'淘宝推广位id','tip'=>'','type'=>'string','value'=>'','content'=>NULL,'rule'=>''],
+                ['name'=>'tb_inviter_code','title'=>'淘宝私域用户邀请码','tip'=>'','type'=>'string','value'=>'','content'=>NULL,'rule'=>''],
+                ['name'=>'extract_auto','title'=>'自动提现:0=否,1=是','tip'=>'','type'=>'radio','value'=>['0'],'content'=>['0'=>'否','1'=>'是'],'rule'=>''],
             ], 
             'active'=>true
         ],
@@ -40984,31 +40992,30 @@ public function index(){
             'name'=>'test', 
             'title'=>'测试配置', 
             'list'=>[
-                ['name'=>'date', 'title'=>'日期', 'tip'=>'', 'type'=>'date', 'value'=>'', 'content'=>NULL, 'rule'=>''], 
-                ['name'=>'time', 'title'=>'时间', 'tip'=>'', 'type'=>'time', 'value'=>'', 'content'=>NULL, 'rule'=>''], 
-                ['name'=>'datetime', 'title'=>'日期时间', 'tip'=>'', 'type'=>'datetime', 'value'=>'', 'content'=>NULL, 'rule'=>''], 
-                ['name'=>'num', 'title'=>'数字', 'tip'=>'', 'type'=>'number', 'value'=>'1', 'content'=>NULL, 'rule'=>''], 
-                ['name'=>'list', 'title'=>'列表', 'tip'=>'', 'type'=>'select', 'value'=>['value1'], 'content'=>['value1'=>'title1', 'value2'=>'title2'], 'rule'=>''], 
-                ['name'=>'mul_list', 'title'=>'多选列表', 'tip'=>'', 'type'=>'selects', 'value'=>[''], 'content'=>['value1'=>'title1', 'value2'=>'title2'], 'rule'=>''], 
-                ['name'=>'zifu', 'title'=>'字符', 'tip'=>'', 'type'=>'string', 'value'=>'sds', 'content'=>NULL, 'rule'=>''], 
-                ['name'=>'txt', 'title'=>'文本', 'tip'=>'', 'type'=>'text', 'value'=>'sdsds', 'content'=>NULL, 'rule'=>''], 
-                ['name'=>'data_time_range', 'title'=>'日期时间区间', 'tip'=>'', 'type'=>'datetimerange', 'value'=>'2020-10-29 00:00:00 - 2020-11-04 23:59:59', 'content'=>NULL, 'rule'=>''], 
-                ['name'=>'img', 'title'=>'图片', 'tip'=>'', 'type'=>'image', 'value'=>'/uploads/20201104/f09.png', 'content'=>NULL, 'rule'=>''], 
-                ['name'=>'mul_img', 'title'=>'多图', 'tip'=>'', 'type'=>'images', 'value'=>'/uploads/20201104/3cb.jpg,/uploads/20201104/f09.png', 'content'=>NULL, 'rule'=>''], 
-                ['name'=>'file', 'title'=>'文件', 'tip'=>'', 'type'=>'file', 'value'=>'/uploads/20201104/f09.png', 'content'=>NULL, 'rule'=>''], 
-                ['name'=>'mul_file', 'title'=>'多文件', 'tip'=>'', 'type'=>'files', 'value'=>'/uploads/20201104/f09.png,/uploads/20201104/34b.jpg', 'content'=>NULL, 'rule'=>''], 
-                ['name'=>'switch', 'title'=>'开关', 'tip'=>'', 'type'=>'switch', 'value'=>'0', 'content'=>NULL, 'rule'=>''], 
-                ['name'=>'fuxuan', 'title'=>'复选', 'tip'=>'', 'type'=>'checkbox', 'value'=>[''], 'content'=>['value1'=>'title1', 'value2'=>'title2'], 'rule'=>''], 
-                ['name'=>'danxuan', 'title'=>'单选', 'tip'=>'', 'type'=>'radio', 'value'=>[''], 'content'=>['value1'=>'title1', 'value2'=>'title2'], 'rule'=>''], 
-                ['name'=>'city', 'title'=>'城市', 'tip'=>'', 'type'=>'city', 'value'=>'湖南省/长沙市/芙蓉区', 'content'=>NULL, 'rule'=>''], 
-                ['name'=>'arr', 'title'=>'数组', 'tip'=>'', 'type'=>'array', 'value'=>'{"1":"1","2":"2"}', 'content'=>['value1'=>'title1', 'value2'=>'title2'], 'rule'=>''], 
-                ['name'=>'edit', 'title'=>'编辑器', 'tip'=>'', 'type'=>'editor', 'value'=>'撒大声地所多多所', 'content'=>NULL, 'rule'=>''],
-                ['name'=>'mail_from', 'title'=>'发件人邮箱', 'tip'=>'', 'type'=>'string', 'value'=>'10000@qq.com', 'content'=>NULL, 'rule'=>''], 
+                ['name'=>'date','title'=>'日期','tip'=>'','type'=>'date','value'=>'','content'=>NULL,'rule'=>''], 
+                ['name'=>'time','title'=>'时间','tip'=>'','type'=>'time','value'=>'','content'=>NULL,'rule'=>''], 
+                ['name'=>'datetime','title'=>'日期时间','tip'=>'','type'=>'datetime','value'=>'','content'=>NULL,'rule'=>''], 
+                ['name'=>'num','title'=>'数字','tip'=>'','type'=>'number','value'=>'1','content'=>NULL,'rule'=>''], 
+                ['name'=>'list','title'=>'列表','tip'=>'','type'=>'select','value'=>['value1'],'content'=>['value1'=>'title1','value2'=>'title2'],'rule'=>''], 
+                ['name'=>'mul_list','title'=>'多选列表','tip'=>'','type'=>'selects','value'=>[''],'content'=>['value1'=>'title1','value2'=>'title2'],'rule'=>''], 
+                ['name'=>'zifu','title'=>'字符','tip'=>'','type'=>'string','value'=>'sds','content'=>NULL,'rule'=>''], 
+                ['name'=>'txt','title'=>'文本','tip'=>'','type'=>'text','value'=>'sdsds','content'=>NULL,'rule'=>''], 
+                ['name'=>'data_time_range','title'=>'日期时间区间','tip'=>'','type'=>'datetimerange','value'=>'2020-10-29 00:00:00 - 2020-11-04 23:59:59','content'=>NULL,'rule'=>''], 
+                ['name'=>'img','title'=>'图片','tip'=>'','type'=>'image','value'=>'/uploads/20201104/f09.png','content'=>NULL,'rule'=>''], 
+                ['name'=>'mul_img','title'=>'多图','tip'=>'','type'=>'images','value'=>'/uploads/20201104/3cb.jpg,/uploads/20201104/f09.png','content'=>NULL,'rule'=>''], 
+                ['name'=>'file','title'=>'文件','tip'=>'','type'=>'file','value'=>'/uploads/20201104/f09.png','content'=>NULL,'rule'=>''], 
+                ['name'=>'mul_file','title'=>'多文件','tip'=>'','type'=>'files','value'=>'/uploads/20201104/f09.png,/uploads/20201104/34b.jpg','content'=>NULL,'rule'=>''], 
+                ['name'=>'switch','title'=>'开关','tip'=>'','type'=>'switch','value'=>'0','content'=>NULL,'rule'=>''], 
+                ['name'=>'fuxuan','title'=>'复选','tip'=>'','type'=>'checkbox','value'=>[''],'content'=>['value1'=>'title1','value2'=>'title2'],'rule'=>''], 
+                ['name'=>'danxuan','title'=>'单选','tip'=>'','type'=>'radio','value'=>[''],'content'=>['value1'=>'title1','value2'=>'title2'],'rule'=>''], 
+                ['name'=>'city','title'=>'城市','tip'=>'','type'=>'city','value'=>'湖南省/长沙市/芙蓉区','content'=>NULL,'rule'=>''], 
+                ['name'=>'arr','title'=>'数组','tip'=>'','type'=>'array','value'=>'{"1":"1","2":"2"}','content'=>['value1'=>'title1','value2'=>'title2'],'rule'=>''], 
+                ['name'=>'edit','title'=>'编辑器','tip'=>'','type'=>'editor','value'=>'多多','content'=>NULL,'rule'=>''],
+                ['name'=>'mail_from','title'=>'发件人邮箱','tip'=>'','type'=>'string','value'=>'10000@qq.com','content'=>NULL,'rule'=>''], 
             ], 
             'active'=>false, 
         ],
     ];
-
     $this->view->assign('siteList', $siteList);
     return $this->view->fetch();
 }
@@ -41018,24 +41025,19 @@ public function index(){
 fastadmin前端表格组件使用的是bootstrap-table,如果我们想要自定义表格的内容,可以使用formatter属性。最常规的用法如下：
 
 </pre><textarea>
-columns: [
-    [
-                       
-        {
-           field: 'type', title: __('type'), 
-           formatter: function (value,row) {
-              if (value === 0) return '普通存储';
-              if (value === 1) return '低频存储';
-           }
-        },
-        {
-           field: 'url', title: __('url'), 
-           formatter: function (value,row) {
-              return '< a href="' + value + '">' + row.name + '< /a>';
-           }
+columns: [ [
+    {
+        field: 'type', title: __('type'), 
+        formatter: function (value,row) {
+            return value === 0 ? '普通存储' : '低频存储';
         }
-    ]
-]
+    }, {
+        field: 'url', title: __('url'), 
+        formatter: function (value,row) {
+            return '< a href="' + value + '">' + row.name + '< /a>';
+        }
+    }
+] ]
 
 </textarea><pre>
 简单来说formatter可以定义为一个function返回一段html代码而这个function的第一个参数为当前字段值第二个参数为一整行数据。
@@ -41077,9 +41079,7 @@ fastadmin默认自带三个操作按钮拖拽、编辑和删除,自定义菜单�
 
 </pre><textarea>
 {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: function (value, row, index) {
-    if(row.id == Config.admin.id){
-        return '';
-    }
+    if(row.id == Config.admin.id) return '';
     return Table.api.formatter.operate.call(this, value, row, index);
 }}
 
@@ -41137,8 +41137,7 @@ table.bootstrapTable({
                         },
                         success: function (data, ret) {
                             $(".btn-refresh").trigger("click");
-                            //如果需要阻止成功提示,则必须使用return false;
-                            //return false;
+                            //return false;  //如果需要阻止成功提示,则必须使用return false;
                         },
                         error: function (data, ret) {
                             console.log(data, ret);
@@ -41223,7 +41222,6 @@ Controller.api.bindevent();
 define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
     var Controller = {
         index: function () {
-            // 初始化表格参数配置
             Table.api.init({
                 extend: {
                     index_url: 'weizhang_order/index' + location.search,
@@ -41266,8 +41264,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     name:'detail',text: '违章详情',icon:'',
                                     classname:'btn btn-xs btn-primary btn-dialog', 
                                     url:'weizhang_order/detail'+ location.search + '&weizhangid={weizhangid}',  // 自定义参数使用weizhangid字段
-                                },
-                                {
+                                },{
                                     name:'detail',text: '完成',icon:'',
                                     classname: 'btn btn-xs btn-success btn-magic btn-ajax',
                                     url:'weizhang_order/finish',
@@ -41287,14 +41284,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         Layer.alert(ret.msg);
                                         return false;
                                     }
-                                },
-                                {
+                                },{
                                     name:'detail',text: '退款',icon:'',
                                     classname:'btn btn-xs btn-danger btn-refund', 
                                     visible: function (row) { //返回true时按钮显示,返回false隐藏
                                         return row.status == 2 || row.status == 3
                                     },
-                                },
+                                },{
+                                    name: 'click',
+                                    text: '复制',
+                                    title: '复制提示',
+                                    classname: 'btn btn-xs btn-info btn-click',
+                                    // icon: 'fa fa-leaf',
+                                    visible: function (row) { //返回true时按钮显示,返回false隐藏
+                                        return row.info;
+                                    },
+                                    click: function (data) {
+                                        $row = Table.api.selecteddata(table)[0];
+                                        var oInput = document.createElement('input');
+                                        oInput.value = $row.info;
+                                        document.body.appendChild(oInput);
+                                        oInput.select(); // 选择对象
+                                        document.execCommand("Copy"); // 执行浏览器复制命令
+                                        oInput.className = 'oInput';
+                                        oInput.style.display='none';
+                                        Layer.alert("复制成功");
+                                    }
+                                }
                             ],
                             events: {
                                 ...Table.api.events.operate,
@@ -41366,7 +41382,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'operate', title: __('Operate'), table: table,
                             buttons: [
                                 {
-                                    name:'detail_finish',text: '已处理',icon:'',
+                                    name:'detail_finish',
+                                    text: '已处理',
+                                    icon: 'fa fa-list',
                                     classname: 'btn btn-xs btn-danger btn-magic btn-ajax',
                                     url:'weizhang/finish',
                                     visible: function (row) { //返回true时按钮显示,返回false隐藏
@@ -41387,10 +41405,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Table.api.formatter.operate
                         },
                         {field: 'id', title: __('Id')},
-                        {field: 'status', title: __('Status'), searchList: {"0":__('未处理'),"1":__('已处理')}, formatter: Table.api.formatter.status},
+                        {field: 'status',title: __('Status'),searchList:{"0":__('未处理'),"1":__('已处理')},formatter:Table.api.formatter.status},
                         {field: 'user_id', title: __('User_id'), visible: false},
                         {field: 'car_id', title: __('Car_id'), visible: false},
-                        {field: 'time', title: __('时间'), operate:'RANGE', addclass:'datetimerange', autocomplete:false, formatter: Table.api.formatter.datetime},
+                        {field: 'time',title:__('时间'),operate:'RANGE',addclass:'datetimerange',autocomplete:false,formatter:Table.api.formatter.datetime},
                         {field: 'address', title: __('地点'), operate: 'LIKE'},
                         {field: 'score', title: __('扣分')},
                         {field: 'price', title: __('罚款金额'), operate:'BETWEEN'},
@@ -41400,8 +41418,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     ]
                 ]
             });
-
-            // 为表格绑定事件
             Table.api.bindevent(table);
         },
         add: function () {
@@ -41462,9 +41478,45 @@ public function finish(){
      return json_encode(['code' => 1, 'msg' => '操作成功']);
 }
 
-</textarea><pre>
+</textarea>自定义弹窗底部按钮<textarea>
+在视图中的.layer-footer区域内添加按钮，例如：
+<div class="form-group layer-footer">
+    <label class="control-label col-xs-12 col-sm-2"></label>
+    <div class="col-xs-12 col-sm-8">
+        <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+        <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        <button type="button" class="btn btn-info btn-embossed btn-accept">{:__('Accept')}</button>
+        <button type="button" class="btn btn-danger btn-embossed btn-reject">{:__('Reject')}</button>
+    </div>
+</div>
 
+然后在所对应的JS方法中添加
+$(document).on("click", ".btn-accept", function(){
+    Fast.api.ajax("你的链接", function(){
+        parent.window.$("#table").bootstrapTable('refresh');
+        Fast.api.close();  // 关闭弹窗
+    });
+});
+
+</textarea>自定义工具按钮弹窗筛选数据<textarea>
+< a href="auth/admin/add?type=sale" class="btn btn-info btn-dialog {:$auth->check('auth/admin/add')?'':'hide'}" title="{:__('Add')}" ><i class="fa fa-plus"></i> 添加销售</a>
+
+</textarea><pre>
 3、渲染数据
+Table.api.init(defaults, columnDefaults, locales)  // 此方法用于初始化表格默认配置、表格列配置、写入语言包等操作
+Table.api.bindevent(table)                         // 此方法用于为表格中的元素绑定相关事件
+Table.api.multi(action, ids, table, element)       // 此方法常用于批量操作请求，内部使用
+Table.api.events.operate                           // 操作栏单元格方法
+Table.api.events.image                             // 图片栏单元格方法
+Table.api.formatter                                // 格式化方法，后面单独介绍
+Table.api.buttonlink(column, buttons, value, row, index, type) // 按钮链接生成，内部使用
+Table.api.replaceurl(url, row, table)              // 替换URL中的数据
+Table.api.selectedids(table)                       // 获取选中的条目ID集合
+Table.api.toggleattr(table)                        // 切换复选框状态
+Table.api.getrowdata(table, index)                 // 根据行索引获取行数据
+Table.api.getrowbyindex(table, index)              // 根据行索引获取行数据
+Table.api.getrowbyid(table, id)                    // 根据主键ID获取行数据
+
 fastadmin底层自带了很多渲染数据的格式,比如
 > `Table.api.formatter.icon` 快速将字段渲染成一个按钮,仅支持Fontawesome按钮
 > `Table.api.formatter.image` 快速将字段渲染成图片展示的形式
@@ -41480,9 +41532,7 @@ fastadmin底层自带了很多渲染数据的格式,比如
 > `Table.api.formatter.buttons` 快速生成多个按钮
 > `Table.api.formatter.toggle` 快速生成切换按钮
 
-可以自定义渲染数据,比如订单查询的时候,一个订单可能会对应多条商品数据,这在index页面显示的时候,就不好显示了,所以可以把每个订单对应的商品数据,都放在一个字段里,示例如下图所示,此处goods字段是控制器中with的一对多的goods模型
-
-可以自定义渲染数据,比如订单查询的时候,一个订单可能会对应多条商品数据,这在index页面显示的时候,就不好显示了,所以可以把每个订单对应的商品数据都放在一个字段里,示例如下所示,此处goods字段是控制器中with的一对多的goods模型
+可以自定义渲染数据,比如订单查询的时候,一个订单可能会对应多条商品数据,这在index页面显示的时候就不好显示了,所以可以把每个订单对应的商品数据都放在一个字段里,此处goods字段是控制器中with的一对多的goods模型
 
 </pre><textarea>
 {field: 'goods',title:'商品',formatter:function (value,data,key) {
@@ -41494,7 +41544,6 @@ fastadmin底层自带了很多渲染数据的格式,比如
     });
     return content;
 }},
-// {field: 'address_address', title: __('Address_address')},
 
 </textarea><pre>
 4、js中使用控制器中的数据
@@ -41505,12 +41554,33 @@ fastadmin底层自带了很多渲染数据的格式,比如
 如果想自定义配置的话,首先在application/common/model/config.php中获取配置类型的方法,可以追加自己想要的类型,比如：
 
 </pre><textarea>
-'radio'    => __('Radio'),
-'array'    => __('Array'),
-'custom'   => __('Custom'),
-'rank'     =>'名次规则',
-];
-return $typeList;
+public static function getTypeList() {
+    $typeList = [
+        'string'        => __('String'),
+        'text'          => __('Text'),
+        'editor'        => __('Editor'),
+        'number'        => __('Number'),
+        'date'          => __('Date'),
+        'time'          => __('Time'),
+        'datetime'      => __('Datetime'),
+        'datetimerange' => __('Datetimerange'),
+        'select'        => __('Select'),
+        'selects'       => __('Selects'),
+        'image'         => __('Image'),
+        'images'        => __('Images'),
+        'file'          => __('File'),
+        'files'         => __('Files'),
+        'switch'        => __('Switch'),
+        'checkbox'      => __('Checkbox'),
+        'radio'         => __('Radio'),
+        'city'          => __('City'),
+        'selectpage'    => __('Selectpage'),
+        'selectpages'   => __('Selectpages'),
+        'array'         => __('Array'),
+        'custom'        => __('Custom'),
+        'rank'          =>'名次规则',
+    ];
+    return $typeList;
 }
 
 然后在application/admin/view/general/config/index.html文件中,增加自定义配置的格式就行了,比如借用一下数组的格式设置不同等级的不同佣金比例
@@ -41584,6 +41654,64 @@ api: {
         data-url="jq/ajax/company?type=3" data-query-name="pid">
 </select>
 
+</textarea>Selectpage下拉列表实现二级联动，多级联动<textarea>
+// 添加页面 add
+<div class="form-group">
+    <label class="control-label col-xs-12 col-sm-2">{:__('水厂')}:</label>
+    <div class="col-xs-12 col-sm-8">
+        <input id="c-waterworks_id" data-rule="required" data-field="waterworks_name" data-source="waterworks/index" class="form-control selectpage" name="row[waterworks_id]" type="text" value="">
+    </div>
+</div>
+<div class="form-group">
+    <label class="control-label col-xs-12 col-sm-2">{:__('设备间')}:</label>
+    <div class="col-xs-12 col-sm-8">
+        <input id="c-waterworks_type_id" data-rule="required" data-field="device_name" data-source="waterworks_device/index" class="form-control selectpage" name="row[device_id]" type="text" value="">
+    </div>
+</div>
+
+$param1 = $this->request->param();
+if(!empty($param1['custom'])){
+    $where1['waterworks_id'] = $param1['custom']['waterworks_id'];
+}else{
+    $where1 = "id > 0";
+}
+$list = $this->model->where($where)->where($where1)->order($sort, $order)->limit($offset, $limit)->select();
+
+add: function () {
+    $("#c-waterworks_type_id").data("params", function(){
+        return {custom: {waterworks_id: $("#c-waterworks_id").val()}};
+    });
+    Controller.api.bindevent();
+},
+edit: function () {
+    $("#c-waterworks_type_id").data("params", function(){
+        return {custom: {waterworks_id: $("#c-waterworks_id").val()}};
+    });
+    Controller.api.bindevent();
+},
+
+// 修改页面 edit
+<div class="form-group">
+    <label class="control-label col-xs-12 col-sm-2">{:__('水厂')}:</label>
+    <div class="col-xs-12 col-sm-8">
+        <input id="c-waterworks_id" data-rule="required" data-field="waterworks_name" data-source="waterworks/index" class="form-control selectpage" name="row[waterworks_id]" type="text" value="{$row.waterworks_id}">
+    </div>
+</div>
+<div class="form-group">
+    <label class="control-label col-xs-12 col-sm-2">{:__('设备间')}:</label>
+    <div class="col-xs-12 col-sm-8">
+        <input id="c-waterworks_type_id" data-rule="required" data-field="device_name" data-source="waterworks_device/index" class="form-control selectpage" name="row[device_id]" type="text" value="{$row.device_id}">
+    </div>
+</div>
+
+foreach($list as $key=>$value){
+    $list[$key]['parent_id']=db('admin')->where('id',$value['parent_id'])->value('nickname');//所属客户
+    $list[$key]['operate_id']=db('admin')->where('id',$value['operate_id'])->value('nickname');//运维人员
+    if($this->request->request("keyValue") && $this->request->request("keyValue") == $value['id']){
+        return [ 'total'=>1, 'list'=>[ ['id'=>$value['id'], 'waterworks_name'=>$value['waterworks_name']] ] ];
+    }
+}
+
 </textarea><pre>
 8、详情内自定义审核按钮
 查看详情时默认就是确定及重置操作,其中确定是提交到form表单指定的action地址上,已经满足了日常修改的需求
@@ -41618,11 +41746,11 @@ api: {
 
 use traits\model\SoftDelete;
 class Product extends Model{
-use SoftDelete;
-protected $autoWriteTimestamp = 'int';  // 自动写入时间戳字段
-protected $createTime = 'createtime';  // 定义时间戳字段名
-protected $updateTime = 'updatetime';
-protected $deleteTime = 'delete_time'; //默认就是deleteTime,所以此处直接可以省略可以不写
+    use SoftDelete;
+    protected $autoWriteTimestamp = 'int';  // 自动写入时间戳字段
+    protected $createTime = 'createtime';  // 定义时间戳字段名
+    protected $updateTime = 'updatetime';
+    protected $deleteTime = 'delete_time'; //默认就是deleteTime,所以此处直接可以省略可以不写
 }
 
 10、手动更改toggle
@@ -41662,14 +41790,45 @@ public function multi($ids = ""){
 通过cssStyle自定义样式,然后再自定义formatter即可
 
 </pre><textarea>
-{field: 'des', title: __('Des'), operate:false,cellStyle:function (value,row,index,field) {
-    return {css: {"min-width": "150px","white-space": "nowrap","text-overflow": "ellipsis","overflow": "hidden","max-width":"300px"}};
-    },formatter:function (value,row,index,field) {
-    var span=document.createElement('span');
-    span.setAttribute('title',value);
-    span.innerHTML = value;
-    return span.outerHTML;
-}},
+{
+    field: 'des', title: __('Des'), operate:false,
+    cellStyle:function (value,row,index,field) {
+        return {css: {"min-width": "150px","white-space": "nowrap","text-overflow": "ellipsis","overflow": "hidden","max-width":"300px"}};
+    },
+    formatter:function (value,row,index,field) {
+        var span=document.createElement('span');
+        span.setAttribute('title',value);
+        span.innerHTML = value;
+        return span.outerHTML;
+    }
+},
+
+{
+    field: 'mark',
+    title: '备注',
+    formatter:function(value,row,index){
+        value=value?value:'';  //此处对value值做判断，不然value为空就会报错
+        var length = value.length;
+        var ext = '';
+        if(length && length>10){
+            length=10;
+            ext = '...';
+        }
+        return"<span title ='"+value+"'>"+value.substring(0,length) + ext +"</span>"
+    }
+}
+
+// 超过宽度则换行
+{
+    field: 'info',
+    title: '工作详情',
+    operate: false,
+    formatter: function (value, row, index) {
+        return row.remarks;
+    },
+    align: 'left',
+    cellStyle: {css: {"min-width":"200px","max-width":"400px",'word-break':'break-all','white-space':'normal'}}
+},
 
 </textarea><pre>
 13、data_rule 验证规则
@@ -41710,6 +41869,1811 @@ protected $searchFields = 'id,operating,member_id,remarks';
         return Table.api.formatter.operate.call(that, value, row, index);
     }
 }
+
+</textarea>
+</div>
+
+<div id="we7">
+<h2>微擎</h2><pre>
+微擎框架中uid、acid、uniacid之间的关系
+首先,在创建应用的时候,会在表uni_account中插入一条应用数据,其中default_acid=0,返回值为该表的主键,作为$uniacid。
+然后,会在表account中插入一条账户数据,其中uniacid=$uniacid,返回值为该表的主键,作为$acid。
+然后,会更新表uni_account中的数据default_acid=$acid,也就是说正常情况下,$uniacid和$acid值是相同的,但如果在两个表操作过程中出现了异常情况,则有可能导致不同。
+最后,会在表uni_account_users中插入用户与应用的关联数据,其中uniacid=$uniacid,uid=$uid,role=$rold。而role可以是clerk,operator,manager,owner,founder,vice_founder,unbind_user,expired中的一个角色。
+也就是说用户和应用之间是多对多的关系,一个用户可以管理多个应用,一个应用可以授权给多个用户管理。
+
+微擎模块更新
+我们公司这边有一个测试环境,我每次都是在测试环境测试通过后就git到码云中去。然后深圳那边的公司的人进行打包升级,但是最近频繁出错,原因是php的版本问题。然后他们那边也想创一个测试环境部署,测试通过才发布。他们从git项目中拉下来的项目到部署环境中部署,出现了一大堆的问题。后面排查是数据库字段问题。所以我猜测到应该是断更的问题,也就是我们每个版本的升级可能有一些表要增加字段,所以要在manifest.xml配置文件中的upgrade节点中写入sql语句。但是每个版本只能写入当前版本要增加或者修改的字段,这样就导致如果断更过,直接升级到高级的版本可能某个功能就会用不了,出现缺乏字段等等。
+所以我查了微擎的升级方式,有两种：
+1：在maifest.xml文件写入sql语句
+2：在manifest.xml文件目录下新建一个upgrade.php文件,然后在manifest.xml文件中的upgrade节点输入upgrade.php即可
+
+</pre>网络文件上传<textarea>
+public function doPageWxcode(){
+    global $_GPC, $_W;
+    $file = "qrcode{$_W['user']['id']}.png";
+    $target = ATTACHMENT_ROOT . $file;
+
+    if(!file_exists($target)){
+        $res = ihttp_get("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={$_W['account']['key']}&secret={$_W['account']['secret']}");
+        if($res['code'] != 200) $this->result(0, '获取失败');
+        $res = json_decode($res['content'], true);
+        $token = $res['access_token'];
+        $res = ihttp_post("https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token={$token}", json_encode(['page' => 'pages/home/home', 'scene' => $_W['user']['code']]));
+        if($res['code'] != 200) $this->result(0, '获取失败');
+        file_put_contents($target, $res['content']);
+    }
+    $this->result(0, '小程序码', tomedia($file));
+}
+
+</textarea>图片上传<textarea>
+public function doPageUpload(){
+    global $_GPC, $_W;
+    $uptypes = array('image/jpg', 'image/jpeg', 'image/png', 'image/pjpeg', 'image/gif', 'image/bmp', 'image/x-png');
+    $max_file_size = 2000000; //上传文件大小限制, 单位BYTE
+    $destination_folder = "../attachment/".$_GPC['m']."/"; //上传文件路径
+    if (!is_uploaded_file($_FILES["upfile"]['tmp_name'])) exit("图片不存在!");
+    $file = $_FILES["upfile"];
+    if ($max_file_size < $file["size"]) exit("文件太大!");
+    if (!in_array($file["type"], $uptypes)) exit("文件类型不符!" . $file["type"]);
+    if (!file_exists($destination_folder)) mkdir($destination_folder);
+    
+    $filename = $file["tmp_name"];
+    $pinfo = pathinfo($file["name"]);
+    $ftype = $pinfo['extension'];
+    $destination = $destination_folder . str_shuffle(time() . rand(111111, 999999)) . "." . $ftype;
+    if (file_exists($destination) && $overwrite != true) exit("同名文件已经存在了");
+    if (!move_uploaded_file($filename, $destination)) exit("移动文件出错");
+
+    $pinfo = pathinfo($destination);
+    $fname = $pinfo['basename'];
+    echo $fname;
+    @require_once (IA_ROOT . '/framework/function/file.func.php');
+    @$filename = $fname;
+    @file_remote_upload($filename);
+}
+
+selImg(e){
+    let that = this;
+    let name = e.currentTarget.dataset.name;
+    let attachurl = that.data.attachurl;
+    let uploadUrl = app.util.url('entry/wxapp/upload',{m:'duson_test'});
+    wx.chooseImage({
+        count: 1, // 默认9
+        sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
+        sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
+        success: function (res) {
+            var tempFilePaths = res.tempFilePaths[0]
+            wx.uploadFile({
+                url: uploadUrl,
+                filePath: tempFilePaths,
+                name: 'upfile',
+                formData: {},
+                success: function (res) {
+                    console.log(res)
+                    if (name == 'head') {
+                        let head_img = 'business.head_img';
+                        that.setData({ [head_img]: res.data })
+                    }
+                    if (name == 'door') {
+                        let door_photo = 'business.door_photo';
+                        that.setData({ [door_photo]:  res.data })
+                    }
+                },
+                fail: function (res) {
+                    console.log('失败返回数据',res)
+                },
+            })
+        }
+    })
+},
+
+</textarea>微擎中海报生成处理以图片处理<textarea>
+/**
+* @param $imgurl
+* @return resource
+* GD库载入一幅图像 (背景)
+*/
+function createImage($imgurl) {
+    load()->func("communication");
+    $resp = ihttp_request($imgurl);
+    return imagecreatefromstring($resp["content"]);
+}
+
+/**
+* @param $param 海报配置文件
+* @param $qr_file  用户二维码
+* @return string
+* 创建海报图片
+*/
+function createImageUrl($param, $qr_file) {
+    load()->func('logging');
+    error_reporting(E_ALL ^ E_NOTICE);
+    load()->func("file");
+    $pp1="images/" . $param["uniacid"] . "/" . date("Y/m/d");
+    $path = ATTACHMENT_ROOT.$pp1;
+    $filename="/qr-image-" . $param["from_user"] . rand() . ".jpg";
+    $target_file = $path.$filename;
+    $bg_file = empty($param["bg"]) ? IA_ROOT . "/addons/le_hykx/style/images/qrcode.jpg" : $param["bg"];
+    set_time_limit(0);
+    @ini_set("memory_limit", "256M");
+    $target = imagecreatetruecolor(640, 1008);       //创建,宽:640  高:1008
+    $bg = createImage(tomedia($bg_file));            //载入后台配置的背景图片
+    imagecopy($target, $bg, 0, 0, 0, 0, 640, 1008);  //拷贝背景图到target上  宽:640 高:1008
+    imagedestroy($bg);                               //释放原背景关联内存
+    $data = json_decode(str_replace("&quot;", "'", $param["data"]), true);
+    foreach ($data as $d) {
+        $d = getRealData($d);
+        if ($d["type"] == "head") {
+            $avatar = preg_replace("/\\/0\$/i", "/96", $param["avatar"]);
+            $target = newMergeImage($target, $d, $avatar);
+        } else {
+            if ($d["type"] == "img") {
+                $target = newMergeImage($target, $d, $d["src"]);
+            } else {
+                if ($d["type"] == "qr") {
+                    $target = newMergeImage($target, $d, tomedia($qr_file));
+                } else {
+                    if ($d["type"] == "nickname") {
+                        $target = mergeText($target, $d, $param["nickname"]);
+                    }else {
+                        if ($d["type"] == "qq") {
+                            $target = mergeText($target, $d, $param["qq"]);
+                        }else {
+                            if ($d["type"] == "jg") {
+                                $target = mergeText($target, $d, $param["jg"]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    $res=imagejpeg($target, $target_file);
+
+    logging_run('图片创建结果');
+    logging_run($target_file);
+    imagedestroy($target);
+    tomedia($target_file);
+    return array('target_file'=>$target_file,'pp1'=>$pp1.$filename);
+}
+
+function getRealData($data) {
+    $data["left"] = intval(str_replace("px", '', $data["left"])) * 2;
+    $data["top"] = intval(str_replace("px", '', $data["top"])) * 2;
+    $data["width"] = intval(str_replace("px", '', $data["width"])) * 2;
+    $data["height"] = intval(str_replace("px", '', $data["height"])) * 2;
+    $data["size"] = intval(str_replace("px", '', $data["size"])) * 2;
+    $data["src"] = tomedia($data["src"]);
+    return $data;
+}
+
+function newMergeImage($target, $data, $imgurl) {
+    $img = createImage($imgurl);
+    $w = imagesx($img);
+    $h = imagesy($img);
+    imagecopyresized($target, $img, $data["left"], $data["top"], 0, 0, $data["width"], $data["height"], $w, $h);
+    imagedestroy($img);
+    return $target;
+}
+
+//用户昵称处理
+function mergeText($target, $data, $text) {
+    load()->func('logging');
+    $font = IA_ROOT . "/web/resource/fonts/le_hykx.ttf";
+    $colors = hex2rgb($data["color"]);
+    $color = imagecolorallocate($target, $colors["red"], $colors["green"], $colors["blue"]);
+
+    $temp = array("color" => array($colors['red'], $colors['green'], $colors['blue']), "fontsize" =>$data['size'],"height"=>$data['height'], "width" => $data['width'], "left" => $data['left'], "top" => $data['top'], "hang_size" => 40);    //这里我只用它做测量高度，把参数false改为true就是绘制了。
+
+    draw_txt_to($target, $temp, $text, true);
+
+    //$res=textalign($target,$data,$text,true,'','','');
+
+    //logging_run($str_h);
+    //imagettftext($target, $data["size"], 0, $data["left"], $data["top"] + $data["size"], $color, $font, $text);
+    return $target;
+}
+
+//----------分割线------------/**
+/* 文字自动换行算法
+* @param $card 画板
+* @param $pos 数组，top距离画板顶端的距离，fontsize文字的大小，width宽度，left距离左边的距离，hang_size行高
+* @param $str 要写的字符串
+* @param $iswrite  是否输出，ture，  花出文字，false只计算占用的高度
+* @return int 返回整个字符所占用的高度*/
+function draw_txt_to($card, $pos, $str, $iswrite){
+    load()->func('logging');
+    $_str_h = $pos['top'];
+    $fontsize = $pos["fontsize"];
+    $width = $pos["width"];
+    $margin_lift = $pos["left"];
+    $hang_size = $pos["hang_size"];
+    $temp_string = "";
+    $font_file = IA_ROOT . "/web/resource/fonts/le_hykx.ttf";
+    $tp = 0;
+
+    logging_run($pos);
+    $font_color = imagecolorallocate($card, $pos["color"][0], $pos["color"][1], $pos["color"][2]);
+    for ($i = 0; $i < mb_strlen($str); $i++) {
+        if($_str_h>$pos['height']+$pos['top']) continue;
+        $box = imagettfbbox($fontsize, 0, $font_file, $temp_string);
+        $_string_length = $box[2] - $box[0];
+        $temptext = mb_substr($str, $i, 1);
+        $temp = imagettfbbox($fontsize, 0, $font_file, $temptext);
+        //logging_run('宽度测试:'.$_str_h);
+        if ($_string_length + $temp[2] - $temp[0] < $width) {//长度不够，字数不够，需要
+            $temp_string .= mb_substr($str, $i, 1);  //继续拼接字符串。
+            if ($i == mb_strlen($str) - 1) {         //是不是最后半行。不满一行的情况
+                $_str_h += $hang_size;               //计算整个文字换行后的高度。
+                $tp++;                               //行数
+                if ($iswrite) {                      //是否需要写入，核心绘制函数
+                    imagettftext($card, $fontsize, 0, $margin_lift, $_str_h, $font_color, $font_file, $temp_string);
+                }
+            }
+        } else {                                     //一行的字数够了，长度够了。打印输出，对字符串零时字符串置null
+            logging_run('宽度测试:2');
+            $texts = mb_substr($str, $i, 1);         //零时行的开头第一个字。判断默认第一个字符是不是符号；
+            $isfuhao = preg_match("/[\\\\pP]/u", $texts) ? true : false;//一行的开头这个字符，是不是标点符号
+            if ($isfuhao) {                          //如果是标点符号，则添加在第一行的结尾
+                $temp_string .= $texts;              // 判断如果是连续两个字符出现，并且两个丢失必须放在句末尾的，单独处理
+                $f = mb_substr($str, $i + 1, 1);
+                $fh = preg_match("/[\\\\pP]/u", $f) ? true : false;                if ($fh) {
+                    $temp_string .= $f;
+                    $i++;
+                }
+            } else {
+                $i--;
+            }
+
+            $tmp_str_len = mb_strlen($temp_string);
+            $s = mb_substr($temp_string, $tmp_str_len-1, 1);//取零时字符串最后一位字符
+
+            if (is_firstfuhao($s)) {                        //判断零时字符串的最后一个字符是不是可以放在见面
+                $temp_string=rtrim($temp_string,$s);        //讲最后一个字符用“_”代替。指针前移动一位。重新取被替换的字符。
+                $i--;
+            }//            }                                //计算行高，和行数。
+            $_str_h += $hang_size;
+            $tp++;            
+            if ($iswrite) {
+                imagettftext($card, $fontsize, 0, $margin_lift, $_str_h, $font_color, $font_file, $temp_string);
+            }                              // 写完了改行，置null该行的临时字符串。
+            $temp_string = "";
+        }
+    }    
+    return $tp * $hang_size;
+}
+
+function is_firstfuhao($str){
+    $fuhaos = array("\\", "“", "'", "<", "《","[","]","+");
+    return in_array($str, $fuhaos);
+}
+
+function autowrap($fontsize, $angle, $fontface, $string, $width) {
+    mb_internal_encoding("UTF-8");
+    // 这几个变量分别是 字体大小, 角度, 字体名称, 字符串, 预设宽度
+    $content = "";
+    // 将字符串拆分成一个个单字 保存到数组 letter 中
+    for ($i=0;$i < mb_strlen($string);$i++) {
+        $letter[] = mb_substr($string, $i, 1);
+    }
+
+    foreach ($letter as $l) {
+        $teststr = $content." ".$l;
+        $testbox = imagettfbbox($fontsize, $angle, $fontface, $teststr);
+        // 判断拼接后的字符串是否超过预设的宽度
+        if (($testbox[2] > $width) && ($content !== "")) {
+            $content .= "\n";
+        }
+        $content .= $l;
+    }
+    return $content;
+}
+
+function hex2rgb($colour) {
+    if ($colour[0] == "#") {
+        $colour = substr($colour, 1);
+    }
+    if (strlen($colour) == 6) {
+        list($r, $g, $b) = array($colour[0] . $colour[1], $colour[2] . $colour[3], $colour[4] . $colour[5]);
+    } else {
+        if (strlen($colour) == 3) {
+            list($r, $g, $b) = array($colour[0] . $colour[0], $colour[1] . $colour[1], $colour[2] . $colour[2]);
+        } else {
+            return false;
+        }
+    }
+    $r = hexdec($r);
+    $g = hexdec($g);
+    $b = hexdec($b);
+    return array("red" => $r, "green" => $g, "blue" => $b);
+}
+
+function get_config(){
+    global $_W;
+    $sysconfig=pdo_get('le_hykx_config',array('uniacid'=>$_W['uniacid']));
+    return unserialize($sysconfig['sysconfig']);
+}
+
+//-------------新版图片生成 多图拼接方式------------
+function createImageUrl_new($param, $qr_file) {
+    load()->func('logging');
+    error_reporting(E_ALL ^ E_NOTICE);
+    load()->func("file");
+    $pp1="images/" . $param["uniacid"] . "/" . date("Y/m/d");
+    logging_run($pp1);
+
+    $path = ATTACHMENT_ROOT.$pp1;
+
+    if (!is_dir($path)) {
+        load()->func("file");
+        mkdirs($path);
+    }
+
+    $content_file_name="/qr-image-content-" . $param["from_user"] . rand() . ".jpg";
+    $filename="/qr-image-" . $param["from_user"] . rand() . ".jpg";
+    $target_file = $path.$filename;
+    $content_file=$path.$content_file_name;
+    if (empty($param["bg"])) {
+        $bg_file = IA_ROOT . "/addons/le_hykx/style/images/qrcode.jpg";
+    } else {
+        $bg_file = $param["bg"];
+    }
+    set_time_limit(0);
+    @ini_set("memory_limit", "256M");
+    //创建一个图片  宽:640  高:1008
+
+    //计算文章内容的高度/宽度
+    $poster_header_img=tomedia($param['poster_header_img']);
+    $poster_footer_img=tomedia($param['poster_footer_img']);
+    //头部图片信息
+    $header_img_info = getimagesize($poster_header_img);
+    $header_img_height=$header_img_info[1];
+    //尾部图片信息
+    $footer_img_info = getimagesize($poster_footer_img);
+    $footer_img_height=$footer_img_info[1];
+
+    //获取文字标题字数
+    $title_count=mb_strlen($param['nickname'],"utf-8");
+    //获取行数
+    $title_h_count=ceil($title_count/14);
+    //计算高度
+    $title_height=$title_h_count*50;
+
+    //获取文章内容数量
+    $content_count=mb_strlen($param['jg'],"utf-8");
+    //获取文章行数
+    $content_h_count=ceil($content_count/22);
+    //计算文章高度
+    $content_height=$content_h_count*40;
+    //计算总高度
+    $z_height=$header_img_height+$footer_img_height+$title_height+$content_height;
+
+    //单独创建中间内容图片
+    $content_garget_px=180;//固定增加px
+    $content_garget = @imagecreate(640, $title_height+$content_height+$content_garget_px);
+    $content_bg = imagecolorallocate($content_garget, 255, 255, 255);
+
+    //标题
+    $n_d=array(
+        'top'=>"50px",
+        'left'=>'30px',
+        'width'=>'580px',
+        'height'=>$title_height."px",
+        'size'=>"28px",
+        'color'=>'#212121'
+    );
+    $targets = mergeText($content_garget, $n_d, $param["nickname"]);
+
+    //内容
+    $n_d=array(
+        'top'=>($title_height+60)."px",
+        'left'=>'30px',
+        'width'=>'580px',
+        'height'=>$content_height."px",
+        'size'=>"20px",
+        'color'=>'#666666'
+    );
+    $targets = mergeText($content_garget, $n_d, $param["jg"]);
+
+    $ress=imagejpeg($content_garget, $content_file);
+
+    //内容图片信息
+    $content_img_info = getimagesize(tomedia($pp1.$content_file_name));
+
+    //创建总画布
+    $z_height=$title_height+$content_height+$content_garget_px+$header_img_height+$footer_img_height;  //高度
+    $target = imagecreatetruecolor(640, $z_height);
+    $c_poster_header_img=createImage($poster_header_img);                 //拷贝头部图到target上
+    imagecopy($target, $c_poster_header_img, 0, 0, 0, 0, $header_img_info[0], $header_img_info[1]);
+    imagedestroy($c_poster_header_img);                                   //释放头部图片关联内存
+    $c_poster_content_img=createImage(tomedia($pp1.$content_file_name));  //拷贝内容图到target上
+    imagecopy($target, $c_poster_content_img, 0, $header_img_height, 0, 0, $content_img_info[0], $content_img_info[1]);
+    imagedestroy($c_poster_content_img);                                  //释放头部图片关联内存
+
+    //拷贝底部图片到target上   放在底部，计算坐标
+    $c_poster_footer_img=createImage($poster_footer_img);
+    $f_y=$z_height-$footer_img_height;
+    imagecopy($target, $c_poster_footer_img, 0, $f_y, 0, 0, $footer_img_info[0], $footer_img_info[1]);
+    imagedestroy($c_poster_footer_img);                                   //释放底部图片关联内存
+
+    //二维码 计算坐标
+    $n_d=array(
+        'top'=>($z_height-$footer_img_height+40),
+        'left'=>'508',
+        'width'=>'100',
+        'height'=>"100",
+    );
+    $targets = newMergeImage($target, $n_d, tomedia($qr_file));
+    $res=imagejpeg($target, $target_file);
+
+    logging_run('图片创建结果');
+    logging_run($target_file);
+    imagedestroy($target);
+    tomedia($target_file);
+    return array('target_file'=>$target_file,'pp1'=>$pp1.$filename);
+}
+
+//调用
+//查询海报配置信息
+$poster = pdo_fetch("select * from " . tablename("le_hykx_poster") . " where `uniacid`=:uniacid limit 1", array(":uniacid" => $uniacid));
+if(empty($poster)) return false;
+$article=pdo_get('le_hykx_article',array('id'=>$articleid));
+$sysconfig=get_config();
+if($sysconfig['code_type']=='1'){
+    $code_url=$sysconfig['code_img'];  //固定二维码
+}else{
+    if(empty($article['link_code'])){  //链接二维码
+        //生成二维码
+        $link=$_W['siteroot'].$this->createMobileUrl('detail',array('id'=>$articleid));
+        load()->library('qrcode');
+        $errorCorrectionLevel = 'L';    //容错级别
+        $matrixPointSize = 4;           //生成图片大小
+        //生成二维码图片
+        $time=date("Y/m/d");
+        $path = "../attachment/images/" . $_W['uniacid'] . "/" . $time;
+        if (!is_dir($path)) {
+            load()->func("file");
+            mkdirs($path);
+        }
+        $filename="/qr-image-article".$articleid. rand() . ".png";
+        QRcode::png($link,$path.$filename , $errorCorrectionLevel, $matrixPointSize);
+        pdo_update('le_hykx_article',array('link_code'=>'images/'.$_W['uniacid'].'/'.$time.$filename),array('id'=>$articleid));
+        $code_url=$path.$filename;
+    }else{
+        $code_url=$article['link_code'];
+    }
+}
+
+//数据组合
+$poster['nickname']=$article['title'];
+$poster['from_user']=time();
+//$poster['avatar']=$fans['avatar'];
+$poster['jg']=$article['content'];
+
+//二维码处理
+//判断海报生成类型
+if($sysconfig['poster_type']=="1"){  //老版本生成
+    $updates=createImageUrl($poster,$code_url);
+    if($updates['pp1']){
+        pdo_update('le_hykx_article',array('poster_img'=>$updates['pp1']),array('id'=>$articleid));
+        return true;
+    }else{
+        return false;
+    }
+}else{    //新版
+    $poster['poster_header_img']=$sysconfig['poster_header_img'];
+    $poster['poster_footer_img']=$sysconfig['poster_footer_img'];
+    $updates=createImageUrl_new($poster,$code_url);
+    if($updates['pp1']){
+        pdo_update('le_hykx_article',array('poster_img'=>$updates['pp1']),array('id'=>$articleid));
+        return true;
+    }else{
+        return false;
+    }
+}
+
+</textarea>upgrade.php<textarea>
+/*
+ * 以后升级有修改、添加字段都要在这里进行判断,防止版本断更之后字段不统一而报错
+ * */
+ 
+/ *------------------------------------2.07版本升级开始 2017-07-20----------------------------------*/
+//如果qidong_shequn_site的site_icon不存在则创建,如果存在则修改为varchar(255)
+if(!pdo_fieldexists('qidong_shequn_site', 'site_icon')){
+    $sql = "ALTER TABLE  ".tablename('qidong_shequn_site')." ADD `site_icon` varchar(255) NULL";
+    pdo_query($sql);
+}else{
+    $sql = "ALTER TABLE `ims_qidong_shequn_site` MODIFY COLUMN `site_icon` VARCHAR(255) NOT NULL";
+    pdo_query($sql);
+}
+ 
+//如果qidong_shequn_shop_banner的action不存在则创建,如果存在则修改为varchar(255)
+if(!pdo_fieldexists('qidong_shequn_shop_banner', 'action')){
+    $sql = "ALTER TABLE  ".tablename('qidong_shequn_shop_banner')." ADD `action` varchar(255) NULL";
+    pdo_query($sql);
+}else{
+    $sql = "ALTER TABLE `ims_qidong_shequn_shop_banner` MODIFY COLUMN `action` VARCHAR(255) NOT NULL COMMENT '跳转链接'";
+    pdo_query($sql);
+}
+ 
+//如果qidong_shequn_shop_banner的img_url不存在则创建,如果存在则修改为varchar(255)
+if(!pdo_fieldexists('qidong_shequn_shop_banner', 'img_url')){
+    $sql = "ALTER TABLE  ".tablename('qidong_shequn_shop_banner')." ADD `img_url` varchar(255) NULL";
+    pdo_query($sql);
+}else{
+    $sql = "ALTER TABLE `ims_qidong_shequn_shop_banner` MODIFY COLUMN `img_url` VARCHAR(255) NOT NULL COMMENT '图片地址'";
+    pdo_query($sql);
+}
+ 
+//如果qidong_shequn_shop_banner的title不存在则创建,如果存在则修改为varchar(255)
+if(!pdo_fieldexists('qidong_shequn_shop_banner', 'title')){
+    $sql = "ALTER TABLE  ".tablename('qidong_shequn_shop_banner')." ADD `title` varchar(255) NULL";
+    pdo_query($sql);
+}else{
+    $sql = "ALTER TABLE `ims_qidong_shequn_shop_banner` MODIFY COLUMN `title` VARCHAR(255) NOT NULL COMMENT '说明'";
+    pdo_query($sql);
+}
+/ *------------------------------------2.07版本升级结束 2017-07-20----------------------------------*/
+
+</textarea><textarea>
+$appid = $this->w['account']['key'];
+$secret = $this->w['account']['secret'];
+
+defined('IN_IA') or exit('Access Denied');
+
+function tb($name){
+    return "wd_collect_card1_{$name}";
+}
+
+class Wd_collect_card1ModuleWxapp extends WeModuleWxapp {
+    private $gpc;
+    private $w;
+    private $uid; // 用户ID
+    public function __construct() {
+        // parent::__construct();
+        global $_W, $_GPC;
+        $this->gpc = $_GPC;
+        $this->w = $_W;
+        $this->uid = $_W['openid'];
+        $this->uniacid = $_W['uniacid'];
+
+        // $this->uid = 0;
+        // 如果需要强制登录 加 下边代码
+        // if (empty($this->uid)) {
+        // 	$this->result(41009, '请先登录');
+        // }
+    }
+    
+    public function doPageTest(){
+        var_export($this->w);die;
+        var_export($this->gpc);die;
+        var_dump(__DIR__, 1, MODULE_URL, MODULE_ROOT, $this->w['current_module']);
+    }
+
+    public function get($key, $default = null) {
+        return isset($this->gpc[$key]) ? safe_gpc_string($this->gpc[$key]) : $default;
+    }
+}
+
+array (
+    'config' => 
+        array (
+            'cookie' => array ( 'pre' => 'nAer_', 'domain' => '', 'path' => '/', ),
+            'setting' => array (
+                'charset' => 'utf-8',
+                'cache' => 'mysql',
+                'timezone' => 'Asia/Shanghai',
+                'memory_limit' => '256M',
+                'filemode' => 420,
+                'authkey' => 'Zp7tuLWU',
+                'founder' => '1',
+                'development' => 0,
+                'referrer' => 0,
+                'memcache' => array ( 'server' => '', 'port' => 11211, 'pconnect' => 1, 'timeout' => 30, 'session' => 1, ),
+                'proxy' => array ( 'host' => '', 'auth' => '', ),
+            ),
+            'upload' => 
+                array (
+                'image' => array ( 'extentions' => array ( 0 => 'gif', 1 => 'jpg', 2 => 'jpeg', 3 => 'png', ), 'limit' => 5000, ),
+                'attachdir' => 'attachment',
+                'audio' => array ( 'extentions' => array ( 0 => 'mp3', ), 'limit' => 5000, ),
+                ),
+            'db' => array ( 'tablepre' => 'ims_', 'slave_status' => false, ),
+        ),
+  'timestamp' => 1612278109,
+  'charset' => 'utf-8',
+  'clientip' => '220.202.233.139',
+  'ishttps' => true,
+  'isajax' => false,
+  'ispost' => false,
+  'sitescheme' => 'https://',
+  'script_name' => '/app/index.php',
+  'siteroot' => 'https://wq.dev.0731bai.com/',
+  'siteurl' => 'https://wq.dev.0731bai.com/app/index.php?i=2&t=0&v=1.0&from=wxapp&c=entry&a=wxapp&do=test&m=wd_collect_card1',
+  'uid' => 0,
+  'uniacid' => 2,
+  'setting' => array (
+        'copyright' => array (
+        'slides' => array ( 0 => 'https://img.alicdn.com/tps/TB1pfG4IFXXXXc6XXXXXXXXXXXX.jpg', 1 => 'https://img.alicdn.com/tps/TB1sXGYIFXXXXc5XpXXXXXXXXXX.jpg', 2 => 'https://img.alicdn.com/tps/TB1h9xxIFXXXXbKXXXXXXXXXXXX.jpg', ),
+        ),
+        'authmode' => 1,
+        'close' => array ( 'status' => '0', 'reason' => '', ),
+        'register' => array ( 'open' => 1, 'verify' => 0, 'code' => 1, 'groupid' => 1, ),
+        'site' => array (
+            'key' => 254837,
+            'token' => 'fd6445ff7a8488d628de4a168ab661e5',
+            'url' => 'https://wq.dev.0731bai.com',
+            'version' => '2.6.5',
+            'release' => '202008170002',
+            'name' => 'https://wq.dev.0731bai.com的站点',
+            'family' => 'v',
+            'profile_perfect' => false,
+        ),
+        'module_receive_ban' => array ( 'wd_collect_card1' => 'wd_collect_card1', 'wd_draw' => 'wd_draw', ),
+        'cloudip' => array ( 'ip' => '36.25.253.56', 'expire' => 1612245651, ),
+        'upload' => array (
+            'image' => array ( 'extentions' => array ( 0 => 'gif', 1 => 'jpg', 2 => 'jpeg', 3 => 'png', ), 'limit' => 5000, ),
+            'attachdir' => 'attachment',
+            'audio' => array ( 'extentions' => array ( 0 => 'mp3', 1 => 'mp4', ), 'limit' => 5000, ),
+        ),
+        'remote_complete_info' => NULL,
+    ),
+    'os' => 'windows',
+    'container' => 'unknown',
+    'account' => 
+    WxappAccount::__set_state(array(
+     'acid' => '2',
+     'uniacid' => '2',
+     'token' => 'tHL49eisIingjGZ8hD8hUje9nXsD8JNj',
+     'encodingaeskey' => 'RLvYyIB6CEq2gqHCcblYqbqq9ZLCSLG9iC9sylWpg9l',
+     'level' => '1',
+     'account' => '',
+     'original' => 'gh_ea4eb5cc0ae7',
+     'key' => 'wx59e904a82c91a661',
+     'secret' => '342fc4461eb7029cfd886057f18eaaff',
+     'name' => '封面领取助手',
+     'appdomain' => '',
+     'auth_refresh_token' => '',
+     'encrypt_key' => 'wx59e904a82c91a661',
+     'hash' => 'uzo1J9rm',
+     'type' => '4',
+     'isconnect' => '0',
+     'isdeleted' => '0',
+     'endtime' => '0',
+     'send_account_expire_status' => '0',
+     'send_api_expire_status' => '0',
+     'groupid' => '0',
+     'description' => '封面领取助手',
+     'default_acid' => '2',
+     'rank' => NULL,
+     'title_initial' => 'F',
+     'createtime' => '',
+     'logo' => '',
+     'qrcode' => '',
+     'create_uid' => '1',
+     'type_sign' => 'wxapp',
+     'starttime' => '0',
+     'groups' => array ( ),
+     'setting' => 
+        array (
+            'uniacid' => '2',
+            'passport' => '',
+            'oauth' => '',
+            'jsauth_acid' => '0',
+            'notify' => '',
+            'creditnames' => array (
+                'credit1' => array ( 'title' => '积分', 'enabled' => 1, ),
+                'credit2' => array ( 'title' => '余额', 'enabled' => 1, ),
+            ),
+            'creditbehaviors' => array ( 'activity' => 'credit1', 'currency' => 'credit2', ),
+            'welcome' => '',
+            'default' => '',
+            'default_message' => '',
+            'payment' => '',
+            'stat' => '',
+            'default_site' => NULL,
+            'sync' => '0',
+            'recharge' => '',
+            'tplnotice' => '',
+            'grouplevel' => '0',
+            'mcplugin' => '',
+            'exchange_enable' => '0',
+            'coupon_type' => '0',
+            'menuset' => '',
+            'statistics' => '',
+            'bind_domain' => '',
+            'comment_status' => '0',
+            'reply_setting' => '0',
+            'default_module' => '',
+            'attachment_limit' => '0',
+            'attachment_size' => '912',
+            'sync_member' => '0',
+            'remote' => '',
+        ),
+     'grouplevel' => '0',
+     'type_name' => '微信小程序',
+     'switchurl' => './index.php?c=account&a=display&do=switch&uniacid=2',
+     'setmeal' => array ( 'uid' => -1, 'username' => '创始人', 'timelimit' => '未设置', 'groupid' => '-1', 'groupname' => '所有服务', ),
+     'current_user_role' => NULL,
+     'is_star' => 0,
+     'manageurl' => 'https://wq.dev.0731bai.com/web/index.php?c=account&a=post&uniacid=2&account_type=4',
+     'accessurl' => 'https://wq.dev.0731bai.com/web/index.php?c=account&a=post&uniacid=2&account_type=4',
+     'roleurl' => 'https://wq.dev.0731bai.com/web/index.php?c=account&a=post-user&do=edit&uniacid=2&account_type=4',
+     'oauth' => array ( 'key' => 'wx59e904a82c91a661', 'secret' => '342fc4461eb7029cfd886057f18eaaff', 'acid' => '2', 'type' => '4', 'level' => '1', 'support_oauthinfo' => 0, 'support_jssdk' => 1, ),
+  )),
+  'uniaccount' => 
+  WxappAccount::__set_state(array(
+     'acid' => '2',
+     'uniacid' => '2',
+     'token' => 'tHL49eisIingjGZ8hD8hUje9nXsD8JNj',
+     'encodingaeskey' => 'RLvYyIB6CEq2gqHCcblYqbqq9ZLCSLG9iC9sylWpg9l',
+     'level' => '1',
+     'account' => '',
+     'original' => 'gh_ea4eb5cc0ae7',
+     'key' => 'wx59e904a82c91a661',
+     'secret' => '342fc4461eb7029cfd886057f18eaaff',
+     'name' => '封面领取助手',
+     'appdomain' => '',
+     'auth_refresh_token' => '',
+     'encrypt_key' => 'wx59e904a82c91a661',
+     'hash' => 'uzo1J9rm',
+     'type' => '4',
+     'isconnect' => '0',
+     'isdeleted' => '0',
+     'endtime' => '0',
+     'send_account_expire_status' => '0',
+     'send_api_expire_status' => '0',
+     'groupid' => '0',
+     'description' => '封面领取助手',
+     'default_acid' => '2',
+     'rank' => NULL,
+     'title_initial' => 'F',
+     'createtime' => '',
+     'logo' => '',
+     'qrcode' => '',
+     'create_uid' => '1',
+     'type_sign' => 'wxapp',
+     'starttime' => '0',
+     'groups' => array ( ),
+     'setting' => 
+    array (
+      'uniacid' => '2',
+      'passport' => '',
+      'oauth' => '',
+      'jsauth_acid' => '0',
+      'notify' => '',
+      'creditnames' => array ( 'credit1' => array ( 'title' => '积分', 'enabled' => 1, ), 'credit2' => array ( 'title' => '余额', 'enabled' => 1, ), ),
+      'creditbehaviors' => array ( 'activity' => 'credit1', 'currency' => 'credit2', ),
+      'welcome' => '',
+      'default' => '',
+      'default_message' => '',
+      'payment' => '',
+      'stat' => '',
+      'default_site' => NULL,
+      'sync' => '0',
+      'recharge' => '',
+      'tplnotice' => '',
+      'grouplevel' => '0',
+      'mcplugin' => '',
+      'exchange_enable' => '0',
+      'coupon_type' => '0',
+      'menuset' => '',
+      'statistics' => '',
+      'bind_domain' => '',
+      'comment_status' => '0',
+      'reply_setting' => '0',
+      'default_module' => '',
+      'attachment_limit' => '0',
+      'attachment_size' => '912',
+      'sync_member' => '0',
+      'remote' => '',
+    ),
+     'grouplevel' => '0',
+     'type_name' => '微信小程序',
+     'switchurl' => './index.php?c=account&a=display&do=switch&uniacid=2',
+     'setmeal' => array ( 'uid' => -1, 'username' => '创始人', 'timelimit' => '未设置', 'groupid' => '-1', 'groupname' => '所有服务', ),
+     'current_user_role' => NULL,
+     'is_star' => 0,
+     'manageurl' => 'https://wq.dev.0731bai.com/web/index.php?c=account&a=post&uniacid=2&account_type=4',
+     'accessurl' => 'https://wq.dev.0731bai.com/web/index.php?c=account&a=post&uniacid=2&account_type=4',
+     'roleurl' => 'https://wq.dev.0731bai.com/web/index.php?c=account&a=post-user&do=edit&uniacid=2&account_type=4',
+     'oauth' => array ( 'key' => 'wx59e904a82c91a661', 'secret' => '342fc4461eb7029cfd886057f18eaaff', 'acid' => '2', 'type' => '4', 'level' => '1', 'support_oauthinfo' => 0, 'support_jssdk' => 1, ),
+  )),
+  'acid' => '2',
+  'session_id' => 'f472084722e13ba275fb43db490b0dfc',
+  'oauth_account' => array ( 'key' => 'wx59e904a82c91a661', 'secret' => '342fc4461eb7029cfd886057f18eaaff', 'acid' => '2', 'type' => '4', 'level' => '1', 'support_oauthinfo' => 0, 'support_jssdk' => 1, ),
+  'token' => 'GnkF',
+  'attachurl_local' => 'https://wq.dev.0731bai.com/attachment/',
+  'attachurl' => 'https://wq.dev.0731bai.com/attachment/',
+  'template' => 'default',
+  'styles' => array ( ),
+  'page' => array ( 'title' => NULL, ),
+  'current_module' => 
+  array (
+    'mid' => '17',
+    'name' => 'wd_collect_card1',
+    'application_type' => '1',
+    'type' => 'activity',
+    'title' => '封面集卡小程序',
+    'version' => '1.0.5',
+    'ability' => '织梦团队  必出正品-客服微信 wendaokeji888',
+    'description' => '织梦团队  必出正品-客服微信 wendaokeji888',
+    'author' => 'devin66',
+    'url' => '',
+    'settings' => '0',
+    'subscribes' => array ( 0 => 'text', 1 => 'image', 2 => 'voice', 3 => 'location', 4 => 'unsubscribe', 5 => 'qr', 6 => 'subscribe', 7 => 'link', 8 => 'shortvideo', 9 => 'video', 10 => 'trace', 11 => 'click', 12 => 'view', 13 => 'merchant_order', 14 => 'user_get_card', 15 => 'user_del_card', 16 => 'user_consume_card', 17 => 'mass_send_job_finish', 18 => 'template_send_job_finish', ),
+    'handles' => array ( 0 => 'text', 1 => 'image', 2 => 'voice', 3 => 'video', 4 => 'shortvideo', 5 => 'location', 6 => 'link', 7 => 'subscribe', 8 => 'qr', 9 => 'trace', 10 => 'click', 11 => 'merchant_order', 12 => 'user_get_card', 13 => 'user_consume_card', 14 => 'user_del_card', ),
+    'isrulefields' => '0',
+    'issystem' => '0',
+    'target' => '0',
+    'iscard' => '0',
+    'permissions' => 'N;',
+    'title_initial' => 'F',
+    'wxapp_support' => '2',
+    'welcome_support' => '1',
+    'oauth_type' => '1',
+    'webapp_support' => '2',
+    'phoneapp_support' => '1',
+    'account_support' => '1',
+    'xzapp_support' => '0',
+    'aliapp_support' => '1',
+    'logo' => 'https://wq.dev.0731bai.com/addons/wd_collect_card1/icon.jpg',
+    'baiduapp_support' => '1',
+    'toutiaoapp_support' => '1',
+    'from' => '',
+    'cloud_record' => '0',
+    'sections' => '0',
+    'label' => '',
+    'isdisplay' => 1,
+    'preview' => 'https://wq.dev.0731bai.com/addons/wd_collect_card1/preview.jpg?v=1612261295',
+    'main_module' => false,
+    'is_receive_ban' => true,
+    'recycle_info' => array ( ),
+    'config' => NULL,
+    'enabled' => 1,
+    'displayorder' => NULL,
+    'shortcut' => NULL,
+    'module_shortcut' => NULL,
+  ),
+)
+
+</textarea>
+</div>
+
+<div id="layui">
+<h3>layui</h3>Layui 内置方法 - layer.alert（普通信息框）<textarea>
+layer.alert 信息层提示层
+layer.msg   信息层提示层
+layer.confirm   对话询问层
+layer.load   信息加载层
+layer.tips   信息提示
+
+layer.alert
+语法：layer.alert(content[, options][, yes]) 普通信息框
+
+layer.alert('只想简单的提示');        
+layer.alert('加了个图标', {icon: 1}); //这时如果你也还想执行yes回调，可以放在第三个参数中。
+layer.alert('加了个图标', {icon: 6}); // 笑脸
+layer.alert('有了回调', function(index){
+    //do something
+    layer.close(index);
+});
+layer.alert("内容",{
+    yes:function () {            
+}
+layer.alert('墨绿风格，点击确认看深蓝', {
+    skin: 'layui-layer-molv' //样式类名  自定义样式
+    ,closeBtn: 1    // 是否显示关闭按钮
+    ,anim: 1 //动画类型
+    ,btn: ['重要','奇葩'] //按钮
+    ,icon: 6    // icon
+    ,yes:function(){
+        layer.msg('按钮1')
+    }
+    ,btn2:function(){
+        layer.msg('按钮2')
+    }}
+);
+
+layer.msg
+语法：layer.msg(content[, options][, end]) 提示框
+layer.msg('这里是msg内容');
+layer.msg('这里是msg内容',{icon:1});
+layer.msg('关闭后想做些什么', function(){
+    //do something
+});
+layer.msg('同上', {
+    icon: 1,
+    time: 2000 //2秒关闭（如果不配置，默认是3秒）
+}, function(){
+    //do something
+});
+
+layer.msg('大部分参数都是可以公用的<br>合理搭配，展示不一样的风格', {
+    time: 2000, //2s后自动关闭
+    btn: ['明白了', '知道了', '哦']
+});
+
+layer.msg('也可以这样', {
+     btn: ['明白了', '知道了']
+     ,yes: function(index, layero){
+          layer.msg("按钮1回调,参数是:"+index)
+     }
+    ,btn2: function(index, layero){
+         //按钮【按钮二】的回调
+         layer.msg("按钮2回调,参数是:"+index)
+         return false //开启该代码可禁止点击该按钮关闭
+    }
+});
+
+layer.confirm
+语法：layer.confirm(content[, options], yes[, cancel]) 询问框
+
+layer.confirm('is not?', {icon: 3, title:'提示'}, function(index){
+    //do something
+    layer.close(index);
+});
+ 
+layer.confirm('is not?', function(index){
+    //do something
+    layer.close(index);
+});
+
+layer.confirm('内容', {
+    yes:function(){
+        layer.closeAll();//确认按钮如果不能关闭弹框，使用layer.closeAll()进行弹框关闭
+    }
+});
+
+layer.propmt
+语法：layer.prompt([options,] yes) 输入层/询问层
+
+//prompt层新定制的成员如下
+{
+    formType: 1, //输入框类型，支持0（文本）默认1（密码）2（多行文本）
+    value: '', //初始时的值，默认空字符
+    maxlength: 140, //可输入文本的最大长度，默认500
+}
+ 
+//例子1
+layer.prompt(function(value, index, elem){
+    alert(value); //得到value
+    layer.close(index);
+});
+ 
+//例子2
+layer.prompt({
+    formType: 2,
+    value: '初始值',
+    title: '这里是title'
+}, function(value, index, elem){
+    alert(value); //得到value
+    layer.close(index);
+});
+
+layer.open方式
+layer提供了5中层类型，可传入的值有：0=信息框，默认，1=页面层，2=iframe层，3=加载层，4=tips层
+语法：layer.open(options) 原始核心方法
+基本上是露脸率最高的方法，不管是使用哪种方式创建层，都是走layer.open()，创建任何类型的弹层都会返回一个当前层索引，上述的options即是基础参数，另外，该文档统一采用options作为基础参数的标识
+
+layer.open({
+    type: 1
+    ,title: "open方式弹出层" //不显示标题栏   title : false/标题
+    ,closeBtn: true
+    ,area: '300px;'
+    ,shade: 0.8
+    ,id: 'LAY_layuipro' //设定一个id，防止重复弹出
+    ,resize: false
+    ,btn: ['火速围观', '残忍拒绝']
+    ,btnAlign: 'c'
+    ,moveType: 1 //拖拽模式，0或者1
+    ,content: '<div style="padding: 50px; line-height: 22px; background-color: #393D49; color: #fff; font-weight: 300;">内容<br>内容</div>'
+    ,success: function(layero){
+        var btn = layero.find('.layui-layer-btn');
+        btn.find('.layui-layer-btn0').attr({href: 'http://www.layui.com/',target: '_blank' });
+    }
+});
+
+//example1:
+var index = layer.open({
+  content: 'test'
+});
+//拿到的index是一个重要的凭据，它是诸如layer.close(index)等方法的必传参数。
+
+//example2
+layer.open({
+    type: 1 //Layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+    ,title: 'title here'
+    ,area: ['390px', '330px']
+    ,shade: 0.4
+    ,content: $("#test") //支持获取DOM元素
+    ,btn: ['yes', 'close'] //按钮
+    ,scrollbar: false //屏蔽浏览器滚动条
+    ,yes: function(index){
+        //layer.msg('yes');
+        layer.close(index);
+        showToast();
+    }
+    ,btn2: function(){
+        //layer.alert('aaa',{title:'msg title'});
+        layer.msg('bbb');
+        //layer.closeAll();
+    }
+});
+
+layer.load
+语法：layer.load(icon, options) 加载层
+icon支持传入0-2,如果是0，无需传。另外特别注意一点：load默认是不会自动关闭的，因为你一般会在ajax回调体中关闭它。
+
+var index = layer.load();
+var index = layer.load(1); //换了种风格
+var index = layer.load(2, {time: 10*1000}); //又换了种风格，并且设定最长等待10秒 
+layer.close(index);  //关闭
+
+layer.tab
+语法：layer.tab(options) tab层
+
+layer.tab({
+    area: ['600px', '300px'],
+    tab: [{
+      title: 'TAB1', 
+      content: '内容1'
+    }, {
+      title: 'TAB2', 
+      content: '内容2'
+    }, {
+      title: 'TAB3', 
+      content: '内容3'
+    }]
+});
+
+type-基本层类型
+类型：Number，默认：0
+layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）。 此为重要参数，不同类型层的总开关，若为type:0则不需要配置，其它类型层在调用时必须设置type。若你采用layer.open({type: 1})方式调用，则type为必填项（信息框除外,信息框默认）
+
+title-标题
+类型：String/Array/Boolean，默认：'信息'
+
+title支持三种类型的值，若你传入的是普通的字符串，如title :'我是标题'，那么只会改变标题文本；若你还需要自定义标题区域样式，那么你还可以title: ['文本', 'font-size:18px;']，数组第二项可以写任意css样式；如果你不想显示标题栏，你可以title: false
+
+content-内容
+类型：String/DOM/Array，默认：''
+content可传入的值是灵活多变的，不仅可以传入普通的html内容，还可以指定DOM，更可以随着type的不同而不同
+
+/!*
+ 如果是页面层
+ */
+layer.open({
+  type: 1, 
+  content: '传入任意的文本或html' //这里content是一个普通的String
+});
+layer.open({
+  type: 1,
+  content: $('#id') //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
+});
+//Ajax获取
+$.post('url', {}, function(str){
+  layer.open({
+    type: 1,
+    content: str //注意，如果str是object，那么需要字符拼接。
+  });
+});
+/!*
+ 如果是iframe层
+ */
+layer.open({
+  type: 2, 
+  content: 'http://sentsin.com' //这里content是一个URL，如果你不想让iframe出现滚动条，你还可以content: ['http://sentsin.com', 'no']
+}); 
+/!*
+ 如果是用layer.open执行tips层
+ */
+layer.open({
+  type: 4,
+  content: ['内容', '#id'] //数组第二项即吸附元素选择器或者DOM
+});        
+
+skin-样式类名
+类型：String，默认：''
+skin不仅允许你传入layer内置的样式class名，还可以传入您自定义的class名。这是一个很好的切入点，意味着你可以借助skin轻松完成不同的风格定制。目前layer内置的skin有：layui-layer-lanlayui-layer-molv，未来我们还会选择性地内置更多，但更推荐您自己来定义。以下是一个自定义风格的简单例子
+
+//单个使用
+layer.open({
+  skin: 'demo-class'
+});
+//全局使用。即所有弹出层都默认采用，但是单个配置skin的优先级更高
+layer.config({
+  skin: 'demo-class'
+})
+//CSS 
+body .demo-class .layui-layer-title{background:#c00; color:#fff; border: none;}
+body .demo-class .layui-layer-btn{border-top:1px solid #E9E7E7}
+body .demo-class .layui-layer-btn a{background:#333;}
+body .demo-class .layui-layer-btn .layui-layer-btn1{background:#999;}
+加上body是为了保证优先级。你可以借助Chrome调试工具，定义更多样式控制层更多的区域。
+
+area-宽高
+类型：String/Array，默认：'auto'，area值分别为：[宽度, 高度]（iframe层不能设置auto）, 对于宽度，并不推荐您设置auto。
+在默认状态下，layer是宽高都自适应的，但当你只想定义宽度时，你可以area: '500px'，高度仍然是自适应的。当你宽高都要定义时，你可以area: ['500px', '300px']
+
+offset-坐标
+类型：String/Array，默认：垂直水平居中， [纵坐标, 横坐标]，默认为垂直水平居中
+offset默认情况下不用设置。但如果你不想垂直水平居中，你还可以进行以下赋值：
+值	备注
+offset: '100px'	只定义top坐标，水平保持居中
+offset: ['100px', '50px']	同时定义top、left坐标
+offset: 't'	快捷设置顶部坐标
+offset: 'r'	快捷设置右边缘坐标
+offset: 'b'	快捷设置底部坐标
+offset: 'l'	快捷设置左边缘坐标
+offset: 'lt'	快捷设置左上角
+offset: 'lb'	快捷设置左下角
+offset: 'rt'	快捷设置右上角
+offset: 'rb'	快捷设置右下角
+
+layer.msg("请先选择项！", { offset: 'rt' });
+layer.confirm("确定删除吗", {
+    btn: ['确认', '取消'],
+    offset: '300px'
+}, function (index) {
+    layer.close(index);
+    $.post("feedbacklist.aspx?cmd=del", { "idlist": idlist }, function (resp) {
+        if (resp.res == 1) {
+            window.location.href = location.href; //刷新当前页
+            parent.layer.msg(resp.msg);
+        }
+        layer.msg(resp.msg);
+    }, "json");
+}, function (index) {
+    layer.close(index);
+});
+
+iocn-图标。信息框和加载层的私有参数
+类型：Number，默认：-1（信息框）/0（加载层）
+信息框默认不显示图标。当你想显示图标时，默认皮肤可以传入0-6。如果是加载层，可以传入0-2。如：
+layer.alert('酷毙了', {icon: 1});
+layer.msg('不开心。。', {icon: 5});
+layer.load(1); //风格1的加载
+        
+btn-按钮
+类型：String/Array，默认：'确认'
+信息框模式时，btn默认是一个确认按钮，其它层类型则默认不显示，加载层和tips层则无效。当您只想自定义一个按钮时可以btn: '我知道了'，当要定义两个按钮时可以btn: ['yes', 'no']。也可以定义更多按钮，比如：btn: ['按钮1', '按钮2', '按钮3', …]，按钮1的回调是yes，而从按钮2开始，则回调为btn2: function(){}，以此类推。如：
+//eg1       
+layer.confirm('纳尼？', {
+  btn: ['按钮一', '按钮二', '按钮三'] //可以无限个按钮
+  ,btn3: function(index, layero){
+    //按钮【按钮三】的回调
+  }
+}, function(index, layero){
+  //按钮【按钮一】的回调
+}, function(index){
+  //按钮【按钮二】的回调
+});
+ 
+//eg2
+layer.open({
+  content: 'test'
+  ,btn: ['按钮一', '按钮二', '按钮三']
+  ,yes: function(index, layero){
+    //按钮【按钮一】的回调
+  }
+  ,btn2: function(index, layero){
+    //按钮【按钮二】的回调
+    //return false 开启该代码可禁止点击该按钮关闭
+  }
+  ,btn3: function(index, layero){
+    //按钮【按钮三】的回调
+    //return false 开启该代码可禁止点击该按钮关闭
+  }
+  ,cancel: function(){ 
+    //右上角关闭回调
+    //return false 开启该代码可禁止点击该按钮关闭
+  }
+});
+        
+btnAlign-按钮排列
+类型：String，默认：r
+你可以快捷定义按钮的排列位置，btnAlign的默认值为r，即右对齐。该参数可支持的赋值如下：
+值	备注
+btnAlign: 'l'	按钮左对齐
+btnAlign: 'c'	按钮居中对齐
+btnAlign: 'r'	按钮右对齐。默认值，不用设置
+
+closeBtn - 关闭按钮
+类型：String/Boolean，默认：1
+layer提供了两种风格的关闭按钮，可通过配置1和2来展示，如果不显示，则closeBtn: 0
+
+shade- 控制遮罩
+类型：String/Array/Boolean，默认：0.3  
+即弹层外区域。默认是0.3透明度的黑色背景（'#000'）。如果你想定义别的颜色，可以shade: [0.8, '#393D49']；如果你不想显示遮罩，可以shade: 0
+
+shadeClose- 是否点击遮罩关闭
+类型：Boolean，默认：false
+如果你的shade是存在的，那么你可以设定shadeClose来控制点击弹层外区域关闭。点击弹框以外区域，弹框会自动消失。
+
+time- 自动关闭所需毫秒
+类型：Number，默认：0
+默认不会自动关闭。当你想自动关闭时，可以time: 5000，即代表5秒后自动关闭，注意单位是毫秒（1秒=1000毫秒）
+
+id - 用于控制弹层唯一标识
+类型：String，默认：空字符
+设置该值后，不管是什么类型的层，都只允许同时弹出一个。一般用于页面层和iframe层模式
+
+anim - 弹出动画
+类型：Number，默认：0
+我们的出场动画全部采用CSS3。这意味着除了ie6-9，其它所有浏览器都是支持的。目前anim可支持的动画类型有0-6 如果不想显示动画，设置 anim: -1 即可。另外需要注意的是，3.0之前的版本用的是 shift 参数
+值	备注
+anim: 0	平滑放大。默认
+anim: 1	从上掉落
+anim: 2	从最底部往上滑入
+anim: 3	从左滑入
+anim: 4	从左翻滚
+anim: 5	渐显
+anim: 6	抖动
+
+isOutAnim- 关闭动画 （layer 3.0.3新增）
+类型：Boolean，默认：true
+默认关闭层时会有一个过度动画。如果你不想开启，设置 isOutAnim: false 即可
+
+maxmin - 最大最小化。
+类型：Boolean，默认：false
+该参数值对type:1和type:2有效。默认不显示最大小化按钮。需要显示配置maxmin: true即可
+
+fixed - 固定
+类型：Boolean，默认：true
+即鼠标滚动时，层是否固定在可视区域。如果不想，设置fixed: false即可
+
+resize- 是否允许拉伸
+类型：Boolean，默认：true
+默认可以在弹层右下角拖动来拉伸尺寸。如果对指定的弹层屏蔽该功能，设置 false即可。该参数对loading、tips层无效
+
+resizing- 监听窗口拉伸动作
+类型：Function，默认：null
+当你拖拽弹层右下角对窗体进行尺寸调整时，如果你设定了该回调，则会执行。回调返回一个参数：当前层的DOM对象
+resizing: function(layero){
+  console.log(layero);
+}   
+        
+scrollbar- 是否允许浏览器出现滚动条
+类型：Boolean，默认：true
+默认允许浏览器滚动，如果设定scrollbar: false，则屏蔽
+
+maxWidth- 最大宽度
+类型：Number，默认：360
+只有当area: 'auto'时，maxWidth的设定才有效。
+
+maxHeight- 最大高度
+类型：Number，默认：无
+只有当高度自适应时，maxHeight的设定才有效。
+
+zlndex- 层叠顺序
+类型：，默认：19891014（贤心生日 0.0）
+一般用于解决和其它组件的层叠冲突。
+
+move- 触发拖动的元素
+类型：String/DOM/Boolean，默认：'.layui-layer-title'
+默认是触发标题区域拖拽。如果你想单独定义，指向元素的选择器或者DOM即可。如move: '.mine-move'。你还配置设定move: false来禁止拖拽
+
+moveOut- 是否允许拖拽到窗口外
+类型：Boolean，默认：false
+默认只能在窗口内拖拽，如果你想让拖到窗外，那么设定moveOut: true即可
+
+moveEnd- 拖动完毕后的回调方法
+类型：Function，默认：null
+默认不会触发moveEnd，如果你需要，设定moveEnd: function(layero){}即可。其中layero为当前层的DOM对象
+
+tips- tips方向和颜色
+类型：Number/Array，默认：2
+tips层的私有参数。支持上右下左四个方向，通过1-4进行方向设定。如tips: 3则表示在元素的下面出现。有时你还可能会定义一些颜色，可以设定tips: [1, '#c00']
+
+tipsMore- 是否允许多个tips
+类型：Boolean，默认：false
+允许多个意味着不会销毁之前的tips层。通过tipsMore: true开启
+
+success- 层弹出后的成功回调方法
+类型：Function，默认：null
+当你需要在层创建完毕时即执行一些语句，可以通过该回调。success会携带两个参数，分别是当前层DOM当前层索引。如：
+layer.open({
+  content: '测试回调',
+  success: function(layero, index){
+    console.log(layero, index);
+  }
+});        
+        
+yes- 确定按钮回调方法
+类型：Function，默认：null
+该回调携带两个参数，分别为当前层索引、当前层DOM对象。如：
+layer.open({
+  content: '测试回调',
+  yes: function(index, layero){
+    //do something
+    layer.close(index); //如果设定了yes回调，需进行手工关闭
+  }
+});        
+        
+cancel- 右上角关闭按钮触发的回调
+类型：Function，默认：null
+该回调携带两个参数，分别为：当前层索引参数（index）、当前层的DOM对象（layero），默认会自动触发关闭。如果不想关闭，return false即可，如；
+cancel: function(index, layero){ 
+  if(confirm('确定要关闭么')){ //只有当点击confirm框的确定时，该层才会关闭
+    layer.close(index)
+  }
+  return false; 
+}    
+        
+end- 层销毁后触发的回调
+类型：Function，默认：null
+无论是确认还是取消，只要层被销毁了，end都会执行，不携带任何参数。
+
+full/min/restore-分别代表最大化、最小化、还原 后触发的回调
+类型：Function，默认：null
+携带一个参数，即当前层DOM
+
+layer-config(options)- 初始化全局配置
+这是一个可以重要也可以不重要的方法，重要的是，它的权利真的很大，尤其是在模块化加载layer时必须要用到它。它不仅可以配置一些诸如路径、加载的模块，甚至还可以决定整个弹层的默认参数。而说它不重要，是因为多数情况下似乎不是那么十分需要它
+如果您是采用seajs或者requirejs加载layer，你需要执行该方法来完成初始化的配置。比如：
+layer.config({
+  path: '/res/layer/' //layer.js所在的目录，可以是绝对目录，也可以是相对目录
+});
+//这样的话，layer就会去加载一些它所需要的配件，比如css等。  
+//当然，你即便不用seajs或者requirejs，也可以通过上述方式设定路径             
+如果你是采用< script src="?a.js&layer.js">这种合并的方式引入layer，那么您需要在script标签上加一个自定义属性merge="true"。如：
+< script src="?a.js&layer.js" merge="true">
+这样的话，layer就不会去自动去获取路径，但你需要通过以下方式来完成初始化的配置
+layer.config({
+  path: '/res/layer/' //layer.js所在的目录，可以是绝对目录，也可以是相对目录
+});
+注意：如果采用 layui 加载 layer，无需设置 path。所以前置工作都是自动完成。
+但layer.config的作用远不止上述这样。它还可以配置层默认的基础参数，如：
+layer.config({
+  anim: 1, //默认动画风格
+  skin: 'layui-layer-molv' //默认皮肤
+  …
+});
+//除此之外，extend还允许你加载拓展的css皮肤，如：
+layer.config({
+  //如果是独立版的layer，则将myskin存放在./skin目录下
+  //如果是layui中使用layer，则将myskin存放在./css/modules/layer目录下
+  extend: 'myskin/style.css'
+});
+//具体的皮肤定制，可以参见：skin参数说明      
+        
+layer.ready(callback)- 初始化就绪
+由于layer内置了轻量级加载器，所以你根本不需要单独引入css等文件。但是加载总是需要过程的。当你在页面一打开就要执行弹层时，你最好是将弹层放入ready方法中，如：
+//页面一打开就执行弹层
+layer.ready(function(){
+  layer.msg('很高兴一开场就见到你');
+});
+
+layer.open(options)- 原始核心方法
+基本上是露脸率最高的方法，不管是使用哪种方式创建层，都是走layer.open()，创建任何类型的弹层都会返回一个当前层索引，上述的options即是基础参数，另外，该文档统一采用options作为基础参数的标识例子：
+var index = layer.open({
+  content: 'test'
+});
+//拿到的index是一个重要的凭据，它是诸如layer.close(index)等方法的必传参数。       
+
+layer.alert(content,options,yes)- 普通信息框
+它的弹出似乎显得有些高调，一般用于对用户造成比较强烈的关注，类似系统alert，但却比alert更灵便。它的参数是自动向左补齐的。通过第二个参数，可以设定各种你所需要的基础参数，但如果你不需要的话，直接写回调即可。如
+//eg1
+layer.alert('只想简单的提示');        
+//eg2
+layer.alert('加了个图标', {icon: 1}); //这时如果你也还想执行yes回调，可以放在第三个参数中。
+//eg3
+layer.alert('有了回调', function(index){
+  //do something
+  layer.close(index);
+});       
+        
+layer.confirm(content,options,yes,cancel)- 询问框
+类似系统confirm，但却远胜confirm，另外它不是和系统的confirm一样阻塞你需要把交互的语句放在回调体中。同样的，它的参数也是自动补齐的。
+//eg1
+layer.confirm('is not?', {icon: 3, title:'提示'}, function(index){
+  //do something
+  layer.close(index);
+});
+//eg2
+layer.confirm('is not?', function(index){
+  //do something
+  layer.close(index);
+});       
+        
+layer.msg(content,options,end)- 提示框
+我们在源码中用了相对较大的篇幅来定制了这个msg，目的是想将其打造成露脸率最高的提示框。而事实上我的确也在大量地使用它。因为它简单，而且足够得自觉，它不仅占据很少的面积，而且默认还会3秒后自动消失所有这一切都决定了我对msg的爱。因此我赋予了它许多可能在外形方面，它坚持简陋的变化，在作用方面，它坚持零用户操作。而且它的参数也是自动补齐的。
+//eg1
+layer.msg('只想弱弱提示');
+//eg2
+layer.msg('有表情地提示', {icon: 6}); 
+//eg3
+layer.msg('关闭后想做些什么', function(){
+  //do something
+}); 
+//eg
+layer.msg('同上', {
+  icon: 1,
+  time: 2000 //2秒关闭（如果不配置，默认是3秒）
+}, function(){
+  //do something
+});   
+        
+layer.load(iocn,options)- 加载层
+type:3的深度定制。load并不需要你传太多的参数，但如果你不喜欢默认的加载风格，你还有选择空间。icon支持传入0-2如果是0，无需传。另外特别注意一点：load默认是不会自动关闭的，因为你一般会在ajax回调体中关闭它。
+//eg1
+var index = layer.load();
+//eg2
+var index = layer.load(1); //换了种风格
+//eg3
+var index = layer.load(2, {time: 10*1000}); //又换了种风格，并且设定最长等待10秒 
+//关闭
+layer.close(index);     
+        
+layer.tips(content,follow,options)- tips层
+type:4的深度定制。也是我本人比较喜欢的一个层类型，因为它拥有和msg一样的低调和自觉，而且会智能定位，即灵活地判断它应该出现在哪边。默认是在元素右边弹出
+//eg1
+layer.tips('只想提示地精准些', '#id');
+//eg 2
+$('#id').on('click', function(){
+  var that = this;
+  layer.tips('只想提示地精准些', that); //在元素的事件回调体中，follow直接赋予this即可
+});
+//eg 3
+layer.tips('在上面', '#id', {
+  tips: 1
+});
+        
+上面主要是一些弹层的调用方式，而下面介绍的是一些辅助性的方法
+
+layer.close(index)- 关闭特定层
+关于它似乎没有太多介绍的必要，唯一让你疑惑的，可能就是这个index了吧。事实上它非常容易得到。
+//当你想关闭当前页的某个层时
+var index = layer.open();
+var index = layer.alert();
+var index = layer.load();
+var index = layer.tips();
+//正如你看到的，每一种弹层调用方式，都会返回一个index
+layer.close(index); //此时你只需要把获得的index，轻轻地赋予layer.close即可
+ 
+//如果你想关闭最新弹出的层，直接获取layer.index即可
+layer.close(layer.index); //它获取的始终是最新弹出的某个层，值是由layer内部动态递增计算的
+ 
+//当你在iframe页面关闭自身时
+var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+parent.layer.close(index); //再执行关闭   
+        
+layer.closeAll(type)- 关闭所有层
+如果不想去获取index你只想关闭。那么closeAll真的可以帮上你。如果你不指向层类型的话，它会销毁掉当前页所有的layer层。当然，如果你只想关闭某个类型的层，那么你可以
+layer.closeAll(); //疯狂模式，关闭所有层
+layer.closeAll('dialog'); //关闭信息框
+layer.closeAll('page'); //关闭所有页面层
+layer.closeAll('iframe'); //关闭所有的iframe层
+layer.closeAll('loading'); //关闭加载层
+layer.closeAll('tips'); //关闭所有的tips层    
+        
+layer.style(index,cssStyle)- 重新定义层的样式
+该方法对loading层和tips层无效。参数index为层的索引，cssStyle允许你传入任意的css属性
+//重新给指定层设定width、top等
+layer.style(index, {
+  width: '1000px',
+  top: '10px'
+});       
+        
+layer.title(title,index)- 改变层的标题
+使用方式：layer.title('标题变了', index)
+
+layer.getChildFrame(selector,index)- 获取iframe页的DOM
+当你试图在当前页获取iframe页的DOM元素时，你可以用此方法。selector即iframe页的选择器
+layer.open({
+  type: 2,
+  content: 'test/iframe.html',
+  success: function(layero, index){
+    var body = layer.getChildFrame('body', index);
+    var iframeWin = window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+    console.log(body.html()) //得到iframe页的body内容
+    body.find('input').val('Hi，我是从父页来的')
+  }
+});       
+        
+layer.getFrameIndex(windowName)- 获取特定iframe层的索引
+此方法一般用于在iframe页关闭自身时用到。
+//假设这是iframe页
+var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+parent.layer.close(index); //再执行关闭        
+        
+layer.iframeAuto(index)- 指定iframe层自适应
+调用该方法时，iframe层的高度会重新进行适应
+
+layer.iframeSrc(index,url)- //重置特定iframe url
+似乎不怎么常用的样子。使用方式：layer.iframeSrc(index, 'http://sentsin.com')
+
+layer.setTop(layero)-置顶当前窗口
+非常强大的一个方法，虽然一般很少用。但是当你的页面有很多很多layer窗口，你需要像Window窗体那样，点击某个窗口，该窗体就置顶在上面，那么setTop可以来轻松实现。它采用巧妙的逻辑，以使这种置顶的性能达到最优
+//通过这种方式弹出的层，每当它被选择，就会置顶。
+layer.open({
+  type: 2,
+  shade: false,
+  area: '500px',
+  maxmin: true,
+  content: 'http://www.layui.com',
+  zIndex: layer.zIndex, //重点1
+  success: function(layero){
+    layer.setTop(layero); //重点2
+  }
+});     
+        
+layer.full()、layer.min()、layer.store()- 手工执行最大小化
+（这三个酱油又一次被并列 ==。）一般用于在自定义元素上触发最大化、最小化和全屏。
+
+layer.prompt(options,yes)- 输入层
+prompt的参数也是向前补齐的。options不仅可支持传入基础参数，还可以传入prompt专用的属性。当然，也可以不传。yes携带value 表单值index 索引elem 表单元素
+//prompt层新定制的成员如下
+{
+  formType: 1, //输入框类型，支持0（文本）默认1（密码）2（多行文本）
+  value: '', //初始时的值，默认空字符
+  maxlength: 140, //可输入文本的最大长度，默认500
+}
+ 
+//例子1
+layer.prompt(function(value, index, elem){
+  alert(value); //得到value
+  layer.close(index);
+});
+ 
+//例子2
+layer.prompt({
+  formType: 2,
+  value: '初始值',
+  title: '请输入值',
+  area: ['800px', '350px'] //自定义文本域宽高
+}, function(value, index, elem){
+  alert(value); //得到value
+  layer.close(index);
+});
+        
+layer.tab(options)- tab层
+tab层只单独定制了一个成员，即tab: []
+layer.tab({
+  area: ['600px', '300px'],
+  tab: [{
+    title: 'TAB1', 
+    content: '内容1'
+  }, {
+    title: 'TAB2', 
+    content: '内容2'
+  }, {
+    title: 'TAB3', 
+    content: '内容3'
+  }]
+});        
+        
+layer.photo(options)- 相册层
+相册层，也可以称之为图片查看器。它的出场动画从layer内置的动画类型中随机展现。photos支持传入json和直接读取页面图片两种方式。如果是json传入，如下：
+
+$.getJSON('/jquery/layer/test/photos.json', function(json){
+  layer.photos({
+    photos: json
+    ,anim: 5 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
+  });
+}); 
+//而返回的json需严格按照如下格式：
+{
+  "title": "", //相册标题
+  "id": 123, //相册id
+  "start": 0, //初始显示的图片序号，默认0
+  "data": [   //相册包含的图片，数组格式
+    {
+      "alt": "图片名",
+      "pid": 666, //图片id
+      "src": "", //原图地址
+      "thumb": "" //缩略图地址
+    }
+  ]
+}
+        
+如果是直接从页面中获取图片，那么需要指向图片的父容器，并且你的img可以设定一些规定的属性（但不是必须的）。
+//HTML示例
+<div id="layer-photos-demo" class="layer-photos-demo">
+  <img layer-pid="图片id，可以不写" layer-src="大图地址" src="缩略图" alt="图片名">
+  <img layer-pid="图片id，可以不写" layer-src="大图地址" src="缩略图" alt="图片名">
+</div>
+ 
+//调用示例
+layer.photos({
+  photos: '#layer-photos-demo'
+  ,anim: 5 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
+}); 
+        
+第二种方式的图片查看器显然更加简单，因为无需像第一种那样返回规定的json，但是他们还是有各自的应用场景的，你可以按照你的需求进行选择。另外，photos还有个tab回调，切换图片时触发。
+layer.photos({
+  photos: json/选择器,
+  tab: function(pic, layero){
+    console.log(pic) //当前图片的一些信息
+  }
+});
+
+</textarea><textarea>
+< link rel="stylesheet" href="/addons/{$_GPC['m']}/assert/layui/css/layui.css">
+
+<form id="search-form" class="layui-form" method="POST" action="">
+    <div class="layui-inline"> <input class="layui-input" placeholder="提现单号" name="extract_no"> </div>
+    <div class="layui-inline"> <input class="layui-input" placeholder="用户ID或昵称" name="user"> </div>
+
+    <div class="layui-inline">
+        <select name="extract_type" lay-filter="aihao">
+            <option value="">提现方式</option>
+            {loop $extract_type_map $key $item}
+            <option value="{$key}">{$item}</option>
+            {/loop}
+        </select>
+    </div>
+    <div class="layui-inline">
+        <select name="money_type" lay-filter="aihao">
+            <option value="">金额类型</option>
+            {loop $money_type_map $key $item}
+            <option value="{$key}">{$item}</option>
+            {/loop}
+        </select>
+    </div>
+    <div class="layui-inline">
+        <select name="status" lay-filter="aihao">
+            <option value="">状态</option>
+            {loop $status_map $key $item}
+            <option value="{$key}">{$item}</option>
+            {/loop}
+        </select>
+    </div>
+    <button class="layui-btn" id="search-btn" lay-submit lay-filter="*">搜索</button>
+</form>
+<table id="list" lay-filter="test"></table>
+
+< script src="/addons/{$_GPC['m']}/assert/layui/layui.js">< /script>
+< script>
+layui.use(['table', 'form'],function(args){
+    var table = layui.table, form = layui.form;
+
+    table.render({
+        elem: '#list'
+        ,id: 'list'
+        ,even: true //开启隔行背景
+        ,title: '收支明细'
+        ,url: "{php echo $this->createWebUrl('extract');}" //数据接口
+        ,method: 'post'
+        ,page: true //开启分页
+        // ,toolbar: true
+        // ,totalRow: true
+        ,cellMinWidth: 80 //全局定义常规单元格的最小宽度
+        ,cols: [[ //表头
+            {type:'checkbox'}
+            ,{field: 'id', title: 'ID', sort: true, width: 60, fixed: 'left'}  //width支持数字、百分比和不填写,还可以通过minWidth参数局部定义当前单元格的最小宽度
+            ,{field: 'extract_no', title: '提现单号', width: 160, sort: true, align: 'center'} //单元格内容水平居中
+            ,{field: 'uid', title: '用户ID', width: 100}
+            ,{field: 'extract_type', title: '提现方式', width: 90} 
+            ,{field: 'money_type', title: '金额类型', width: 100, sort: true, templet: function (d) {
+                if (d.checkState == "已通过") {
+                    return '<span style="color:#008000;">' + d.checkState + '</span>'
+                }
+                if (d.checkState == "未通过") {
+                    return '<span style="color:#c00;">' + d.checkState + '</span>'
+                }
+                if (d.checkState == "待审核") {
+                    return '<span style="color:#FF4500;">' + d.checkState + '</span>'
+                }
+                if (d.checkState == "未提交") {
+                    return '<span style="color:#000000;">' + d.checkState + '</span>'
+                }
+
+            }}
+            ,{field: 'money', title: '金额', width: 80, sort: true}
+            ,{field: 'fee', title: '手续费', width: 90, sort: true}
+            ,{field: 'status', title: '状态', width: 90}
+            ,{field: 'createtime', title: '申请时间', sort: true, width: 160}
+            ,{field: 'zfb', title: '支付宝账号', width: 180, sort: true}
+            ,{field: 'operate', title: '操作', toolbar: '#operate', width: 180}
+        ]]
+        ,done: function(res, curr, count){
+            //如果是异步请求数据方式，res即为你接口返回的信息。
+            //如果是直接赋值的方式，res即为：{data: [], count: 99} data为当前页数据、count为数据总长度
+            // console.log(res);
+            // console.log(curr);  //得到当前页码
+            // console.log(count);  //得到数据总量
+        }
+    });
+
+    form.on('submit(*)', function(data){
+        table.reload('list', {
+            url: "{php echo $this->createWebUrl('extract');}"
+            ,methods: "post"
+            ,where: data.field
+            ,page: { curr: 1} //重新从第 1 页开始
+        });
+        return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+    });
+
+    //监听工具条 
+    table.on('tool(test)', function(obj){ //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+        var data = obj.data;              //获得当前行数据
+        var layEvent = obj.event;         //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+        var tr = obj.tr;                  //获得当前行 tr 的 DOM 对象（如果有的话）
+
+        if(layEvent === 'detail'){ //查看
+            location.href = "{php echo $this->createWebUrl('extractedit');}&id=" + obj.data.id
+        } else if(layEvent === 'del'){ //删除
+            layer.confirm('真的删除行么', function(index){
+                obj.del(); //删除对应行（tr）的DOM结构，并更新缓存
+                layer.close(index);
+                //向服务端发送删除指令
+            });
+        } else if(layEvent === 'edit'){ //编辑
+            //do something
+
+            //同步更新缓存对应的值
+            obj.update({
+                username: '123'
+                ,title: 'xxx'
+            });
+        }else if(layEvent === 'check-1'){
+            if(obj.data.status_orign > 0){
+                layer.alert('该订单已审核');
+                return false;
+            }
+            $.ajax({
+                url: "{php echo $this->createWebUrl('extractedit');}&check=1&id=" + obj.data.id,
+                type: 'post',
+                data:{reason: ''},
+                success:function(data){
+                    var result = JSON.parse(data);
+                    if(result['errno']){
+                        util.message(result['message'], "{php echo $this->createWebUrl('extract');}", 'error');
+                    }else{
+                        util.message(result['message'], "{php echo $this->createWebUrl('extract');}", 'success');
+                    }
+                },
+            });
+
+        }else if(layEvent === 'check-2'){
+            if(obj.data.status_orign > 0){
+                layer.alert('该订单已审核');
+                return false;
+            }
+            layer.prompt({
+                formType: 2,
+                value: '',
+                title: '请输入不通过的原因',
+            }, function(value, index, elem){
+                layer.close(index);
+                $.ajax({
+                    url: "{php echo $this->createWebUrl('extractedit');}&check=2&id=" + obj.data.id,
+                    type: 'post',
+                    data:{reason: value},
+                    success:function(data){
+                        var result = JSON.parse(data);
+                        if(result['errno']){
+                            util.message(result['message'], "{php echo $this->createWebUrl('extract');}", 'error');
+                        }else{
+                            util.message(result['message'], "{php echo $this->createWebUrl('extract');}", 'success');
+                        }
+                    },
+                });
+            });
+        }
+    });
+});
+< /script>
+
+< script type="text/html" id="operate">
+    <a class="layui-btn layui-btn-xs" lay-event="detail">查看</a>
+    <!-- <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a> -->
+    <!-- <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a> -->
+
+    {{# if(d.status_orign == 0){ }}
+    <a class="layui-btn layui-btn-xs check-1" lay-event="check-1">通过</a>
+    <a class="layui-btn layui-btn-xs check-2" lay-event="check-2">不通过</a>
+    {{# } }}
+    
+    <!-- 这里同样支持 laytpl 语法，如： -->
+    {{#  if(d.auth > 2){ }}
+        <a class="layui-btn layui-btn-xs" lay-event="check">审核</a>
+    {{#  } }}
+< /script>
 
 </textarea>
 </div>
@@ -41830,6 +43794,8 @@ protected $searchFields = 'id,operating,member_id,remarks';
         <li><a href="#separation">前后端分离</a></li>
         <li><a href="#miaosha">秒杀架构</a></li>
         <li><a href="#fastadmin">fastadmin</a></li>
+        <li><a href="#we7">we7</a></li>
+        <li><a href="#layui">layui</a></li>
     </ol>
 
     <script src="vendors/jquery-3.3.1.min.js"></script>
