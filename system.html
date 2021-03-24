@@ -242,7 +242,7 @@ tdn tab -> text-decoration: none;
 
 批量重命名 shift + ctrl + l
 
-rest client插件
+【 rest client插件 】
 /test.http
 ### baidu
 GET https://www.baidu.com HTTP/1.1
@@ -294,12 +294,12 @@ ubuntu下载安装sublime
 wget https://download.sublimetext.com/sublime-text_build-3126_amd64.deb
 sudo dpkg -i sublime-text_build-3126_amd64.deb
 
-编辑器就是纯粹编辑文本的编辑器,编辑器的本质是可以写字符就行,像windows自带的写字板就是最简单的编辑器,他的识别级别在文字级,只显示你想写入和打开的文本内容,不管写什么内容,只提供接收与显示功能。
+编辑器就是纯粹编辑文本的编辑器,编辑器的本质是可以写字符就行,像windows自带的写字板就是最简单的编辑器,他的识别级别在文字级,只显示想写入和打开的文本内容,不管写什么内容,只提供接收与显示功能。
 
 IDE是带有软件开发功能的"集成开发环境",IDE里面除了编辑器还有很多其他东西,IDE是集合了sdk、语言支持包、函数库、编辑器在一起的软件或集合
 可以支持特定编程语言,识别级别比编辑器高一级,可识别编程语言或者这种语言的库,往往用起来更方便更专业
 集成开发环境(IDE,Integrated Development Environment)是用于提供程序开发环境的应用程序,一般包括代码编辑器、编译器、调试器和图形用户界面等工具。集成了代码编写、分析、编译、调试功能等一体化的开发软件服务套。所有具备这一特性的软件或软件套组都可以叫集成开发环境。如微软的Visual Studio系列,Borland的C++ Builder、Delphi系列等。该程序可以独立运行,也可以和其它程序并用
-IDE多被用于开发HTML应用软件。例如许多人在设计网站时使用IDE如HomeSite、DreamWeaver等,因为很多项任务会自动生成
+IDE多被用于开发HTML应用软件,例如许多人在设计网站时使用IDE如HomeSite、DreamWeaver等,因为很多项任务会自动生成
 
 【 快捷键 】
 菜单栏隐藏之后显示菜单栏,按住Alt键菜单栏即会出现,松开后则菜单栏就会消失
@@ -327,7 +327,8 @@ sublime支持原始的vi编辑器模式,默认的配置中是不开启vi支持�
 任意模式下按Esc键进入 命令模式(command mode)——是用来编辑文本,如上下翻页等、复制粘贴、跳转到指定行等操作。
 再按a键进入编辑(插入)模式(insert mode)——是用来编写文本内容的
 
-</pre><textarea>//写一个函数或者类的注释
+</pre><textarea>
+//写一个函数或者类的注释
 /**
 *@author  作者   [name] <[< email address>]>
 *@param  参数 格式为  {String} 参数描述 [type] $[name] [< description>]
@@ -12340,6 +12341,49 @@ GitHub就是一个免费托管开源代码的远程仓库,但对于某些视源�
 
 </pre>
 
+<h4>将git修改的文件按照原来的目录层次全部复制出来</h4><pre>
+在使用git管理源代码时,经常需要将一台机器上一堆已修改但未提交的文件,按照原来的目录层次,全部复制到另一台机器上去。最笨的办法当然是一个个查找已修改的文件,并将其复制出来。不过已修改文件数量较多时,这种方法不但繁琐,而且容易出错。本文介绍一种使用git和Shell脚本,将修改的文件按照原来的目录层次全部复制出来的方法。
+
+一、尚未使用git提交修改的文件
+如果修改的文件尚未使用git提交,可使用如下命令复制并打包：
+
+# 在源代码根目录,使用git status命令获取已修改文件的列表
+git status | grep modified | awk '{print $2}' > list.txt
+# 在当前目录下,创建temp目录
+mkdir temp
+# 将已修改文件列表逐一复制到当前目录下的temp目录
+xargs -a ./list.txt cp --parents -t ./temp
+# 将temp目录下的所有文件打包为modules.tar.gz
+cd temp
+tar -czf modules.tar.gz *
+
+二、提取git某条提交记录中更改的文件
+如果已使用git提交修改,可使用下述命令将某条提交记录中所有更改的文件按原来的目录层次全部复制出来：
+
+# 在源代码根目录,获取提交记录f3794bd30cb1d3f8e64f1177d3149f28cbc828e6中的更改文件名
+# 可以替换为 git show f3794bd30cb1d3f8e64f1177d3149f28cbc828e6 --name-only
+git log f3794bd30cb1d3f8e64f1177d3149f28cbc828e6 -1 --name-only | grep '/' | awk '{print $1}' > list.txt
+# 最近两条记录
+git log -2 --name-only | grep '/' | awk '{print $1}' > list.txt
+# 在当前目录下,创建temp目录
+mkdir temp
+# 将已修改文件列表逐一复制到当前目录下的temp目录
+xargs -a ./list.txt cp --parents -t ./temp
+# 将temp目录下的所有文件打包为modules.tar.gz
+cd temp 
+tar -czf modules.tar.gz *
+
+#!/bin/bash
+cd /mnt/e/wendao/group &&
+rm /mnt/e/wendao/group_cmd/list.txt && 
+rm -rf /mnt/e/wendao/group_cmd/temp &&
+read -p "how many rows: " rows &&
+git log -$rows --name-only | grep '/' | awk '{print $1}' > /mnt/e/wendao/group_cmd/list.txt && 
+mkdir /mnt/e/wendao/group_cmd/temp &&
+xargs -a /mnt/e/wendao/group_cmd/list.txt cp --parents -t /mnt/e/wendao/group_cmd/temp
+
+</pre>
+
 <h4>使用git生成patch和打入patch 打包 补丁</h4><pre>
 平时在使用git管理项目时会遇到这样一种情况,那就是客户使用git生成patch给我们,需要把客户给到patch打入到project
 
@@ -15631,6 +15675,34 @@ $ unzip -l chm.zip         # list files(short format)
 $ unzip -l chm             # list files(short format)
 $ unzip chm.zip            # 解压zip压缩包
 $ zip -r chm.zip ../chm/   # 把chm目录下所有文件打包到chm.zip
+
+【 ubuntu zip/unzip使用 】
+# 将test目录下打包成myfile.zip
+zip -r myfile.zip test/
+
+# 将myfile.zip.解压到当前目录下
+unzip  myfile.zip
+
+删除压缩包内的文件
+$ zip -d myfile.zip a.txt
+-d 删除
+删除myfile.zip中的a.txt
+
+向压缩包内添加文件
+$ zip -m myfile.zip a.txt
+-m 添加
+向 myfile.zip添加文件a.txt
+
+对应参数列举
+参数	描述
+-x	文件列表 解压缩文件,但不包括指定的file文件。
+-v	查看压缩文件目录,但不解压。
+-t	测试文件有无损坏,但不解压。
+-d	目录 把压缩文件解到指定目录下。
+-z	只显示压缩文件的注解。
+-n	不覆盖已经存在的文件。
+-o	覆盖已存在的文件且不要求用户确认。
+-j	不重建文档的目录结构,把所有文件解压到同一目录下
 
 tar -czvf ben.tar.gz /home/ben/   # 对ben用户的文件进行备份
 
@@ -22502,27 +22574,25 @@ yum list pam*  // 利用 yum 的功能,找出以 pam 为开头的软件名称有
 
 <div id="awk">
 <h3>awk命令用法</h3><pre>
-awk是一种编程语言,用于在linux/unix下对文本和数据进行处理。数据可以来自标准输入、一个或多个文件,或其它命令的输出。它支持用户自定义函数和动态正则表达式等先进功能,是linux/unix下的一个强大编程工具。它在命令行中使用,但更多是作为脚本来使用。
+awk是一种编程语言,用于在linux/unix下对文本和数据进行处理。数据可以来自标准输入、一或多个文件,或其它命令的输出。支持用户自定义函数和动态正则表达式等先进功能,是linux/unix下的一个强大编程工具。它在命令行中使用,但更多是作为脚本来使用。
 
-awk是一个强大的文本分析工具,相对于grep的查找,sed的编辑,awk在其对数据分析并生成报告时,显得尤为强大。简单来说awk就是把文件逐行的读入,以空格为默认分隔符将每行切片,切开的部分再进行各种分析处理。
+awk是一个强大的文本分析工具,相对于grep的查找,sed的编辑,awk在其对数据分析并生成报告时显得尤为强大。简单来说awk就是把文件逐行的读入,以空格为默认分隔符将每行切片,切开的部分再进行各种分析处理。
 
-awk的处理文本和数据的方式是这样的,它逐行扫描文件,从第一行到最后一行,寻找匹配的特定模式的行,并在这些行上进行想要的操作。如果没有指定处理动作,则把匹配的行显示到标准输出(屏幕),如果没有指定模式,则所有被操作所指定的行都被处理。
+awk的处理文本和数据的方式
+通常awk是以文件的一行为处理单位的。awk每接收文件的一行,然后执行相应的命令来处理文本。
+逐行扫描文件,从第一行到最后一行,寻找匹配的特定模式的行,并在这些行上进行想要的操作。如果没有指定处理动作,则把匹配的行显示到标准输出(屏幕),如果没有指定模式则所有被操作所指定的行都被处理。
 
-awk分别代表其作者姓氏的第一个字母Alfred Aho、Brian Kernighan、Peter Weinberger。gawk是awk的GNU版本,它提供了Bell实验室和GNU的一些扩展,在linux系统中已把awk链接到gawk
-
-awk有3个不同版本: awk、nawk和gawk,未作特别说明,一般指gawk,gawk是AWK的GNU版本
-
+awk分别代表其作者姓氏的第一个字母Alfred Aho、Brian Kernighan、Peter Weinberger。gawk是awk的GNU版本,提供了Bell实验室和GNU的一些扩展,在linux系统中已把awk链接到gawk
+awk有3个不同版本: awk、nawk和gawk,未作特别说明一般指gawk,gawk是AWK的GNU版本
 windows上的awk:gawk.exe,这样在windows上也能享受awk处理数据的方便性
 
-通常awk是以文件的一行为处理单位的。awk每接收文件的一行,然后执行相应的命令来处理文本。
-
-【awk中同时提供了print和printf两种打印输出的函数】
+【 awk中同时提供了print和printf两种打印输出的函数 】
 其中print函数的参数可以是变量、数值或者字符串。字符串必须用双引号引用,参数用逗号分隔。如果没有逗号,参数就串联在一起而无法区分。这里,逗号的作用与输出文件的分隔符的作用是一样的,只是后者是空格而已。
 
-【有三种方式调用awk】
+【 有三种方式调用awk 】
 1.命令行方式
 awk [-F  field-separator]  'commands'  input-file(s)
-其中commands是真正awk命令,[-F域分隔符]是可选的。 input-file(s) 是待处理的文件。
+其中commands是真正awk命令,[-F域分隔符]是可选的,input-file(s)是待处理的文件
 在awk中文件的每一行中,由域分隔符分开的每一项称为一个域。通常在不指名-F域分隔符的情况下,默认的域分隔符是空格。
 
 2.shell脚本方式
@@ -22532,9 +22602,10 @@ awk [-F  field-separator]  'commands'  input-file(s)
 
 3.将所有的awk命令插入一个单独文件,然后调用:
 awk -f awk-script-file input-file(s)
-其中,-f选项加载awk-script-file中的awk脚本,input-file(s)跟上面的是一样的。
+-f选项加载awk-script-file中的awk脚本,input-file(s)跟上面的是一样的。
 
-</pre><textarea>$ last -n 5 <==仅取出前五行
+</pre><textarea>
+$ last -n 5 <==仅取出前五行
 root     pts/1   192.168.1.100  Tue Feb 10 11:21   still logged in
 root     pts/1   192.168.1.100  Tue Feb 10 00:46 - 02:28 (01:41)
 root     pts/1   192.168.1.100  Mon Feb  9 11:41 - 18:30 (06:48)
@@ -22548,9 +22619,10 @@ root
 dmtsai
 root
 
-awk工作流程是这样的:读入有'\n'换行符分割的一条记录,然后将记录按指定的域分隔符划分域,填充域,$0则表示所有域,$1表示第一个域,$n表示第n个域,默认域分隔符是"空白键" 或 "[tab]键",所以$1表示登录用户,$3表示登录用户ip,以此类推
+awk工作流程:读入有'\n'换行符分割的一条记录,然后将记录按指定的域分隔符划分域,填充域,$0则表示所有域,$1表示第一个域,$n表示第n个域,默认域分隔符是"空白键" 或 "[tab]键",所以$1表示登录用户,$3表示登录用户ip,以此类推
 
-</textarea><textarea>$ awk -F ':' 'NR <= 5 {print $1}' /etc/passwd
+</textarea><textarea>
+$ awk -F ':' 'NR <= 5 {print $1}' /etc/passwd
 
 $ cat /etc/passwd |awk  -F ':'  '{print $1}'
 root
@@ -22561,14 +22633,14 @@ sys
 -F指定域分隔符为':'
 
 如果只是显示/etc/passwd的账户和账户对应的shell,而账户与shell之间以tab键分割
-#cat /etc/passwd |awk  -F ':'  '{print $1"\t"$7}'
+#cat /etc/passwd |awk -F ':' '{print $1"\t"$7}'
 root    /bin/bash
 daemon  /bin/sh
 bin     /bin/sh
 sys     /bin/sh
 
 如果只是显示/etc/passwd的账户和账户对应的shell,而账户与shell之间以逗号分割,而且在所有行添加列名name,shell,在最后一行添加"blue,/bin/nosh"。
-cat /etc/passwd |awk  -F ':'  'BEGIN {print "name,shell"}  {print $1","$7} END {print "blue,/bin/nosh"}'
+cat /etc/passwd |awk -F ':' 'BEGIN {print "name,shell"}  {print $1","$7} END {print "blue,/bin/nosh"}'
 name,shell
 root,/bin/bash
 daemon,/bin/sh
@@ -22590,7 +22662,7 @@ $ awk -F: '/root/{print $7}' /etc/passwd
 这里指定了action{print $7}
 
 </textarea><pre>
-【awk的语法有两种形式】
+【 awk的语法有两种形式 】
 awk [options] 'awkscript' var=value file(s)
 awk [options] -f awkscriptfile var=value file(s)
 
@@ -22602,8 +22674,7 @@ awk [options] -f awkscriptfile var=value file(s)
 在任何情况下, 程序都可以用引号包含起来放到awk命令的一个参数中运行,或者把它放到一个文件中使用awk的-f参数调用它
 当程序比较短小(几行的长度)的时候,这种约定会很方便
 如果程序较长将程序写到一个单独的文件中会更加方便。假设存在程序 progfile ,输入命令行::
-awk -f progfile     optional list of input files
-其中 -f 选项指示awk从指定文件中获取程序progfile
+awk -f progfile optional list of input files  // -f选项指示awk从指定文件中获取程序progfile
 
 模式-动作语句以及动作中的语句通常以换行分隔,如果它们以分号分隔则多个语句可以出现在一行中。分号可以放在任意语句的尾部
 动作的开大括号必须与其对应的模式处于同一行;动作的其余部分,包括闭大括号,则可以出现接下来的行中
@@ -22617,7 +22688,7 @@ awk -f progfile     optional list of input files
   $2,        # area in thousands of square miles
   $3 }       # population in millions
 
-【命令选项】
+【 命令选项 】
 -F fs or --field-separator fs
 指定输入文件折分字段分隔符,fs是一个字符串或者是一个正则表达式,如-F:。
 默认的分隔符是连续的空格或制表符
@@ -22658,12 +22729,12 @@ awk -f progfile     optional list of input files
 -W version or --version
 打印bug报告信息的版本。
 
-【模式和操作】
+【 模式和操作 】
 awk脚本是由模式和操作组成的:
 pattern {action} 如$ awk '/root/' test,或$ awk '$3 < 100' test。
 两者是可选的,如果没有模式则action应用到全部记录,如果没有action则输出匹配全部记录。
 由于模式和动作两者任一都是可选的,所以需要使用大括号包围动作以区分于其他模式
-默认情况下,每一个输入行都是一条记录,但用户可通过RS变量指定不同的分隔符进行分隔。
+默认每一个输入行都是一条记录,但用户可通过RS变量指定不同的分隔符进行分隔。
 
 awk [options] 'BEGIN{action} pattern{ action;...}END{action;...}' file..
 
@@ -22691,7 +22762,7 @@ BEGIN和END不与其他模式组合。范围模式不可以是任何其他模式
 3、内置函数
 4、控制流命令
 
-【模式】
+【 模式 】
 通过对比选择
 $2 >= 5
 
@@ -22699,9 +22770,9 @@ $2 >= 5
 $2 * $3 > 50 { printf("$%.2f for %s\n", $2 * $3, $1) }
 
 通过文本内容选择
-除了数值测试,还可以选择包含特定单词或短语的输入行。这个程序会打印所有第一个字段为 Susie 的行::
+除了数值测试,还可以选择包含特定单词或短语的输入行。这个程序会打印所有第一个字段为Susie的行::
 $1 == "Susie"
-操作符 == 用于测试相等性。你也可以使用称为 正则表达式 的模式查找包含任意字母组合,单词或短语的文本。这个程序打印任意位置包含 Susie 的行::
+操作符 == 用于测试相等性,也可以使用称为正则表达式的模式查找包含任意字母组合,单词或短语的文本。这个程序打印任意位置包含Susie的行::
 /Susie/
 
 模式组合
@@ -22721,26 +22792,27 @@ $3 > 60     { print $0, "too many hours worked" }
 特殊模式BEGIN用于匹配第一个输入文件的第一行之前的位置
 END则用于匹配处理过的最后一个文件的最后一行之后的位置
 
-普通的 print 是打印当前输入行,与之不同的是 print "" 会打印一个空行
+普通的print是打印当前输入行,与之不同的是print ""会打印一个空行
 这个程序使用 BEGIN 来输出一个标题:
 BEGIN { print "Name    RATE    HOURS"; print ""}
       { print }
 
-【匹配操作符(~)】
-用来在记录或者域内匹配正则表达式。如$ awk '$1 ~/^root/' test,将显示test文件第一列中以root开头的行
+【 匹配操作符(~) 】
+用来在记录或域内匹配正则表达式。如awk '$1 ~/^root/' test,将显示test文件第一列中以root开头的行
 
-【比较表达式】
+【 比较表达式 】
 conditional expression1 ? expression2: expression3
-例如:$ awk '{max = {$1 > $3} ? $1: $3: print max}' test。如果第一个域大于第三个域,$1就赋值给max,否则$3就赋值给max。
+如:awk '{max = {$1 > $3} ? $1: $3: print max}' test。如果第一个域大于第三个域,$1就赋值给max,否则$3就赋值给max。
 
 $ awk '$1 + $2 < 100' test      如果第一和第二个域相加大于100,则打印这些行。
 $ awk '$1 > 5 && $2 < 10' test  如果第一个域大于5,并且第二个域小于10,则打印这些行。
 
-【范围模板】
+【 范围模板 】
 范围模板匹配从第一个模板的第一次出现到第二个模板的第一次出现之间所有行。如果有一个模板没出现,则匹配到开头或末尾
 如$ awk '/root/,/mysql/' test  # 将显示root第一次出现到mysql第一次出现之间的所有行。
 
-</pre>再看几个条件判断的例子<textarea>$ cat aa.txt
+</pre>再看几个条件判断的例子<textarea>
+$ cat aa.txt
 123 root
 345 wangshibo
 456 opt
@@ -22777,10 +22849,10 @@ $ awk '$1< 200 && $2=="wangshibo" {print $0}' aa.txt
 $ awk '$1< 200 || $2=="wangshibo" {print $0}' aa.txt
 
 </textarea><pre>
-【BEGIN模块】
+【 BEGIN模块 】
 BEGIN模块后紧跟着动作块,这个动作块在awk处理任何输入文件之前执行。所以它可以在没有任何输入的情况下进行测试。它通常用来改变内建变量的值,如OFS,RS和FS等,以及打印标题。如:$ awk 'BEGIN{FS=":"; OFS="\t"; ORS="\n\n"}{print $1,$2,$3} test。上式表示,在处理输入文件以前,域分隔符(FS)被设为冒号,输出文件分隔符(OFS)被设置为制表符,输出记录分隔符(ORS)被设置为两个换行符。$ awk 'BEGIN{print "TITLE TEST"}只打印标题。
 
-【END模块】
+【 END模块 】
 END不匹配任何的输入文件,但是执行动作块中的所有动作,它在整个输入文件处理完成后被执行
 如$ awk 'END{print "The number of records is" NR}' test,上式将打印所有被处理的记录数。
 
@@ -22830,14 +22902,14 @@ awk -F: '$3!=$4{print $1}' /etc/passwd
 awk -F: '$7==""{print $1}' /etc/passwd
 
 </textarea><pre>
-【执行AWK程序】
+【 执行AWK程序 】
 执行awk程序的方式有多种:
 awk 'program' input files               #在每个指定的输入文件上执行这个program
 awk '$3 == 0 { print $1 }' file1 file2  #打印file1和file2文件中第三个字段为0的每一行的第一个字段。
 
 可以省略命令行中的输入文件,仅输入::
 awk 'program'
-这种情况下,awk会将program应用于终端中接着输入的任意数据行,直到你输入一个文件结束信号(Unix系统上为control-d)
+这种情况下awk会将program应用于终端中接着输入的任意数据行,直到输入一个文件结束信号(Unix系统上为control-d)
 如下是Unix系统的一个会话示例:
 $ awk '$3 == 0 { print $1 }'
 Beth 4.00 0
@@ -22846,8 +22918,8 @@ Kathy 3.75 10
 Kathy 3.75 0
 Kathy
 
-【awk错误】
-如果awk程序存在错误,awk会给一段诊断信息。例如打错了大括号
+【 awk错误 】
+如果awk程序存在错误,awk会给一段诊断信息,如打错了大括号
 
 $ awk '$3 == 0 [ print $1 }' test
 awk: cmd. line:1: $3 == 0 [ print $1 }
@@ -22855,18 +22927,14 @@ awk: cmd. line:1:         ^ syntax error
 awk: cmd. line:1: $3 == 0 [ print $1 }
 awk: cmd. line:1:                    ^ syntax error
 
-【awk输出】
+【 awk输出 】
 打印每一行
-如果一个动作没有任何模式, 这个动作会对所有输入的行进行操作. print 语 句用来打印(输出)当前输入的行, 所以程序
-{ print }
-会输出所有输入的内容到标准输出. 由于 $0 表示整行,
-{ print $0 }
-也会做一样的事情
+如果一个动作没有任何模式,这个动作会对所有输入的行进行操作. print语句用来打印(输出)当前输入的行, 所以程序{ print }会输出所有输入的内容到标准输出. 由于$0表示整行,{ print $0 }也会做一样的事情
 
 打印特定字段
 使用一个print语句可以在同一行中输出不止一个字段
 { print $1, $3 }           # 输出了每行输入中的第一和第三个字段
-{ print NF, $1, $NF }      # 依次打印出每一行的字段数量, 第一个字段的值, 最后一个字段的值
+{ print NF, $1, $NF }      # 依次打印出每一行的字段数量,第一个字段的值,最后一个字段的值
 { print $1, $2 * $3 }      # 对字段的值进行计算后再打印出来
 { print NR, $0 }           # NR存储当前已经读取了多少行的计数,使用NR和$0给数据的每一行加上行号
 { print "total pay for", $1, "is", $2 * $3 }             # 双引号内的文字将会在字段和计算的值中插入输出
@@ -22878,7 +22946,7 @@ awk: cmd. line:1:                    ^ syntax error
 排序输出
 awk '{ printf("%6.2f    %s\n", $2 * $3, $0) }' emp.data | sort  # 将awk的输出通过管道传给sort命令来处理
 
-【使用AWK自定义变量进行计算】
+【 使用AWK自定义变量进行计算 】
 计数
 这个程序使用一个变量emp来统计工作超过15个小时的员工的数目,用作数字的awk变量的默认初始值为0,所以不需要初始化 emp
 $3 > 15 { emp = emp + 1 }
@@ -22925,7 +22993,7 @@ END { print NR, "lines,", nw, "words,", nc, "characters" }
 6 lines, 18 words, 77 characters
 $0 并不包含每个输入行的末尾的换行符,所以要另外加个1。
 
-【awk的环境变量】
+【 awk的环境变量 】
 $n          当前记录的第n个字段,字段间由FS分隔。
 $0          完整的输入记录。
 ARGC        命令行参数的数目。
@@ -22949,7 +23017,7 @@ RS          记录分隔符(默认是一个换行符)。
 RSTART      由match函数所匹配的字符串的第一个位置。
 SUBSEP      数组下标分隔符(默认值是\034)。
 
-【awk���算符】
+【 awk运算符 】
 = += -= *= /= %= ^= **=  赋值
 ?:                       C条件表达式
 ||                       逻辑或
@@ -22965,28 +23033,22 @@ SUBSEP      数组下标分隔符(默认值是\034)。
 $                        字段引用
 in                       数组成员
 
-【记录】
+【 记录 】
 awk把每一个以换行符结束的行称为一个记录。
-
 记录分隔符:默认的输入和输出的分隔符都是回车,保存在内建变量ORS和RS中。
-
 $0变量:它指的是整条记录。如$ awk '{print $0}' test将输出test文件中的所有记录。
-
 变量NR:一个计数器,每处理完一条记录,NR的值就增加1。如$ awk '{print NR,$0}' test
 将输出test文件中所有记录,并在记录前显示记录号。
 
-【域】
-记录中每个单词称做"域",默认情况下以空格或tab分隔。awk可跟踪域的个数,并在内建变量NF中保存该值。如$ awk '{print $1,$3}' test将打印test文件中第一和第三个以空格分开的列(域)。
+【 域 】
+记录中每个单词称做"域",默认以空格或tab分隔。awk可跟踪域的个数,并在内建变量NF中保存该值。如awk '{print $1,$3}' test将打印test文件中第一和第三个以空格分开的列(域)。
 
-【域分隔符】
-内建变量FS保存输入域分隔符的值,默认是空格或tab。我们可以通过-F命令行选项修改FS的值。如$ awk -F: '{print $1,$5}' test将打印以冒号为分隔符的第一,第五列的内容。
-
+【 域分隔符 】
+内建变量FS保存输入域分隔符的值,默认空格或tab,可以通过-F命令行选项修改FS的值,如awk -F: '{print $1,$5}' test将打印以冒号为分隔符的第一第五列的内容。
 可以同时使用多个域分隔符,这时应该把分隔符写成放到方括号中,如$awk -F'[:\t]' '{print $1,$3}' test,表示以空格、冒号和tab作为分隔符。
-
 输出域的分隔符默认是一个空格,保存在OFS中。如$ awk -F: '{print $1,$5}' test,$1和$5间的逗号就是OFS的值
 
-
-【一个验证passwd文件有效性的例子】
+【 验证passwd文件有效性 】
 $ cat /etc/passwd | awk -F: '\
 NF != 7{\
 printf("line %d,does not have 7 fields:%s\n",NR,$0)}\
@@ -22999,7 +23061,7 @@ printf打印字符串"line ?? does not have 7 fields",并显示该条记录。
 如果第一个域没有包含任何字母和数字,printf打印"no alpha and numeric user id" ,并显示记录数和记录。
 如果第二个域是一个星号,就打印字符串"no passwd",紧跟着显示记录数和记录本身。
 
-【重定向和管道】
+【 重定向和管道 】
 awk可使用shell的重定向符进行重定向输出
 如:$ awk '$1 = 100 {print $1 > "output_file" }' test
 上式表示如果第一个域的值等于100,则把它输出到output_file中。也可以用>>来重定向输出,但不清空文件,只做追加操作。
@@ -23029,8 +23091,8 @@ system函数可以在awk中执行linux的命令。如:$ awk 'BEGIN{system("clear
 
 fflush函数用以刷新输出缓冲区,如果没有参数,就刷新标准输出的缓冲区,如果以空字符串为参数,如fflush(""),则刷新所有文件和管道的输出缓冲区。
 
-【使用NR和FNR的一些例子】
-一般在awk里面输入文件是多个时,NR==FNR才有意义,如果这个值为true,表示还在处理第一个文件。
+【 使用NR和FNR的一些例子 】
+一般在awk里面输入文件是多个时,NR==FNR才有意义,这个值为true表示还在处理第一个文件
 
 </pre><textarea>test.txt 10行内容
 test2.txt 4行内容
@@ -23051,7 +23113,20 @@ awk '{print NR,FNR}' test.txt test2.txt
 13 3
 14 4
 
-</textarea><textarea>现在有两个文件格式如下:
+</textarea>删除文本中的重复行<textarea>
+第一,用sort+uniq,单纯uniq是不行的。
+shell> sort -k2n file | uniq
+当file中的重复行不在一起时uniq将服务删除所有的重复行。经过排序后,所有相同的行都在相邻,因此unqi可以正常删除重复行。
+
+第二,用sort+awk命令,单纯awk同样不行,原因同上。
+shell> sort -k2n file | awk '{if ($0!=line) print;line=$0}'
+把管道后面的代码重新设计一下,可能不需要sort命令先排序了
+
+第三,用sort+sed命令,同样需要sort命令先排序。
+shell> sort -k2n file | sed '$!N; /^.∗\n\1$/!P; D'
+
+</textarea><textarea>
+现在有两个文件格式如下:
 #cat account
 张三|000001
 李四|000002
@@ -23090,15 +23165,10 @@ END {printf "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t",c1,c2,c3,c4,c5,c6,c7,c8,c
 
 示例/例子:
 awk '{if($0~/^>.*$/) {tmp=$0; getline; if( length($0)>=200) {print tmp"\n"$0; } }}' filename
-
 awk '{if($0~/^>.*$/) {IGNORECASE=1; if($0~/PREDICTED/) {getline;} else {print $0; getline; print $0; } }}' filename
-
 awk '{if($0~/^>.*$/) {IGNORECASE=1; if($0~/mRNA/) {print $0; getline; print $0; } else {getline;} }}' filename
-
 awk '{ temp=$0; getline; if($0~/unavailable/) {;} else {print temp"\n"$0;} }' filename
-
 substr($4,20) ---> 表示是从第4个字段里的第20个字符开始,一直到设定的分隔符","结束.
-
 substr($3,12,8) ---> 表示是从第3个字段里的第12个字符开始,截取8个字符结束.
 
 </textarea><pre>
@@ -23127,11 +23197,11 @@ awk '{printf("%s,",$1)}' filename
 </pre>
 
 <h4>awk变量</h4><pre>
-在awk中,变量不需要定义就可以直接使用,变量类型可以是数字或字符串。
+在awk中变量不需要定义就可以直接使用,变量类型可以是数字或字符串
 
 赋值格式:Variable = expression
 如$ awk '$1 ~/test/{count = $2 + $3; print count}' test
-上式的作用是,awk先扫描第一个域,一旦test匹配,就把第二个域的值加上第三个域的值,并把结果赋值给变量count,最后打印出来。
+上式的作用是,awk先扫描第一个域,一旦test匹配就把第二个域的值加上第三个域的值,并把结果赋值给变量count,最后打印出来。
 
 awk可以在命令行中给变量赋值,然后将这个变量传输给awk脚本。如$ awk -F: -f awkscript month=4 year=2004 test,上式的month和year都是自定义变量,分别被赋值为4和2004。在awk脚本中,这些变量使用起来就象是在脚本中建立的一样。注意,如果参数前面出现test,那么在BEGIN语句中的变量就不能被使用。
 
@@ -23139,7 +23209,7 @@ awk可以在命令行中给变量赋值,然后将这个变量传输给awk脚本�
 如$ awk '{$2 = 100 + $1; print }' test,上式表示,如果第二个域不存在,awk将计算表达式100加$1的值,并将其赋值给$2,如果第二个域存在,则用表达式的值覆盖$2原来的值
 再例如:$ awk '$1 == "root"{$1 ="test";print}' test,如果第一个域的值是"root",则把它赋值为"test",注意,字符串一定要用双引号。
 
-【内建变量的使用】
+【 内建变量的使用 】
 内置变量来保存某些频繁使用的数量
 
 $ awk -F: '{IGNORECASE=1; $1 == "MARY"{print NR,$1,$2,$NF}'test
@@ -23170,7 +23240,7 @@ filename:/etc/passwd,linenumber:4,columns:7,linecontent:sys:x:3:3:sys:/dev:/bin/
 使用printf替代print,可以让代码更加简洁,易读
 awk  -F ':'  '{printf("filename:%10s,linenumber:%s,columns:%s,linecontent:%s\n",FILENAME,NR,NF,$0)}' /etc/passwd
 
-【awk自定义变量】
+【 awk自定义变量 】
 除了awk的内置变量,awk还可以自定义变量,用于计算、存储数据诸如此类的操作
 awk中用户创建的变量不需要声明
 
@@ -23208,7 +23278,7 @@ awk的数组存储了一组相关的值
 
 用变量作为数组下标。如:$ awk {name[x++]=$2};END{for(i=0;i< NR;i++) print i,name[i]}' test。数组name中的下标是一个自定义变量x,awk初始化x的值为0,在每次使用后增加1。第二个域的值被赋给name数组的各个元素。在END模块中,for循环被用于循环整个数组,从下标为0的元素开始,打印那些存储在数组中的值。因为下标是关健字,所以它不一定从0开始,可以从任何值开始。
 
-special for 循环用于读取关联数组中的元素。格式如下:
+special for 循环用于读取关联数组中的元素,格式如下:
 
 {
   for(item in arrayname){
@@ -23236,13 +23306,13 @@ awk -F ':' 'BEGIN {count=0;} {name[count] = $1;count++;}; END{for(i = 0; i < NR;
 5 games
 ......
 
-</pre><textarea>需求:分析apace日志,获取访问量较大的前十个IP地址
-
+</pre><textarea>
+需求:分析apace日志,获取访问量较大的前十个IP地址
 方法: awk '{ips[$1]++;}END{for(ip in ips)print ip,ips[ip]}' |sort –nk2|head -10
-
 实例结果分析:该apace日志首列保存ip信息。能过awk对日志进行一次遍历,即实现了IP信息的获取,同时采用了哈希结构,对ip进行了累计
 
-</textarea><textarea># 反转 - 按行逆序打印输入
+</textarea><textarea>
+# 反转 - 按行逆序打印输入
     { line[NR] = $0 }  # 记下每个输入行
 END { i = NR           # 逆序打印
       while(i > 0) {
@@ -23254,7 +23324,7 @@ END { i = NR           # 逆序打印
 </textarea>
 
 <h4>条件语句 循环语句</h4><pre>
-【条件语句】
+【 条件语句 】
 awk中的条件语句是从C语言中借鉴来的,见如下声明方式:
 if(expression) {
     statement;
@@ -23288,7 +23358,7 @@ $ awk '{if($1 > 100){ count++; print $1} else {count--; print $2}' test。如果
 
 awk -F: '{if($1 == "root") print $1;else if($1 == "seker") print $6;else if($1 == "zorro") print $7;else print NR}' /etc/passwd
 
-</pre><textarea>将计算时薪超过6美元的员工的总薪酬与平均薪酬。它使用一个 if 来防范计算平均薪酬时的零除问题。
+</pre>将计算时薪超过6美元的员工的总薪酬与平均薪酬。它使用一个 if 来防范计算平均薪酬时的零除问题<textarea>
 $2 > 6 { n = n + 1; pay = pay + $2 * $3 }
 END    { if(n > 0)
             print n, "employees, total pay is", pay,
@@ -23299,14 +23369,14 @@ END    { if(n > 0)
 可以使用一个逗号将一个长语句截断为多行来书写
 
 </textarea><pre>
-【三元表达式】
+【 三元表达式 】
 条件 ? 动作1 : 动作2
 expr?action1:action2
 
 $ awk -F: 'var=($3 >= 500)?$1:"system_user" {print $1"\t"$3"\t"var}' /etc/passwd
 $ awk -F: '{print($3>500?$1:$2)}' /etc/passwd
 
-【循环语句】
+【 循环语句 】
 awk中的循环语句同样借鉴于C语言,支持while、do/while、for、break、continue,这些关键字的语义和C语言中的语义完全相同。
 awk有三种循环: while循环;for循环;special for循环。
 
@@ -23369,7 +23439,7 @@ $ awk -f interest1
 </textarea>
 
 <h4>awk的内建函数</h4><pre>
-【awk的内建函数之字符串函数】
+【 awk的内建函数之字符串函数 】
 1、sub函数匹配记录中最大、最靠左边的子字符串的正则表达式,并用替换字符串替换这些字符串。如果没有指定目标字符串就默认使用整个记录。替换只发生在第一次匹配的时候。格式如下:
 sub(regular expression, substitution string):
 sub(regular expression, substitution string, target string)
@@ -23413,8 +23483,7 @@ substr( string, starting position )
 substr( string, starting position, length of string )
 
 实例:
-$ awk '{ print substr( "hello world", 7,11 ) }'
-上例截取了world子字符串。
+$ awk '{ print substr( "hello world", 7,11 ) }'  // 截取了world子字符串
 
 6、match 函数返回在字符串中正则表达式位置的索引,如果找不到指定的正则表达式则返回0。match函数会设置内建变量RSTART为字符串中子字符串的开始位置,RLENGTH为到子字符串末尾的字符个数。substr可利于这些变量来截取字符串。函数格式如下:
 match( string, regular expression )
@@ -23425,14 +23494,14 @@ $ awk '{start=match("this is a test",/[a-z]+$/); print start, RSTART, RLENGTH }'
 第一个实例打印以连续小写字符结尾的开始位置,这里是11。
 第二个实例还打印RSTART和RLENGTH变量,这里是11(start),11(RSTART),4(RLENGTH)。
 
-7、toupper 和tolower 函数可用于字符串大小间的转换,该功能只在gawk中有效。格式如下:
+7、toupper和tolower函数可用于字符串大小间的转换,该功能只在gawk中有效
 toupper( string )
 tolower( string )
 
 实例:
 $ awk '{ print toupper("test"), tolower("TEST") }'
 
-8、split 函数可按给定的分隔符把字符串分割为一个数组。如果分隔符没提供,则按当前FS值进行分割。格式如下:
+8、split函数可按给定的分隔符把字符串分割为一个数组。如果分隔符没提供,则按当前FS值进行分割
 split( string, array, field separator )
 split( string, array )
 
@@ -23441,9 +23510,7 @@ $ awk '{ split( "20:18:00", time, ":" ); print time[2] }'
 上例把时间按冒号分割到time数组内,并显示第二个数组元素18。
 
 【awk的内建函数之时间函数】
-1、systime()函数返回从1970年1月1日开始到当前时间(不计闰年)的整秒数。格式如下:
-
-实例:
+1、systime()函数返回从1970年1月1日开始到当前时间(不计闰年)的整秒数
 $ awk '{ now = systime(); print now }'
 
 2、strftime函数使用C库中的strftime函数格式化时间。格式如下:
@@ -23479,7 +23546,7 @@ systime( [format specification][,timestamp] )
 $ awk '{ now=strftime( "%D", systime() ); print now }'     // 06/20/18
 $ awk '{ now=strftime("%m/%d/%y"); print now }'            // 06/20/18
 
-【awk的内建函数之数学函数】
+【 awk的内建函数之数学函数 】
 函数名称  返回值
 atan2(x,y) y,x范围内的余切
 cos(x)     余弦函数
@@ -23492,7 +23559,7 @@ srand(x)   x是rand()函数的种子
 int(x)     取整,过程没有舍入
 rand()     产生一个大于等于0而小于1的随机数
 
-【自定义函数】
+【 自定义函数 】
 在awk中还可自定义函数,格式如下:
 
 function name( parameter, parameter, parameter, ... ) {
@@ -23503,12 +23570,13 @@ function name( parameter, parameter, parameter, ... ) {
 </pre>
 
 <h4>shell优化与awk</h4><pre>
-作为解释型的脚本语言,天生就有效率上边的缺陷。尽管它调用的其他命令可能效率上是不错的。
-Shell脚本程序的执行是顺序执行,而非并行执行的。这很大程度上浪费了可能能利用上的系统资源。
-Shell每执行一个命令就创建一个新的进程,如果脚本编写者没有这方面意识,编写脚本不当的话,是非常浪费系统资源的。
+作为解释型的脚本语言,天生就有效率上边的缺陷,尽管它调用的其他命令可能效率上是不错的。
+Shell脚本程序的执行是顺序执行,而非并行执行的,这很大程度上浪费了可能能利用上的系统资源。
+Shell每执行一个命令就创建一个新的进程,如果脚本编写者没有这方面意识,编写脚本不当的话是非常浪费系统资源的。
 
 循环处理数据,程序尽量使用awk来做循环操作
-</pre><textarea>sum=0
+</pre><textarea>
+sum=0
 for((i=0;i < 100000;i++)
 do
 sum=$(($sum+$i)
@@ -23520,7 +23588,8 @@ real    0m2.046s
 user    0m1.922s
 sys     0m0.016s
 
-</textarea><textarea>awk 'BEGIN{
+</textarea><textarea>
+awk 'BEGIN{
   sum=0;
   for(i=0;i < 100000;i++)
   sum=sum+i;
@@ -23535,10 +23604,10 @@ sys     0m0.125s
 </textarea><pre>
 关于正则
 
-有一个1694617行的日志文件 action.log,它的内容类似:
+有一个1694617行的日志文件action.log,内容类似:
 2012_02_07 00:00:04 1977575701 183.10.69.47 login 500004 1977575701 old /***/port/***.php?…
 
-现在想获取//之间的port的字符串,可以这样:
+获取//之间的port的字符串
 awk -F'/' '{print $3}' < 7action.log > /dev/null
 real 0m12.296s
 user 0m12.033s
@@ -41479,7 +41548,7 @@ public function finish(){
 }
 
 </textarea>自定义弹窗底部按钮<textarea>
-在视图中的.layer-footer区域内添加按钮，例如：
+在视图中的.layer-footer区域内添加按钮,例如：
 <div class="form-group layer-footer">
     <label class="control-label col-xs-12 col-sm-2"></label>
     <div class="col-xs-12 col-sm-8">
@@ -41505,11 +41574,11 @@ $(document).on("click", ".btn-accept", function(){
 3、渲染数据
 Table.api.init(defaults, columnDefaults, locales)  // 此方法用于初始化表格默认配置、表格列配置、写入语言包等操作
 Table.api.bindevent(table)                         // 此方法用于为表格中的元素绑定相关事件
-Table.api.multi(action, ids, table, element)       // 此方法常用于批量操作请求，内部使用
+Table.api.multi(action, ids, table, element)       // 此方法常用于批量操作请求,内部使用
 Table.api.events.operate                           // 操作栏单元格方法
 Table.api.events.image                             // 图片栏单元格方法
-Table.api.formatter                                // 格式化方法，后面单独介绍
-Table.api.buttonlink(column, buttons, value, row, index, type) // 按钮链接生成，内部使用
+Table.api.formatter                                // 格式化方法,后面单独介绍
+Table.api.buttonlink(column, buttons, value, row, index, type) // 按钮链接生成,内部使用
 Table.api.replaceurl(url, row, table)              // 替换URL中的数据
 Table.api.selectedids(table)                       // 获取选中的条目ID集合
 Table.api.toggleattr(table)                        // 切换复选框状态
@@ -41654,7 +41723,7 @@ api: {
         data-url="jq/ajax/company?type=3" data-query-name="pid">
 </select>
 
-</textarea>Selectpage下拉列表实现二级联动，多级联动<textarea>
+</textarea>Selectpage下拉列表实现二级联动,多级联动<textarea>
 // 添加页面 add
 <div class="form-group">
     <label class="control-label col-xs-12 col-sm-2">{:__('水厂')}:</label>
@@ -41782,7 +41851,7 @@ public function multi($ids = ""){
 }
 
 </textarea><pre>
-11、设置某字段正序或倒序按钮
+11、设置某字段正序或倒序按钮 排序操作按钮
 {field: 'id', title: __('Id'),operate:false,sortable: true},
 
 12、控制table中字段的长度
@@ -41807,7 +41876,7 @@ public function multi($ids = ""){
     field: 'mark',
     title: '备注',
     formatter:function(value,row,index){
-        value=value?value:'';  //此处对value值做判断，不然value为空就会报错
+        value=value?value:'';  //此处对value值做判断,不然value为空就会报错
         var length = value.length;
         var ext = '';
         if(length && length>10){
@@ -41940,8 +42009,8 @@ selImg(e){
     let uploadUrl = app.util.url('entry/wxapp/upload',{m:'duson_test'});
     wx.chooseImage({
         count: 1, // 默认9
-        sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
-        sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
+        sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图,默认二者都有
+        sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机,默认二者都有
         success: function (res) {
             var tempFilePaths = res.tempFilePaths[0]
             wx.uploadFile({
@@ -42064,7 +42133,7 @@ function mergeText($target, $data, $text) {
     $colors = hex2rgb($data["color"]);
     $color = imagecolorallocate($target, $colors["red"], $colors["green"], $colors["blue"]);
 
-    $temp = array("color" => array($colors['red'], $colors['green'], $colors['blue']), "fontsize" =>$data['size'],"height"=>$data['height'], "width" => $data['width'], "left" => $data['left'], "top" => $data['top'], "hang_size" => 40);    //这里我只用它做测量高度，把参数false改为true就是绘制了。
+    $temp = array("color" => array($colors['red'], $colors['green'], $colors['blue']), "fontsize" =>$data['size'],"height"=>$data['height'], "width" => $data['width'], "left" => $data['left'], "top" => $data['top'], "hang_size" => 40);    //这里我只用它做测量高度,把参数false改为true就是绘制了。
 
     draw_txt_to($target, $temp, $text, true);
 
@@ -42078,9 +42147,9 @@ function mergeText($target, $data, $text) {
 //----------分割线------------/**
 /* 文字自动换行算法
 * @param $card 画板
-* @param $pos 数组，top距离画板顶端的距离，fontsize文字的大小，width宽度，left距离左边的距离，hang_size行高
+* @param $pos 数组,top距离画板顶端的距离,fontsize文字的大小,width宽度,left距离左边的距离,hang_size行高
 * @param $str 要写的字符串
-* @param $iswrite  是否输出，ture，  花出文字，false只计算占用的高度
+* @param $iswrite  是否输出,ture,  花出文字,false只计算占用的高度
 * @return int 返回整个字符所占用的高度*/
 function draw_txt_to($card, $pos, $str, $iswrite){
     load()->func('logging');
@@ -42102,21 +42171,21 @@ function draw_txt_to($card, $pos, $str, $iswrite){
         $temptext = mb_substr($str, $i, 1);
         $temp = imagettfbbox($fontsize, 0, $font_file, $temptext);
         //logging_run('宽度测试:'.$_str_h);
-        if ($_string_length + $temp[2] - $temp[0] < $width) {//长度不够，字数不够，需要
+        if ($_string_length + $temp[2] - $temp[0] < $width) {//长度不够,字数不够,需要
             $temp_string .= mb_substr($str, $i, 1);  //继续拼接字符串。
             if ($i == mb_strlen($str) - 1) {         //是不是最后半行。不满一行的情况
                 $_str_h += $hang_size;               //计算整个文字换行后的高度。
                 $tp++;                               //行数
-                if ($iswrite) {                      //是否需要写入，核心绘制函数
+                if ($iswrite) {                      //是否需要写入,核心绘制函数
                     imagettftext($card, $fontsize, 0, $margin_lift, $_str_h, $font_color, $font_file, $temp_string);
                 }
             }
-        } else {                                     //一行的字数够了，长度够了。打印输出，对字符串零时字符串置null
+        } else {                                     //一行的字数够了,长度够了。打印输出,对字符串零时字符串置null
             logging_run('宽度测试:2');
             $texts = mb_substr($str, $i, 1);         //零时行的开头第一个字。判断默认第一个字符是不是符号；
-            $isfuhao = preg_match("/[\\\\pP]/u", $texts) ? true : false;//一行的开头这个字符，是不是标点符号
-            if ($isfuhao) {                          //如果是标点符号，则添加在第一行的结尾
-                $temp_string .= $texts;              // 判断如果是连续两个字符出现，并且两个丢失必须放在句末尾的，单独处理
+            $isfuhao = preg_match("/[\\\\pP]/u", $texts) ? true : false;//一行的开头这个字符,是不是标点符号
+            if ($isfuhao) {                          //如果是标点符号,则添加在第一行的结尾
+                $temp_string .= $texts;              // 判断如果是连续两个字符出现,并且两个丢失必须放在句末尾的,单独处理
                 $f = mb_substr($str, $i + 1, 1);
                 $fh = preg_match("/[\\\\pP]/u", $f) ? true : false;                if ($fh) {
                     $temp_string .= $f;
@@ -42132,12 +42201,12 @@ function draw_txt_to($card, $pos, $str, $iswrite){
             if (is_firstfuhao($s)) {                        //判断零时字符串的最后一个字符是不是可以放在见面
                 $temp_string=rtrim($temp_string,$s);        //讲最后一个字符用“_”代替。指针前移动一位。重新取被替换的字符。
                 $i--;
-            }//            }                                //计算行高，和行数。
+            }//            }                                //计算行高,和行数。
             $_str_h += $hang_size;
             $tp++;            
             if ($iswrite) {
                 imagettftext($card, $fontsize, 0, $margin_lift, $_str_h, $font_color, $font_file, $temp_string);
-            }                              // 写完了改行，置null该行的临时字符串。
+            }                              // 写完了改行,置null该行的临时字符串。
             $temp_string = "";
         }
     }    
@@ -42291,7 +42360,7 @@ function createImageUrl_new($param, $qr_file) {
     imagecopy($target, $c_poster_content_img, 0, $header_img_height, 0, 0, $content_img_info[0], $content_img_info[1]);
     imagedestroy($c_poster_content_img);                                  //释放头部图片关联内存
 
-    //拷贝底部图片到target上   放在底部，计算坐标
+    //拷贝底部图片到target上   放在底部,计算坐标
     $c_poster_footer_img=createImage($poster_footer_img);
     $f_y=$z_height-$footer_img_height;
     imagecopy($target, $c_poster_footer_img, 0, $f_y, 0, 0, $footer_img_info[0], $footer_img_info[1]);
@@ -42753,7 +42822,7 @@ layer.alert
 语法：layer.alert(content[, options][, yes]) 普通信息框
 
 layer.alert('只想简单的提示');        
-layer.alert('加了个图标', {icon: 1}); //这时如果你也还想执行yes回调，可以放在第三个参数中。
+layer.alert('加了个图标', {icon: 1}); //这时如果你也还想执行yes回调,可以放在第三个参数中。
 layer.alert('加了个图标', {icon: 6}); // 笑脸
 layer.alert('有了回调', function(index){
     //do something
@@ -42762,7 +42831,7 @@ layer.alert('有了回调', function(index){
 layer.alert("内容",{
     yes:function () {            
 }
-layer.alert('墨绿风格，点击确认看深蓝', {
+layer.alert('墨绿风格,点击确认看深蓝', {
     skin: 'layui-layer-molv' //样式类名  自定义样式
     ,closeBtn: 1    // 是否显示关闭按钮
     ,anim: 1 //动画类型
@@ -42785,12 +42854,12 @@ layer.msg('关闭后想做些什么', function(){
 });
 layer.msg('同上', {
     icon: 1,
-    time: 2000 //2秒关闭（如果不配置，默认是3秒）
+    time: 2000 //2秒关闭（如果不配置,默认是3秒）
 }, function(){
     //do something
 });
 
-layer.msg('大部分参数都是可以公用的<br>合理搭配，展示不一样的风格', {
+layer.msg('大部分参数都是可以公用的<br>合理搭配,展示不一样的风格', {
     time: 2000, //2s后自动关闭
     btn: ['明白了', '知道了', '哦']
 });
@@ -42822,7 +42891,7 @@ layer.confirm('is not?', function(index){
 
 layer.confirm('内容', {
     yes:function(){
-        layer.closeAll();//确认按钮如果不能关闭弹框，使用layer.closeAll()进行弹框关闭
+        layer.closeAll();//确认按钮如果不能关闭弹框,使用layer.closeAll()进行弹框关闭
     }
 });
 
@@ -42831,9 +42900,9 @@ layer.propmt
 
 //prompt层新定制的成员如下
 {
-    formType: 1, //输入框类型，支持0（文本）默认1（密码）2（多行文本）
-    value: '', //初始时的值，默认空字符
-    maxlength: 140, //可输入文本的最大长度，默认500
+    formType: 1, //输入框类型,支持0（文本）默认1（密码）2（多行文本）
+    value: '', //初始时的值,默认空字符
+    maxlength: 140, //可输入文本的最大长度,默认500
 }
  
 //例子1
@@ -42853,9 +42922,9 @@ layer.prompt({
 });
 
 layer.open方式
-layer提供了5中层类型，可传入的值有：0=信息框，默认，1=页面层，2=iframe层，3=加载层，4=tips层
+layer提供了5中层类型,可传入的值有：0=信息框,默认,1=页面层,2=iframe层,3=加载层,4=tips层
 语法：layer.open(options) 原始核心方法
-基本上是露脸率最高的方法，不管是使用哪种方式创建层，都是走layer.open()，创建任何类型的弹层都会返回一个当前层索引，上述的options即是基础参数，另外，该文档统一采用options作为基础参数的标识
+基本上是露脸率最高的方法,不管是使用哪种方式创建层,都是走layer.open(),创建任何类型的弹层都会返回一个当前层索引,上述的options即是基础参数,另外,该文档统一采用options作为基础参数的标识
 
 layer.open({
     type: 1
@@ -42863,11 +42932,11 @@ layer.open({
     ,closeBtn: true
     ,area: '300px;'
     ,shade: 0.8
-    ,id: 'LAY_layuipro' //设定一个id，防止重复弹出
+    ,id: 'LAY_layuipro' //设定一个id,防止重复弹出
     ,resize: false
     ,btn: ['火速围观', '残忍拒绝']
     ,btnAlign: 'c'
-    ,moveType: 1 //拖拽模式，0或者1
+    ,moveType: 1 //拖拽模式,0或者1
     ,content: '<div style="padding: 50px; line-height: 22px; background-color: #393D49; color: #fff; font-weight: 300;">内容<br>内容</div>'
     ,success: function(layero){
         var btn = layero.find('.layui-layer-btn');
@@ -42879,11 +42948,11 @@ layer.open({
 var index = layer.open({
   content: 'test'
 });
-//拿到的index是一个重要的凭据，它是诸如layer.close(index)等方法的必传参数。
+//拿到的index是一个重要的凭据,它是诸如layer.close(index)等方法的必传参数。
 
 //example2
 layer.open({
-    type: 1 //Layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+    type: 1 //Layer提供了5种层类型。可传入的值有：0（信息框,默认）1（页面层）2（iframe层）3（加载层）4（tips层）
     ,title: 'title here'
     ,area: ['390px', '330px']
     ,shade: 0.4
@@ -42904,11 +42973,11 @@ layer.open({
 
 layer.load
 语法：layer.load(icon, options) 加载层
-icon支持传入0-2,如果是0，无需传。另外特别注意一点：load默认是不会自动关闭的，因为你一般会在ajax回调体中关闭它。
+icon支持传入0-2,如果是0,无需传。另外特别注意一点：load默认是不会自动关闭的,因为你一般会在ajax回调体中关闭它。
 
 var index = layer.load();
 var index = layer.load(1); //换了种风格
-var index = layer.load(2, {time: 10*1000}); //又换了种风格，并且设定最长等待10秒 
+var index = layer.load(2, {time: 10*1000}); //又换了种风格,并且设定最长等待10秒 
 layer.close(index);  //关闭
 
 layer.tab
@@ -42929,17 +42998,17 @@ layer.tab({
 });
 
 type-基本层类型
-类型：Number，默认：0
-layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）。 此为重要参数，不同类型层的总开关，若为type:0则不需要配置，其它类型层在调用时必须设置type。若你采用layer.open({type: 1})方式调用，则type为必填项（信息框除外,信息框默认）
+类型：Number,默认：0
+layer提供了5种层类型。可传入的值有：0（信息框,默认）1（页面层）2（iframe层）3（加载层）4（tips层）。 此为重要参数,不同类型层的总开关,若为type:0则不需要配置,其它类型层在调用时必须设置type。若你采用layer.open({type: 1})方式调用,则type为必填项（信息框除外,信息框默认）
 
 title-标题
-类型：String/Array/Boolean，默认：'信息'
+类型：String/Array/Boolean,默认：'信息'
 
-title支持三种类型的值，若你传入的是普通的字符串，如title :'我是标题'，那么只会改变标题文本；若你还需要自定义标题区域样式，那么你还可以title: ['文本', 'font-size:18px;']，数组第二项可以写任意css样式；如果你不想显示标题栏，你可以title: false
+title支持三种类型的值,若你传入的是普通的字符串,如title :'我是标题',那么只会改变标题文本；若你还需要自定义标题区域样式,那么你还可以title: ['文本', 'font-size:18px;'],数组第二项可以写任意css样式；如果你不想显示标题栏,你可以title: false
 
 content-内容
-类型：String/DOM/Array，默认：''
-content可传入的值是灵活多变的，不仅可以传入普通的html内容，还可以指定DOM，更可以随着type的不同而不同
+类型：String/DOM/Array,默认：''
+content可传入的值是灵活多变的,不仅可以传入普通的html内容,还可以指定DOM,更可以随着type的不同而不同
 
 /!*
  如果是页面层
@@ -42950,13 +43019,13 @@ layer.open({
 });
 layer.open({
   type: 1,
-  content: $('#id') //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
+  content: $('#id') //这里content是一个DOM,注意：最好该元素要存放在body最外层,否则可能被其它的相对元素所影响
 });
 //Ajax获取
 $.post('url', {}, function(str){
   layer.open({
     type: 1,
-    content: str //注意，如果str是object，那么需要字符拼接。
+    content: str //注意,如果str是object,那么需要字符拼接。
   });
 });
 /!*
@@ -42964,7 +43033,7 @@ $.post('url', {}, function(str){
  */
 layer.open({
   type: 2, 
-  content: 'http://sentsin.com' //这里content是一个URL，如果你不想让iframe出现滚动条，你还可以content: ['http://sentsin.com', 'no']
+  content: 'http://sentsin.com' //这里content是一个URL,如果你不想让iframe出现滚动条,你还可以content: ['http://sentsin.com', 'no']
 }); 
 /!*
  如果是用layer.open执行tips层
@@ -42975,14 +43044,14 @@ layer.open({
 });        
 
 skin-样式类名
-类型：String，默认：''
-skin不仅允许你传入layer内置的样式class名，还可以传入您自定义的class名。这是一个很好的切入点，意味着你可以借助skin轻松完成不同的风格定制。目前layer内置的skin有：layui-layer-lanlayui-layer-molv，未来我们还会选择性地内置更多，但更推荐您自己来定义。以下是一个自定义风格的简单例子
+类型：String,默认：''
+skin不仅允许你传入layer内置的样式class名,还可以传入您自定义的class名。这是一个很好的切入点,意味着你可以借助skin轻松完成不同的风格定制。目前layer内置的skin有：layui-layer-lanlayui-layer-molv,未来我们还会选择性地内置更多,但更推荐您自己来定义。以下是一个自定义风格的简单例子
 
 //单个使用
 layer.open({
   skin: 'demo-class'
 });
-//全局使用。即所有弹出层都默认采用，但是单个配置skin的优先级更高
+//全局使用。即所有弹出层都默认采用,但是单个配置skin的优先级更高
 layer.config({
   skin: 'demo-class'
 })
@@ -42991,17 +43060,17 @@ body .demo-class .layui-layer-title{background:#c00; color:#fff; border: none;}
 body .demo-class .layui-layer-btn{border-top:1px solid #E9E7E7}
 body .demo-class .layui-layer-btn a{background:#333;}
 body .demo-class .layui-layer-btn .layui-layer-btn1{background:#999;}
-加上body是为了保证优先级。你可以借助Chrome调试工具，定义更多样式控制层更多的区域。
+加上body是为了保证优先级。你可以借助Chrome调试工具,定义更多样式控制层更多的区域。
 
 area-宽高
-类型：String/Array，默认：'auto'，area值分别为：[宽度, 高度]（iframe层不能设置auto）, 对于宽度，并不推荐您设置auto。
-在默认状态下，layer是宽高都自适应的，但当你只想定义宽度时，你可以area: '500px'，高度仍然是自适应的。当你宽高都要定义时，你可以area: ['500px', '300px']
+类型：String/Array,默认：'auto',area值分别为：[宽度, 高度]（iframe层不能设置auto）, 对于宽度,并不推荐您设置auto。
+在默认状态下,layer是宽高都自适应的,但当你只想定义宽度时,你可以area: '500px',高度仍然是自适应的。当你宽高都要定义时,你可以area: ['500px', '300px']
 
 offset-坐标
-类型：String/Array，默认：垂直水平居中， [纵坐标, 横坐标]，默认为垂直水平居中
-offset默认情况下不用设置。但如果你不想垂直水平居中，你还可以进行以下赋值：
+类型：String/Array,默认：垂直水平居中, [纵坐标, 横坐标],默认为垂直水平居中
+offset默认情况下不用设置。但如果你不想垂直水平居中,你还可以进行以下赋值：
 值	备注
-offset: '100px'	只定义top坐标，水平保持居中
+offset: '100px'	只定义top坐标,水平保持居中
 offset: ['100px', '50px']	同时定义top、left坐标
 offset: 't'	快捷设置顶部坐标
 offset: 'r'	快捷设置右边缘坐标
@@ -43030,15 +43099,15 @@ layer.confirm("确定删除吗", {
 });
 
 iocn-图标。信息框和加载层的私有参数
-类型：Number，默认：-1（信息框）/0（加载层）
-信息框默认不显示图标。当你想显示图标时，默认皮肤可以传入0-6。如果是加载层，可以传入0-2。如：
+类型：Number,默认：-1（信息框）/0（加载层）
+信息框默认不显示图标。当你想显示图标时,默认皮肤可以传入0-6。如果是加载层,可以传入0-2。如：
 layer.alert('酷毙了', {icon: 1});
 layer.msg('不开心。。', {icon: 5});
 layer.load(1); //风格1的加载
         
 btn-按钮
-类型：String/Array，默认：'确认'
-信息框模式时，btn默认是一个确认按钮，其它层类型则默认不显示，加载层和tips层则无效。当您只想自定义一个按钮时可以btn: '我知道了'，当要定义两个按钮时可以btn: ['yes', 'no']。也可以定义更多按钮，比如：btn: ['按钮1', '按钮2', '按钮3', …]，按钮1的回调是yes，而从按钮2开始，则回调为btn2: function(){}，以此类推。如：
+类型：String/Array,默认：'确认'
+信息框模式时,btn默认是一个确认按钮,其它层类型则默认不显示,加载层和tips层则无效。当您只想自定义一个按钮时可以btn: '我知道了',当要定义两个按钮时可以btn: ['yes', 'no']。也可以定义更多按钮,比如：btn: ['按钮1', '按钮2', '按钮3', …],按钮1的回调是yes,而从按钮2开始,则回调为btn2: function(){},以此类推。如：
 //eg1       
 layer.confirm('纳尼？', {
   btn: ['按钮一', '按钮二', '按钮三'] //可以无限个按钮
@@ -43073,36 +43142,36 @@ layer.open({
 });
         
 btnAlign-按钮排列
-类型：String，默认：r
-你可以快捷定义按钮的排列位置，btnAlign的默认值为r，即右对齐。该参数可支持的赋值如下：
+类型：String,默认：r
+你可以快捷定义按钮的排列位置,btnAlign的默认值为r,即右对齐。该参数可支持的赋值如下：
 值	备注
 btnAlign: 'l'	按钮左对齐
 btnAlign: 'c'	按钮居中对齐
-btnAlign: 'r'	按钮右对齐。默认值，不用设置
+btnAlign: 'r'	按钮右对齐。默认值,不用设置
 
 closeBtn - 关闭按钮
-类型：String/Boolean，默认：1
-layer提供了两种风格的关闭按钮，可通过配置1和2来展示，如果不显示，则closeBtn: 0
+类型：String/Boolean,默认：1
+layer提供了两种风格的关闭按钮,可通过配置1和2来展示,如果不显示,则closeBtn: 0
 
 shade- 控制遮罩
-类型：String/Array/Boolean，默认：0.3  
-即弹层外区域。默认是0.3透明度的黑色背景（'#000'）。如果你想定义别的颜色，可以shade: [0.8, '#393D49']；如果你不想显示遮罩，可以shade: 0
+类型：String/Array/Boolean,默认：0.3  
+即弹层外区域。默认是0.3透明度的黑色背景（'#000'）。如果你想定义别的颜色,可以shade: [0.8, '#393D49']；如果你不想显示遮罩,可以shade: 0
 
 shadeClose- 是否点击遮罩关闭
-类型：Boolean，默认：false
-如果你的shade是存在的，那么你可以设定shadeClose来控制点击弹层外区域关闭。点击弹框以外区域，弹框会自动消失。
+类型：Boolean,默认：false
+如果你的shade是存在的,那么你可以设定shadeClose来控制点击弹层外区域关闭。点击弹框以外区域,弹框会自动消失。
 
 time- 自动关闭所需毫秒
-类型：Number，默认：0
-默认不会自动关闭。当你想自动关闭时，可以time: 5000，即代表5秒后自动关闭，注意单位是毫秒（1秒=1000毫秒）
+类型：Number,默认：0
+默认不会自动关闭。当你想自动关闭时,可以time: 5000,即代表5秒后自动关闭,注意单位是毫秒（1秒=1000毫秒）
 
 id - 用于控制弹层唯一标识
-类型：String，默认：空字符
-设置该值后，不管是什么类型的层，都只允许同时弹出一个。一般用于页面层和iframe层模式
+类型：String,默认：空字符
+设置该值后,不管是什么类型的层,都只允许同时弹出一个。一般用于页面层和iframe层模式
 
 anim - 弹出动画
-类型：Number，默认：0
-我们的出场动画全部采用CSS3。这意味着除了ie6-9，其它所有浏览器都是支持的。目前anim可支持的动画类型有0-6 如果不想显示动画，设置 anim: -1 即可。另外需要注意的是，3.0之前的版本用的是 shift 参数
+类型：Number,默认：0
+我们的出场动画全部采用CSS3。这意味着除了ie6-9,其它所有浏览器都是支持的。目前anim可支持的动画类型有0-6 如果不想显示动画,设置 anim: -1 即可。另外需要注意的是,3.0之前的版本用的是 shift 参数
 值	备注
 anim: 0	平滑放大。默认
 anim: 1	从上掉落
@@ -43113,67 +43182,67 @@ anim: 5	渐显
 anim: 6	抖动
 
 isOutAnim- 关闭动画 （layer 3.0.3新增）
-类型：Boolean，默认：true
-默认关闭层时会有一个过度动画。如果你不想开启，设置 isOutAnim: false 即可
+类型：Boolean,默认：true
+默认关闭层时会有一个过度动画。如果你不想开启,设置 isOutAnim: false 即可
 
 maxmin - 最大最小化。
-类型：Boolean，默认：false
+类型：Boolean,默认：false
 该参数值对type:1和type:2有效。默认不显示最大小化按钮。需要显示配置maxmin: true即可
 
 fixed - 固定
-类型：Boolean，默认：true
-即鼠标滚动时，层是否固定在可视区域。如果不想，设置fixed: false即可
+类型：Boolean,默认：true
+即鼠标滚动时,层是否固定在可视区域。如果不想,设置fixed: false即可
 
 resize- 是否允许拉伸
-类型：Boolean，默认：true
-默认可以在弹层右下角拖动来拉伸尺寸。如果对指定的弹层屏蔽该功能，设置 false即可。该参数对loading、tips层无效
+类型：Boolean,默认：true
+默认可以在弹层右下角拖动来拉伸尺寸。如果对指定的弹层屏蔽该功能,设置 false即可。该参数对loading、tips层无效
 
 resizing- 监听窗口拉伸动作
-类型：Function，默认：null
-当你拖拽弹层右下角对窗体进行尺寸调整时，如果你设定了该回调，则会执行。回调返回一个参数：当前层的DOM对象
+类型：Function,默认：null
+当你拖拽弹层右下角对窗体进行尺寸调整时,如果你设定了该回调,则会执行。回调返回一个参数：当前层的DOM对象
 resizing: function(layero){
   console.log(layero);
 }   
         
 scrollbar- 是否允许浏览器出现滚动条
-类型：Boolean，默认：true
-默认允许浏览器滚动，如果设定scrollbar: false，则屏蔽
+类型：Boolean,默认：true
+默认允许浏览器滚动,如果设定scrollbar: false,则屏蔽
 
 maxWidth- 最大宽度
-类型：Number，默认：360
-只有当area: 'auto'时，maxWidth的设定才有效。
+类型：Number,默认：360
+只有当area: 'auto'时,maxWidth的设定才有效。
 
 maxHeight- 最大高度
-类型：Number，默认：无
-只有当高度自适应时，maxHeight的设定才有效。
+类型：Number,默认：无
+只有当高度自适应时,maxHeight的设定才有效。
 
 zlndex- 层叠顺序
-类型：，默认：19891014（贤心生日 0.0）
+类型：,默认：19891014（贤心生日 0.0）
 一般用于解决和其它组件的层叠冲突。
 
 move- 触发拖动的元素
-类型：String/DOM/Boolean，默认：'.layui-layer-title'
-默认是触发标题区域拖拽。如果你想单独定义，指向元素的选择器或者DOM即可。如move: '.mine-move'。你还配置设定move: false来禁止拖拽
+类型：String/DOM/Boolean,默认：'.layui-layer-title'
+默认是触发标题区域拖拽。如果你想单独定义,指向元素的选择器或者DOM即可。如move: '.mine-move'。你还配置设定move: false来禁止拖拽
 
 moveOut- 是否允许拖拽到窗口外
-类型：Boolean，默认：false
-默认只能在窗口内拖拽，如果你想让拖到窗外，那么设定moveOut: true即可
+类型：Boolean,默认：false
+默认只能在窗口内拖拽,如果你想让拖到窗外,那么设定moveOut: true即可
 
 moveEnd- 拖动完毕后的回调方法
-类型：Function，默认：null
-默认不会触发moveEnd，如果你需要，设定moveEnd: function(layero){}即可。其中layero为当前层的DOM对象
+类型：Function,默认：null
+默认不会触发moveEnd,如果你需要,设定moveEnd: function(layero){}即可。其中layero为当前层的DOM对象
 
 tips- tips方向和颜色
-类型：Number/Array，默认：2
-tips层的私有参数。支持上右下左四个方向，通过1-4进行方向设定。如tips: 3则表示在元素的下面出现。有时你还可能会定义一些颜色，可以设定tips: [1, '#c00']
+类型：Number/Array,默认：2
+tips层的私有参数。支持上右下左四个方向,通过1-4进行方向设定。如tips: 3则表示在元素的下面出现。有时你还可能会定义一些颜色,可以设定tips: [1, '#c00']
 
 tipsMore- 是否允许多个tips
-类型：Boolean，默认：false
+类型：Boolean,默认：false
 允许多个意味着不会销毁之前的tips层。通过tipsMore: true开启
 
 success- 层弹出后的成功回调方法
-类型：Function，默认：null
-当你需要在层创建完毕时即执行一些语句，可以通过该回调。success会携带两个参数，分别是当前层DOM当前层索引。如：
+类型：Function,默认：null
+当你需要在层创建完毕时即执行一些语句,可以通过该回调。success会携带两个参数,分别是当前层DOM当前层索引。如：
 layer.open({
   content: '测试回调',
   success: function(layero, index){
@@ -43182,83 +43251,83 @@ layer.open({
 });        
         
 yes- 确定按钮回调方法
-类型：Function，默认：null
-该回调携带两个参数，分别为当前层索引、当前层DOM对象。如：
+类型：Function,默认：null
+该回调携带两个参数,分别为当前层索引、当前层DOM对象。如：
 layer.open({
   content: '测试回调',
   yes: function(index, layero){
     //do something
-    layer.close(index); //如果设定了yes回调，需进行手工关闭
+    layer.close(index); //如果设定了yes回调,需进行手工关闭
   }
 });        
         
 cancel- 右上角关闭按钮触发的回调
-类型：Function，默认：null
-该回调携带两个参数，分别为：当前层索引参数（index）、当前层的DOM对象（layero），默认会自动触发关闭。如果不想关闭，return false即可，如；
+类型：Function,默认：null
+该回调携带两个参数,分别为：当前层索引参数（index）、当前层的DOM对象（layero）,默认会自动触发关闭。如果不想关闭,return false即可,如；
 cancel: function(index, layero){ 
-  if(confirm('确定要关闭么')){ //只有当点击confirm框的确定时，该层才会关闭
+  if(confirm('确定要关闭么')){ //只有当点击confirm框的确定时,该层才会关闭
     layer.close(index)
   }
   return false; 
 }    
         
 end- 层销毁后触发的回调
-类型：Function，默认：null
-无论是确认还是取消，只要层被销毁了，end都会执行，不携带任何参数。
+类型：Function,默认：null
+无论是确认还是取消,只要层被销毁了,end都会执行,不携带任何参数。
 
 full/min/restore-分别代表最大化、最小化、还原 后触发的回调
-类型：Function，默认：null
-携带一个参数，即当前层DOM
+类型：Function,默认：null
+携带一个参数,即当前层DOM
 
 layer-config(options)- 初始化全局配置
-这是一个可以重要也可以不重要的方法，重要的是，它的权利真的很大，尤其是在模块化加载layer时必须要用到它。它不仅可以配置一些诸如路径、加载的模块，甚至还可以决定整个弹层的默认参数。而说它不重要，是因为多数情况下似乎不是那么十分需要它
-如果您是采用seajs或者requirejs加载layer，你需要执行该方法来完成初始化的配置。比如：
+这是一个可以重要也可以不重要的方法,重要的是,它的权利真的很大,尤其是在模块化加载layer时必须要用到它。它不仅可以配置一些诸如路径、加载的模块,甚至还可以决定整个弹层的默认参数。而说它不重要,是因为多数情况下似乎不是那么十分需要它
+如果您是采用seajs或者requirejs加载layer,你需要执行该方法来完成初始化的配置。比如：
 layer.config({
-  path: '/res/layer/' //layer.js所在的目录，可以是绝对目录，也可以是相对目录
+  path: '/res/layer/' //layer.js所在的目录,可以是绝对目录,也可以是相对目录
 });
-//这样的话，layer就会去加载一些它所需要的配件，比如css等。  
-//当然，你即便不用seajs或者requirejs，也可以通过上述方式设定路径             
-如果你是采用< script src="?a.js&layer.js">这种合并的方式引入layer，那么您需要在script标签上加一个自定义属性merge="true"。如：
+//这样的话,layer就会去加载一些它所需要的配件,比如css等。  
+//当然,你即便不用seajs或者requirejs,也可以通过上述方式设定路径             
+如果你是采用< script src="?a.js&layer.js">这种合并的方式引入layer,那么您需要在script标签上加一个自定义属性merge="true"。如：
 < script src="?a.js&layer.js" merge="true">
-这样的话，layer就不会去自动去获取路径，但你需要通过以下方式来完成初始化的配置
+这样的话,layer就不会去自动去获取路径,但你需要通过以下方式来完成初始化的配置
 layer.config({
-  path: '/res/layer/' //layer.js所在的目录，可以是绝对目录，也可以是相对目录
+  path: '/res/layer/' //layer.js所在的目录,可以是绝对目录,也可以是相对目录
 });
-注意：如果采用 layui 加载 layer，无需设置 path。所以前置工作都是自动完成。
-但layer.config的作用远不止上述这样。它还可以配置层默认的基础参数，如：
+注意：如果采用 layui 加载 layer,无需设置 path。所以前置工作都是自动完成。
+但layer.config的作用远不止上述这样。它还可以配置层默认的基础参数,如：
 layer.config({
   anim: 1, //默认动画风格
   skin: 'layui-layer-molv' //默认皮肤
   …
 });
-//除此之外，extend还允许你加载拓展的css皮肤，如：
+//除此之外,extend还允许你加载拓展的css皮肤,如：
 layer.config({
-  //如果是独立版的layer，则将myskin存放在./skin目录下
-  //如果是layui中使用layer，则将myskin存放在./css/modules/layer目录下
+  //如果是独立版的layer,则将myskin存放在./skin目录下
+  //如果是layui中使用layer,则将myskin存放在./css/modules/layer目录下
   extend: 'myskin/style.css'
 });
-//具体的皮肤定制，可以参见：skin参数说明      
+//具体的皮肤定制,可以参见：skin参数说明      
         
 layer.ready(callback)- 初始化就绪
-由于layer内置了轻量级加载器，所以你根本不需要单独引入css等文件。但是加载总是需要过程的。当你在页面一打开就要执行弹层时，你最好是将弹层放入ready方法中，如：
+由于layer内置了轻量级加载器,所以你根本不需要单独引入css等文件。但是加载总是需要过程的。当你在页面一打开就要执行弹层时,你最好是将弹层放入ready方法中,如：
 //页面一打开就执行弹层
 layer.ready(function(){
   layer.msg('很高兴一开场就见到你');
 });
 
 layer.open(options)- 原始核心方法
-基本上是露脸率最高的方法，不管是使用哪种方式创建层，都是走layer.open()，创建任何类型的弹层都会返回一个当前层索引，上述的options即是基础参数，另外，该文档统一采用options作为基础参数的标识例子：
+基本上是露脸率最高的方法,不管是使用哪种方式创建层,都是走layer.open(),创建任何类型的弹层都会返回一个当前层索引,上述的options即是基础参数,另外,该文档统一采用options作为基础参数的标识例子：
 var index = layer.open({
   content: 'test'
 });
-//拿到的index是一个重要的凭据，它是诸如layer.close(index)等方法的必传参数。       
+//拿到的index是一个重要的凭据,它是诸如layer.close(index)等方法的必传参数。       
 
 layer.alert(content,options,yes)- 普通信息框
-它的弹出似乎显得有些高调，一般用于对用户造成比较强烈的关注，类似系统alert，但却比alert更灵便。它的参数是自动向左补齐的。通过第二个参数，可以设定各种你所需要的基础参数，但如果你不需要的话，直接写回调即可。如
+它的弹出似乎显得有些高调,一般用于对用户造成比较强烈的关注,类似系统alert,但却比alert更灵便。它的参数是自动向左补齐的。通过第二个参数,可以设定各种你所需要的基础参数,但如果你不需要的话,直接写回调即可。如
 //eg1
 layer.alert('只想简单的提示');        
 //eg2
-layer.alert('加了个图标', {icon: 1}); //这时如果你也还想执行yes回调，可以放在第三个参数中。
+layer.alert('加了个图标', {icon: 1}); //这时如果你也还想执行yes回调,可以放在第三个参数中。
 //eg3
 layer.alert('有了回调', function(index){
   //do something
@@ -43266,7 +43335,7 @@ layer.alert('有了回调', function(index){
 });       
         
 layer.confirm(content,options,yes,cancel)- 询问框
-类似系统confirm，但却远胜confirm，另外它不是和系统的confirm一样阻塞你需要把交互的语句放在回调体中。同样的，它的参数也是自动补齐的。
+类似系统confirm,但却远胜confirm,另外它不是和系统的confirm一样阻塞你需要把交互的语句放在回调体中。同样的,它的参数也是自动补齐的。
 //eg1
 layer.confirm('is not?', {icon: 3, title:'提示'}, function(index){
   //do something
@@ -43279,7 +43348,7 @@ layer.confirm('is not?', function(index){
 });       
         
 layer.msg(content,options,end)- 提示框
-我们在源码中用了相对较大的篇幅来定制了这个msg，目的是想将其打造成露脸率最高的提示框。而事实上我的确也在大量地使用它。因为它简单，而且足够得自觉，它不仅占据很少的面积，而且默认还会3秒后自动消失所有这一切都决定了我对msg的爱。因此我赋予了它许多可能在外形方面，它坚持简陋的变化，在作用方面，它坚持零用户操作。而且它的参数也是自动补齐的。
+我们在源码中用了相对较大的篇幅来定制了这个msg,目的是想将其打造成露脸率最高的提示框。而事实上我的确也在大量地使用它。因为它简单,而且足够得自觉,它不仅占据很少的面积,而且默认还会3秒后自动消失所有这一切都决定了我对msg的爱。因此我赋予了它许多可能在外形方面,它坚持简陋的变化,在作用方面,它坚持零用户操作。而且它的参数也是自动补齐的。
 //eg1
 layer.msg('只想弱弱提示');
 //eg2
@@ -43291,58 +43360,58 @@ layer.msg('关闭后想做些什么', function(){
 //eg
 layer.msg('同上', {
   icon: 1,
-  time: 2000 //2秒关闭（如果不配置，默认是3秒）
+  time: 2000 //2秒关闭（如果不配置,默认是3秒）
 }, function(){
   //do something
 });   
         
 layer.load(iocn,options)- 加载层
-type:3的深度定制。load并不需要你传太多的参数，但如果你不喜欢默认的加载风格，你还有选择空间。icon支持传入0-2如果是0，无需传。另外特别注意一点：load默认是不会自动关闭的，因为你一般会在ajax回调体中关闭它。
+type:3的深度定制。load并不需要你传太多的参数,但如果你不喜欢默认的加载风格,你还有选择空间。icon支持传入0-2如果是0,无需传。另外特别注意一点：load默认是不会自动关闭的,因为你一般会在ajax回调体中关闭它。
 //eg1
 var index = layer.load();
 //eg2
 var index = layer.load(1); //换了种风格
 //eg3
-var index = layer.load(2, {time: 10*1000}); //又换了种风格，并且设定最长等待10秒 
+var index = layer.load(2, {time: 10*1000}); //又换了种风格,并且设定最长等待10秒 
 //关闭
 layer.close(index);     
         
 layer.tips(content,follow,options)- tips层
-type:4的深度定制。也是我本人比较喜欢的一个层类型，因为它拥有和msg一样的低调和自觉，而且会智能定位，即灵活地判断它应该出现在哪边。默认是在元素右边弹出
+type:4的深度定制。也是我本人比较喜欢的一个层类型,因为它拥有和msg一样的低调和自觉,而且会智能定位,即灵活地判断它应该出现在哪边。默认是在元素右边弹出
 //eg1
 layer.tips('只想提示地精准些', '#id');
 //eg 2
 $('#id').on('click', function(){
   var that = this;
-  layer.tips('只想提示地精准些', that); //在元素的事件回调体中，follow直接赋予this即可
+  layer.tips('只想提示地精准些', that); //在元素的事件回调体中,follow直接赋予this即可
 });
 //eg 3
 layer.tips('在上面', '#id', {
   tips: 1
 });
         
-上面主要是一些弹层的调用方式，而下面介绍的是一些辅助性的方法
+上面主要是一些弹层的调用方式,而下面介绍的是一些辅助性的方法
 
 layer.close(index)- 关闭特定层
-关于它似乎没有太多介绍的必要，唯一让你疑惑的，可能就是这个index了吧。事实上它非常容易得到。
+关于它似乎没有太多介绍的必要,唯一让你疑惑的,可能就是这个index了吧。事实上它非常容易得到。
 //当你想关闭当前页的某个层时
 var index = layer.open();
 var index = layer.alert();
 var index = layer.load();
 var index = layer.tips();
-//正如你看到的，每一种弹层调用方式，都会返回一个index
-layer.close(index); //此时你只需要把获得的index，轻轻地赋予layer.close即可
+//正如你看到的,每一种弹层调用方式,都会返回一个index
+layer.close(index); //此时你只需要把获得的index,轻轻地赋予layer.close即可
  
-//如果你想关闭最新弹出的层，直接获取layer.index即可
-layer.close(layer.index); //它获取的始终是最新弹出的某个层，值是由layer内部动态递增计算的
+//如果你想关闭最新弹出的层,直接获取layer.index即可
+layer.close(layer.index); //它获取的始终是最新弹出的某个层,值是由layer内部动态递增计算的
  
 //当你在iframe页面关闭自身时
 var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
 parent.layer.close(index); //再执行关闭   
         
 layer.closeAll(type)- 关闭所有层
-如果不想去获取index你只想关闭。那么closeAll真的可以帮上你。如果你不指向层类型的话，它会销毁掉当前页所有的layer层。当然，如果你只想关闭某个类型的层，那么你可以
-layer.closeAll(); //疯狂模式，关闭所有层
+如果不想去获取index你只想关闭。那么closeAll真的可以帮上你。如果你不指向层类型的话,它会销毁掉当前页所有的layer层。当然,如果你只想关闭某个类型的层,那么你可以
+layer.closeAll(); //疯狂模式,关闭所有层
 layer.closeAll('dialog'); //关闭信息框
 layer.closeAll('page'); //关闭所有页面层
 layer.closeAll('iframe'); //关闭所有的iframe层
@@ -43350,7 +43419,7 @@ layer.closeAll('loading'); //关闭加载层
 layer.closeAll('tips'); //关闭所有的tips层    
         
 layer.style(index,cssStyle)- 重新定义层的样式
-该方法对loading层和tips层无效。参数index为层的索引，cssStyle允许你传入任意的css属性
+该方法对loading层和tips层无效。参数index为层的索引,cssStyle允许你传入任意的css属性
 //重新给指定层设定width、top等
 layer.style(index, {
   width: '1000px',
@@ -43361,15 +43430,15 @@ layer.title(title,index)- 改变层的标题
 使用方式：layer.title('标题变了', index)
 
 layer.getChildFrame(selector,index)- 获取iframe页的DOM
-当你试图在当前页获取iframe页的DOM元素时，你可以用此方法。selector即iframe页的选择器
+当你试图在当前页获取iframe页的DOM元素时,你可以用此方法。selector即iframe页的选择器
 layer.open({
   type: 2,
   content: 'test/iframe.html',
   success: function(layero, index){
     var body = layer.getChildFrame('body', index);
-    var iframeWin = window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+    var iframeWin = window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象,执行iframe页的方法：iframeWin.method();
     console.log(body.html()) //得到iframe页的body内容
-    body.find('input').val('Hi，我是从父页来的')
+    body.find('input').val('Hi,我是从父页来的')
   }
 });       
         
@@ -43380,14 +43449,14 @@ var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层�
 parent.layer.close(index); //再执行关闭        
         
 layer.iframeAuto(index)- 指定iframe层自适应
-调用该方法时，iframe层的高度会重新进行适应
+调用该方法时,iframe层的高度会重新进行适应
 
 layer.iframeSrc(index,url)- //重置特定iframe url
 似乎不怎么常用的样子。使用方式：layer.iframeSrc(index, 'http://sentsin.com')
 
 layer.setTop(layero)-置顶当前窗口
-非常强大的一个方法，虽然一般很少用。但是当你的页面有很多很多layer窗口，你需要像Window窗体那样，点击某个窗口，该窗体就置顶在上面，那么setTop可以来轻松实现。它采用巧妙的逻辑，以使这种置顶的性能达到最优
-//通过这种方式弹出的层，每当它被选择，就会置顶。
+非常强大的一个方法,虽然一般很少用。但是当你的页面有很多很多layer窗口,你需要像Window窗体那样,点击某个窗口,该窗体就置顶在上面,那么setTop可以来轻松实现。它采用巧妙的逻辑,以使这种置顶的性能达到最优
+//通过这种方式弹出的层,每当它被选择,就会置顶。
 layer.open({
   type: 2,
   shade: false,
@@ -43404,12 +43473,12 @@ layer.full()、layer.min()、layer.store()- 手工执行最大小化
 （这三个酱油又一次被并列 ==。）一般用于在自定义元素上触发最大化、最小化和全屏。
 
 layer.prompt(options,yes)- 输入层
-prompt的参数也是向前补齐的。options不仅可支持传入基础参数，还可以传入prompt专用的属性。当然，也可以不传。yes携带value 表单值index 索引elem 表单元素
+prompt的参数也是向前补齐的。options不仅可支持传入基础参数,还可以传入prompt专用的属性。当然,也可以不传。yes携带value 表单值index 索引elem 表单元素
 //prompt层新定制的成员如下
 {
-  formType: 1, //输入框类型，支持0（文本）默认1（密码）2（多行文本）
-  value: '', //初始时的值，默认空字符
-  maxlength: 140, //可输入文本的最大长度，默认500
+  formType: 1, //输入框类型,支持0（文本）默认1（密码）2（多行文本）
+  value: '', //初始时的值,默认空字符
+  maxlength: 140, //可输入文本的最大长度,默认500
 }
  
 //例子1
@@ -43430,7 +43499,7 @@ layer.prompt({
 });
         
 layer.tab(options)- tab层
-tab层只单独定制了一个成员，即tab: []
+tab层只单独定制了一个成员,即tab: []
 layer.tab({
   area: ['600px', '300px'],
   tab: [{
@@ -43446,20 +43515,20 @@ layer.tab({
 });        
         
 layer.photo(options)- 相册层
-相册层，也可以称之为图片查看器。它的出场动画从layer内置的动画类型中随机展现。photos支持传入json和直接读取页面图片两种方式。如果是json传入，如下：
+相册层,也可以称之为图片查看器。它的出场动画从layer内置的动画类型中随机展现。photos支持传入json和直接读取页面图片两种方式。如果是json传入,如下：
 
 $.getJSON('/jquery/layer/test/photos.json', function(json){
   layer.photos({
     photos: json
-    ,anim: 5 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
+    ,anim: 5 //0-6的选择,指定弹出图片动画类型,默认随机（请注意,3.0之前的版本用shift参数）
   });
 }); 
 //而返回的json需严格按照如下格式：
 {
   "title": "", //相册标题
   "id": 123, //相册id
-  "start": 0, //初始显示的图片序号，默认0
-  "data": [   //相册包含的图片，数组格式
+  "start": 0, //初始显示的图片序号,默认0
+  "data": [   //相册包含的图片,数组格式
     {
       "alt": "图片名",
       "pid": 666, //图片id
@@ -43469,20 +43538,20 @@ $.getJSON('/jquery/layer/test/photos.json', function(json){
   ]
 }
         
-如果是直接从页面中获取图片，那么需要指向图片的父容器，并且你的img可以设定一些规定的属性（但不是必须的）。
+如果是直接从页面中获取图片,那么需要指向图片的父容器,并且你的img可以设定一些规定的属性（但不是必须的）。
 //HTML示例
 <div id="layer-photos-demo" class="layer-photos-demo">
-  <img layer-pid="图片id，可以不写" layer-src="大图地址" src="缩略图" alt="图片名">
-  <img layer-pid="图片id，可以不写" layer-src="大图地址" src="缩略图" alt="图片名">
+  <img layer-pid="图片id,可以不写" layer-src="大图地址" src="缩略图" alt="图片名">
+  <img layer-pid="图片id,可以不写" layer-src="大图地址" src="缩略图" alt="图片名">
 </div>
  
 //调用示例
 layer.photos({
   photos: '#layer-photos-demo'
-  ,anim: 5 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
+  ,anim: 5 //0-6的选择,指定弹出图片动画类型,默认随机（请注意,3.0之前的版本用shift参数）
 }); 
         
-第二种方式的图片查看器显然更加简单，因为无需像第一种那样返回规定的json，但是他们还是有各自的应用场景的，你可以按照你的需求进行选择。另外，photos还有个tab回调，切换图片时触发。
+第二种方式的图片查看器显然更加简单,因为无需像第一种那样返回规定的json,但是他们还是有各自的应用场景的,你可以按照你的需求进行选择。另外,photos还有个tab回调,切换图片时触发。
 layer.photos({
   photos: json/选择器,
   tab: function(pic, layero){
@@ -43570,8 +43639,8 @@ layui.use(['table', 'form'],function(args){
             ,{field: 'operate', title: '操作', toolbar: '#operate', width: 180}
         ]]
         ,done: function(res, curr, count){
-            //如果是异步请求数据方式，res即为你接口返回的信息。
-            //如果是直接赋值的方式，res即为：{data: [], count: 99} data为当前页数据、count为数据总长度
+            //如果是异步请求数据方式,res即为你接口返回的信息。
+            //如果是直接赋值的方式,res即为：{data: [], count: 99} data为当前页数据、count为数据总长度
             // console.log(res);
             // console.log(curr);  //得到当前页码
             // console.log(count);  //得到数据总量
@@ -43585,11 +43654,11 @@ layui.use(['table', 'form'],function(args){
             ,where: data.field
             ,page: { curr: 1} //重新从第 1 页开始
         });
-        return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+        return false; //阻止表单跳转。如果需要表单跳转,去掉这段即可。
     });
 
     //监听工具条 
-    table.on('tool(test)', function(obj){ //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+    table.on('tool(test)', function(obj){ //注：tool 是工具条事件名,test 是 table 原始容器的属性 lay-filter="对应的值"
         var data = obj.data;              //获得当前行数据
         var layEvent = obj.event;         //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
         var tr = obj.tr;                  //获得当前行 tr 的 DOM 对象（如果有的话）
@@ -43598,7 +43667,7 @@ layui.use(['table', 'form'],function(args){
             location.href = "{php echo $this->createWebUrl('extractedit');}&id=" + obj.data.id
         } else if(layEvent === 'del'){ //删除
             layer.confirm('真的删除行么', function(index){
-                obj.del(); //删除对应行（tr）的DOM结构，并更新缓存
+                obj.del(); //删除对应行（tr）的DOM结构,并更新缓存
                 layer.close(index);
                 //向服务端发送删除指令
             });
@@ -43669,7 +43738,7 @@ layui.use(['table', 'form'],function(args){
     <a class="layui-btn layui-btn-xs check-2" lay-event="check-2">不通过</a>
     {{# } }}
     
-    <!-- 这里同样支持 laytpl 语法，如： -->
+    <!-- 这里同样支持 laytpl 语法,如： -->
     {{#  if(d.auth > 2){ }}
         <a class="layui-btn layui-btn-xs" lay-event="check">审核</a>
     {{#  } }}
