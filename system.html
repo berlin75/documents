@@ -41929,6 +41929,10 @@ protected $searchFields = 'id,operating,member_id,remarks';
 找到控制器所对应的js,然后把要隐藏的列加上visible:false即可
 
 </pre>16、去掉记录后面的删除按钮<textarea>
+删除index.html中table标签的属性接口
+data-operate-edit="{:$auth->check('menu/edit')}" 
+data-operate-del="{:$auth->check('menu/del')}" 
+
 {field: 'operate', title: __('Operate'), table: table,events: Table.api.events.operate, formatter: function (value, row, index) {
         var that = $.extend({}, this);
         var table = $(that.table).clone(true);
@@ -41938,6 +41942,466 @@ protected $searchFields = 'id,operating,member_id,remarks';
         return Table.api.formatter.operate.call(that, value, row, index);
     }
 }
+
+</textarea>导出Excel<textarea>
+< a href="javascript:;" class="btn btn-success btn-export {:$auth->check('stock/stockin/export')?'':'hide'}" title="{:__('Export')}" id="btn-export-file">< i class="fa fa-download">< /i> {:__('Export')}< /a>
+
+use PhpOffice\PhpSpreadsheet\Helper\Sample;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Color;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+
+public function export() {
+    if ($this->request->isPost()) {
+        set_time_limit(0);
+        $search = $this->request->post('search');
+        $ids = $this->request->post('ids');
+        $filter = $this->request->post('filter');
+        $op = $this->request->post('op');
+        $columns = $this->request->post('columns');
+
+        $excel = new Spreadsheet();
+        $excel->getProperties() ->setCreator("FastAdmin") ->setLastModifiedBy("FastAdmin") ->setTitle("标题") ->setSubject("Subject");
+        $excel->getDefaultStyle()->getFont()->setName('Microsoft Yahei');
+        $excel->getDefaultStyle()->getFont()->setSize(12);
+
+        $excel->getDefaultStyle()->applyFromArray(array(
+            'fill'      => array( 'type'  => Fill::FILL_SOLID, 'color' => array('rgb' => '000000') ),
+            'font'      => array( 'color' => array('rgb' => "000000"), ),
+            'alignment' => array( 'vertical'   => Alignment::VERTICAL_CENTER, 'horizontal' => Alignment::HORIZONTAL_CENTER, 'indent'     => 1 ),
+            'borders'   => array( 'allborders' => array('style' => Border::BORDER_THIN), )
+        ));
+
+        $worksheet = $excel->setActiveSheetIndex(0);
+        $worksheet->setTitle('标题');
+
+        $whereIds = $ids == 'all' ? '1=1' : ['id' => ['in', explode(',', $ids)]];
+        $this->request->get(['search' => $search, 'ids' => $ids, 'filter' => $filter, 'op' => $op]);
+        list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+
+        $line = 1;
+        $list = [];
+        $this->model
+            ->field($columns)
+            ->where($where)
+            ->where($whereIds)
+            ->chunk(100, function ($items) use (&$list, &$line, &$worksheet) {
+                $styleArray = array('font' => array( 'color' => array('rgb' => '000000'), 'size'  => 12, 'name'  => 'Verdana' ));
+                $list = $items = collection($items)->toArray();
+                foreach ($items as $key => $v) {
+                    foreach ($v as $k => $ele) {
+                        $tmparray = explode("_text",$k);
+                        if(count($tmparray)>1){
+                            $items[$key][$tmparray[0]] = $ele;
+                            unset($items[$key][$k]);
+                        }
+                    }
+                }
+
+                foreach ($items as $index => $item) {
+                    $line++;
+                    $col = 0;
+                    foreach ($item as $field => $value) {
+                        $worksheet->setCellValueByColumnAndRow($col, $line, $value);
+                        $worksheet->getStyleByColumnAndRow($col, $line)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
+                        $worksheet->getCellByColumnAndRow($col, $line)->getStyle()->applyFromArray($styleArray);
+                        $col++;
+                    }
+                }
+            });
+        $first = array_keys($list[0]);
+        foreach ($first as $k => $ele) {
+            $tmparray = explode("_text",$ele);
+            if(count($tmparray)>1){
+                unset($first[$k]);
+            }
+        }
+
+        foreach ($first as $index => $item) {
+            $worksheet->setCellValueByColumnAndRow($index, 1, __($item));
+        }
+
+        $excel->createSheet();
+        // Redirect output to a client’s web browser (Excel2007)
+        $title = date("YmdHis");
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $title . '.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+
+        // If you're serving to IE over SSL, then the following may be needed
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
+        header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header('Pragma: public'); // HTTP/1.0
+
+        $objWriter = IOFactory::createWriter($excel, 'Xlsx');
+        $objWriter->save('php://output');
+        return;
+    }
+}
+
+//*************************** 自定义export开始
+var submitForm = function (ids, layero) {
+    var options = table.bootstrapTable('getOptions');
+    var columns = [];
+    $.each(options.columns[0], function (i, j) {
+        if (j.field && !j.checkbox && j.visible && j.field != 'operate') {
+            columns.push(j.field);
+        }
+    });
+    var search = options.queryParams({});
+    $("input[name=search]", layero).val(options.searchText);
+    $("input[name=ids]", layero).val(ids);
+    $("input[name=filter]", layero).val(search.filter);
+    $("input[name=op]", layero).val(search.op);
+    $("input[name=columns]", layero).val(columns.join(','));
+    $("form", layero).submit();
+};
+$(document).on("click", ".btn-export", function () {
+    var ids = Table.api.selectedids(table);
+    var page = table.bootstrapTable('getData');
+    var all = table.bootstrapTable('getOptions').totalRows;
+    console.log(ids, page, all);
+    Layer.confirm("请选择导出的选项< form action='" + Fast.api.fixurl("test/export") + "' method='post' target='_blank'>< input type='hidden' name='ids' value='' />< input type='hidden' name='filter' >< input type='hidden' name='op'>< input type='hidden' name='search'>< input type='hidden' name='columns'>< /form>", {
+        title: '导出数据',
+        //btn: ["选中项(" + ids.length + "条)", "本页(" + page.length + "条)", "全部(" + all + "条)"],
+        btn: ["选中项(" + ids.length + "条)"],
+        success: function (layero, index) {
+            $(".layui-layer-btn a", layero).addClass("layui-layer-btn0");
+        }
+        , yes: function (index, layero) {
+            submitForm(ids.join(","), layero);
+            return false;
+        }
+        , btn2: function (index, layero) {
+            var ids = [];
+            $.each(page, function (i, j) {
+                ids.push(j.id);
+            });
+            submitForm(ids.join(","), layero);
+            return false;
+        }
+        , btn3: function (index, layero) {
+            submitForm("all", layero);
+            return false;
+        }
+    })
+});
+//*************************** 自定义export结束
+
+// 为表格绑定事件
+Table.api.bindevent(table);
+
+</textarea>关联表导出Excel<textarea>
+< a href="javascript:;" class="btn btn-success btn-export {:$auth->check('lgwy/gtdetail/export')?'':'hide'}" title="{:__('Export')}" id="btn-export-file">< i class="fa fa-download">< /i> {:__('Export')}< /a>
+
+use PhpOffice\PhpSpreadsheet\Helper\Sample;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Color;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+
+public function export() {
+    if ($this->request->isPost()) {
+        set_time_limit(0);
+        ini_set ('memory_limit', '2048M');
+        $search = $this->request->post('search');
+        $ids = $this->request->post('ids');
+        $filter = $this->request->post('filter');
+        $op = $this->request->post('op');
+        $columns = $this->request->post('columns');
+
+        $whereIds = $ids == 'all' ? '1=1' : ['g.id' => ['in', explode(',', $ids)]];
+        $this->request->get(['search' => $search, 'ids' => $ids, 'filter' => $filter, 'op' => $op]);
+        list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+        $gtTable   = $this->model->getTable();
+        $fTable    = $this->fModel->getTable();
+
+        $sql=$this->model
+            ->table("{$gtTable} g")
+            ->join("{$fTable} f","f.id=g.fang_id")
+            ->field("g.fang_id as 'id' ,g.yymm,f.address,g.cun_gt,g.coop_gt,g.own_gt,g.sum_gt,g.state,g.mod_time")
+            ->where($where)
+            ->where($whereIds)
+            ->select();
+        $sql = collection($sql)->toArray();
+
+        $newExcel = new Spreadsheet();  //创建一个新的excel文档
+        $objSheet = $newExcel->getActiveSheet();  //获取当前操作sheet的对象
+        $objSheet->setTitle('公摊详情');  //设置当前sheet的标题
+
+        $newExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+
+        $objSheet->setCellValue('A1', 'id')
+            ->setCellValue('B1', '年-月')
+            ->setCellValue('C1', '房产')
+            ->setCellValue('D1', '村公摊')
+            ->setCellValue('E1', '社公摊')
+            ->setCellValue('F1', '业主公摊')
+            ->setCellValue('G1', '公摊费用')
+            ->setCellValue('H1', '状态')
+            ->setCellValue('I1', '更新时间');
+        /*--------------开始从数据库提取信息插入Excel表中------------------*/
+        //$i=2;  //定义一个i变量，目的是在循环输出数据是控制行数
+        $count = count($sql);  //计算有多少条数据
+
+        for ($i = 2; $i <= $count+1; $i++) {
+            $objSheet->setCellValue('A' . $i, $sql[$i-2]['id'])
+                ->setCellValue('B' . $i, $sql[$i-2]['yymm'])
+                ->setCellValue('C' . $i, $sql[$i-2]['address'])
+                ->setCellValue('D' . $i, $sql[$i-2]['cun_gt'])
+                ->setCellValue('E' . $i, $sql[$i-2]['coop_gt'])
+                ->setCellValue('F' . $i, $sql[$i-2]['own_gt'])
+                ->setCellValue('G' . $i, $sql[$i-2]['sum_gt'])
+                ->setCellValue('H' . $i, $sql[$i-2]['state'] == 1?'已审批':'未审批')
+                ->setCellValue('I' . $i, date('Y-m-d H:i:s',$sql[$i-2]['mod_time']));
+        }
+
+        /*--------------下面是设置其他信息------------------*/
+        $title = date("Ymd-公摊详情");
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $title . '.xlsx"');
+        header('Cache-Control: max-age=0');
+        $objWriter = IOFactory::createWriter($newExcel, 'Xlsx');
+        $objWriter->save('php://output');
+        return;
+    }
+}
+
+//*************************** 自定义export开始
+var submitForm = function (ids, layero) {
+    var options = table.bootstrapTable('getOptions');
+    console.log(options);
+    var columns = [];
+    $.each(options.columns[0], function (i, j) {
+        if (j.field && !j.checkbox && j.visible && j.field != 'operate') {
+            columns.push(j.field);
+        }
+    });
+    var search = options.queryParams({});
+    $("input[name=search]", layero).val(options.searchText);
+    $("input[name=ids]", layero).val(ids);
+    $("input[name=filter]", layero).val(search.filter);
+    $("input[name=op]", layero).val(search.op);
+    $("input[name=columns]", layero).val(columns.join(','));
+    $("form", layero).submit();
+};
+$(document).on("click", ".btn-export", function () {
+    var ids = Table.api.selectedids(table);
+    var page = table.bootstrapTable('getData');
+    var all = table.bootstrapTable('getOptions').totalRows;
+    console.log(ids, page, all);
+    Layer.confirm("请选择导出的选项< form action='" + Fast.api.fixurl("lgwy/gtdetail/export") + "' method='post' target='_blank'>< input type='hidden' name='ids' value='' />< input type='hidden' name='filter' >< input type='hidden' name='op'>< input type='hidden' name='search'>< input type='hidden' name='columns'>< /form>", {
+        title: '导出数据',
+        btn: ["选中项(" + ids.length + "条)", "本页(" + page.length + "条)", "全部(" + all + "条)"],
+        //btn: ["选中项(" + ids.length + "条)"],
+        success: function (layero, index) {
+            $(".layui-layer-btn a", layero).addClass("layui-layer-btn0");
+        },
+        yes: function (index, layero) {
+            submitForm(ids.join(","), layero);
+            return false;
+        },
+        btn2: function (index, layero) {
+            var ids = [];
+            $.each(page, function (i, j) {
+                ids.push(j.id);
+            });
+            submitForm(ids.join(","), layero);
+            return false;
+        },
+        btn3: function (index, layero) {
+            submitForm("all", layero);
+            return false;
+        }
+    });
+});
+//*************************** 自定义export结束
+
+// 为表格绑定事件
+Table.api.bindevent(table);
+
+</textarea>模板导出Excel<textarea>
+application\admin\controller\muban 模板文件夹
+
+// 控制器test.php
+use PhpOffice\PhpSpreadsheet\Helper\Sample;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Color;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+
+public function export() {
+    if ($this->request->isPost()) {
+        set_time_limit(0);
+        $search = $this->request->post('search');
+        $ids = $this->request->post('ids');
+        $filter = $this->request->post('filter');
+        $op = $this->request->post('op');
+        $columns = $this->request->post('columns');
+
+        //$excel = new PHPExcel();
+        $spreadsheet = new Spreadsheet();
+
+        $spreadsheet->getProperties()
+            ->setCreator("FastAdmin")
+            ->setLastModifiedBy("FastAdmin")
+            ->setTitle("标题")
+            ->setSubject("Subject");
+        $spreadsheet->getDefaultStyle()->getFont()->setName('Microsoft Yahei');
+        $spreadsheet->getDefaultStyle()->getFont()->setSize(12);
+
+        $worksheet = $spreadsheet->setActiveSheetIndex(0);
+        $whereIds = $ids == 'all' ? '1=1' : ['id' => ['in', explode(',', $ids)]];
+        $this->request->get(['search' => $search, 'ids' => $ids, 'filter' => $filter, 'op' => $op]);
+        list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+        
+        $line = 1;
+
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+
+        //如果发送的来源是Selectpage，则转发到Selectpage
+        if ($this->request->request('keyField')) {
+            return $this->selectpage();
+        }
+        list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+        $total = $this->model
+            ->where($whereIds)
+            ->order($sort, $order)
+            ->count();
+
+        $list = $this->model
+            ->where($whereIds)
+            ->order($sort, $order)
+            ->limit($offset, $limit)
+            ->select();
+
+        $list = collection($list)->toArray();
+        $result = array("total" => $total, "rows" => $list);
+        
+        $first = array_keys($list[0]);
+        foreach ($first as $index => $item) {
+            $worksheet->setCellValueByColumnAndRow($index, 1, __($item));
+        }
+        
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load(__DIR__ . '/muban/test.xls');  //读取模板
+        $worksheet = $spreadsheet->getActiveSheet();     //指向激活的工作表
+        $worksheet->setTitle('模板测试标题');
+
+        for($i=0;$i<$total;++$i){ 
+            //向模板表中写入数据
+            $worksheet->setCellValue('A1', '模板测试内容');   //送入A1的内容
+            $worksheet->getCell('B2')->setValue($result['rows'][$i]['week']);    //星期
+            $worksheet->getCell('d2')->setValue($result['rows'][$i]['genderdata']);  //性别
+            $worksheet->getCell('f2')->setValue($result['rows'][$i]['hobbydata']);  //爱好
+            $worksheet->getCell('b3')->setValue($result['rows'][$i]['title']);  //标题
+            $worksheet->getCell('b4')->setValue($result['rows'][$i]['content']);  //内容
+            
+            
+            $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xls');
+            //下载文档
+            header('Content-Type: application/vnd.ms-excel');
+            header('Content-Disposition: attachment;filename="'. date('Y-m-d') . $result['rows'][$i]['admin_id'] .'_test'.'.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }        
+
+        return;
+    }
+}
+
+// test.html
+< a href="javascript:;" class="btn btn-success btn-export {:$auth->check('test/export')?'':'hide'}" title="{:__('Export')}" id="btn-export-file">< i class="fa fa-download">< /i> {:__('Export')}< /a>
+
+// test.js
+//*************************** 自定义export开始
+var submitForm = function (ids, layero) {
+    var options = table.bootstrapTable('getOptions');
+    console.log(options);
+    var columns = [];
+    $.each(options.columns[0], function (i, j) {
+        if (j.field && !j.checkbox && j.visible && j.field != 'operate') {
+            columns.push(j.field);
+        }
+    });
+    var search = options.queryParams({});
+    $("input[name=search]", layero).val(options.searchText);
+    $("input[name=ids]", layero).val(ids);
+    $("input[name=filter]", layero).val(search.filter);
+    $("input[name=op]", layero).val(search.op);
+    $("input[name=columns]", layero).val(columns.join(','));
+    $("form", layero).submit();
+};
+$(document).on("click", ".btn-export", function () {
+    var ids = Table.api.selectedids(table);
+    var page = table.bootstrapTable('getData');
+    var all = table.bootstrapTable('getOptions').totalRows;
+    console.log(ids, page, all);
+    Layer.confirm("请选择导出的选项< form action='" + Fast.api.fixurl("test/export") + "' method='post' target='_blank'>< input type='hidden' name='ids' value='' />< input type='hidden' name='filter' >< input type='hidden' name='op'>< input type='hidden' name='search'>< input type='hidden' name='columns'>< /form>", {
+        title: '导出数据',
+        //btn: ["选中项(" + ids.length + "条)", "本页(" + page.length + "条)", "全部(" + all + "条)"],
+        btn: ["选中项(" + ids.length + "条)"],
+        success: function (layero, index) {
+            $(".layui-layer-btn a", layero).addClass("layui-layer-btn0");
+        }
+        , yes: function (index, layero) {
+            submitForm(ids.join(","), layero);
+            return false;
+        }
+        ,
+        btn2: function (index, layero) {
+            var ids = [];
+            $.each(page, function (i, j) {
+                ids.push(j.id);
+            });
+            submitForm(ids.join(","), layero);
+            return false;
+        }
+        ,
+        btn3: function (index, layero) {
+            submitForm("all", layero);
+            return false;
+        }
+    })
+});
+//*************************** 自定义export结束
+
+// 为表格绑定事件
+Table.api.bindevent(table);
 
 </textarea>
 </div>
