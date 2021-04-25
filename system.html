@@ -12373,14 +12373,16 @@ xargs -a ./list.txt cp --parents -t ./temp
 cd temp 
 tar -czf modules.tar.gz *
 
+### 从git记录中提取修改的文件,并保持完整的路径
 #!/bin/bash
-cd /mnt/e/wendao/group &&
-rm /mnt/e/wendao/group_cmd/list.txt && 
-rm -rf /mnt/e/wendao/group_cmd/temp &&
-read -p "how many rows: " rows &&
-git log -$rows --name-only | grep '/' | awk '{print $1}' > /mnt/e/wendao/group_cmd/list.txt && 
-mkdir /mnt/e/wendao/group_cmd/temp &&
-xargs -a /mnt/e/wendao/group_cmd/list.txt cp --parents -t /mnt/e/wendao/group_cmd/temp
+rm /mnt/e/wendao/group_cmd/list.txt
+rm -rf /mnt/e/wendao/group_cmd/temp
+cd /mnt/e/wendao/group
+read -p "how many rows: " rows
+git log -$rows --name-only | grep '/' | awk '{print $1}' > /mnt/e/wendao/group_cmd/list.txt
+sort -k2n /mnt/e/wendao/group_cmd/list.txt | awk '{if ($0!=line) print;line=$0}' > /mnt/e/wendao/group_cmd/list_unique.txt
+mkdir /mnt/e/wendao/group_cmd/temp
+xargs -a /mnt/e/wendao/group_cmd/list_unique.txt cp --parents -t /mnt/e/wendao/group_cmd/temp
 
 </pre>
 
@@ -41015,6 +41017,9 @@ table.bootstrapTable('refresh', {});  //刷新当前页面
 var ids = Table.api.selectedids(table);
 
 Fast.api.close(data);              //关闭弹出框
+
+bootstrap提示框tooltip的使用
+< i class="fa fa-question-circle hidden-xs" data-toggle="tooltip" data-title="有付款或者确认收货订单的会员数量" data-original-title="" title="">< /i>
 
 </pre>\fast\Http<textarea>
 $url = "https://dm-53.data.aliyun.com/rest/160601/ocr/ocr_vehicle.json";
