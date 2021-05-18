@@ -11313,6 +11313,26 @@ git config --system alias.lg "log --color --graph --pretty=format:'%Cred%h%Crese
 </pre>
 
 <h4>git具体操作流程</h4><pre>
+简易的命令行入门教程:
+Git 全局设置:
+git config --global user.name "berlin75"
+git config --global user.email "465137869@qq.com"
+
+创建 git 仓库:
+mkdir zhutuidao
+cd zhutuidao
+git init
+touch README.md
+git add README.md
+git commit -m "first commit"
+git remote add origin https://gitee.com/berlin75/zhutuidao.git
+git push -u origin master
+
+已有仓库?
+cd existing_git_repo
+git remote add origin https://gitee.com/berlin75/zhutuidao.git
+git push -u origin master
+
 【 帮助文档 】
 git --help
 git help add
