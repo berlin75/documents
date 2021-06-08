@@ -41069,6 +41069,68 @@ if (!$res) $this->error('实名认证失败');
 $res = json_decode($res, true);
 if ($res['resp']['code'] != 0) $this->error($res['resp']['desc']);
 
+</textarea>表格导出时正则替换<textarea>
+//是否显示导出按钮
+showExport: true,
+//导出表格方式（默认basic：只导出当前页的表格数据；all：导出所有数据；selected：导出选中的数据）
+exportDataType: "basic",
+//导出文件类型
+exportTypes: ['json', 'xml', 'csv', 'txt', 'sql', 'excel']
+exportOptions: {
+    fileName: 'export_' + Moment().format("YYYY-MM-DD"),
+    preventInjection: false,
+    mso: {
+        onMsoNumberFormat: function (cell, row, col) {
+            return !isNaN($(cell).text()) ? '\\@' : '';
+        },
+    },
+    ignoreColumn: [0, 'operate'],
+    onCellHtmlData: function ($cell, row, col, htmlData){
+        var html = $.parseHTML(htmlData);
+
+        var result = '';
+        $.each(html, function () {
+            var reg = /\d+\((.+)\)-\(/;
+            if(reg.test($(this).text())){
+                result += RegExp.$1;
+            }else if (typeof $(this).html() === 'undefined') {
+                result += $(this).text();
+            }else if (jQuery().bootstrapTable === undefined ||
+                ($(this).hasClass('filterControl') !== true &&
+                    $cell.parents('.detail-view').length === 0)) {
+                result += $(this).html();
+            }
+        });
+
+        $.each(html, function () {
+            if ($(this).is("input")) {
+                result += $cell.find('input').eq(inputidx++).val();
+            }
+            else if ($(this).is("select")) {
+                result += $cell.find('select option:selected').eq(selectidx++).text();
+            }
+            else if ($(this).is("img")) {
+                var src = $(this).attr('src');
+                if (src.indexOf('http') === -1) {
+                    $(this).attr('src', window.location.origin + src);
+                }
+                $(this).attr("width", "100px").attr("size", "2");
+                result += $(this).get(0).outerHTML;
+            } else {
+                if (typeof $(this).html() === 'undefined') {
+                    result += $(this).text();
+                }
+                else if (jQuery().bootstrapTable === undefined ||
+                    ($(this).hasClass('filterControl') !== true &&
+                        $cell.parents('.detail-view').length === 0)) {
+                    result += $(this).html();
+                }
+            }
+        }
+        return result;
+    }
+},
+
 </textarea>配置数据格式<textarea>
 public function index(){
     $siteList = [
