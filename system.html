@@ -242,6 +242,17 @@ tdn tab -> text-decoration: none;
 
 批量重命名 shift + ctrl + l
 
+批量重命名脚本
+@echo off
+SETLOCAL ENABLEDELAYEDEXPANSION
+for /f "delims=" %%a in ('dir /b^|findstr ".php"') do (
+set name=%%a
+set name=!name:group420_dev_073=a_321city_com!
+ren "%%a" "!name!"
+)
+
+pause
+
 【 rest client插件 】
 /test.http
 ### baidu
@@ -41176,6 +41187,203 @@ public function index(){
     return $this->view->fetch();
 }
 
+</textarea>动态规格 fieldlist</textarea>
+< dl class="fieldlist" data-template="basictpl" data-name="row[basic]">
+    < dd>
+        <ins>规格名称</ins>
+        <ins>直购价</ins>
+        <ins>兑换价</ins>
+        <ins>消耗积分</ins>
+        <ins>补贴</ins>
+        <ins>库存</ins>
+        <ins>主图</ins>
+    </dd>
+    <dd><a href="javascript:;" class="btn btn-sm btn-success btn-append"><i class="fa fa-plus"></i> {:__('Append')}</a></dd>
+    <!--请注意 dd和textarea间不能存在其它任何元素，实际开发中textarea应该添加个hidden进行隐藏-->
+    < textarea name="row[spec]" class="form-control hidden" cols="30" rows="5">[]</textarea>
+</dl>
+< script id="basictpl" type="text/html">
+    <dd class="form-inline">
+        <ins><input type="text" name="<%=name%>[<%=index%>][name]" class="form-control" value="<%=row.name%>" placeholder="规格名称" size="10"/></ins>
+        <ins><input type="text" name="<%=name%>[<%=index%>][buy_money]" class="form-control" value="<%=row.size%>" placeholder="buy_money"/></ins>
+        <ins><input type="text" name="<%=name%>[<%=index%>][exchange_money]" class="form-control" value="<%=row.exchange_money%>" placeholder="兑换价" size="10"/></ins>
+        <ins><input type="text" name="<%=name%>[<%=index%>][point]" class="form-control" value="<%=row.point%>" placeholder="消耗积分"/></ins>
+        <ins><input type="text" name="<%=name%>[<%=index%>][subsidy]" class="form-control" value="<%=row.subsidy%>" placeholder="补贴"/></ins>
+        <ins><input type="text" name="<%=name%>[<%=index%>][stock]" class="form-control" value="<%=row.stock%>" placeholder="库存" size="10"/></ins>
+        <ins style="margin-right:150px;">
+            <div class="input-group">
+                <input id="c-image<%=index%>" data-rule="" class="form-control" size="50" name="<%=name%>[<%=index%>][image]" type="text" value="<%=row.image%>" placeholder="主图" style="width:243px">
+                <div class="input-group-addon no-border no-padding">
+                    <span><button type="button" id="faupload-image<%=index%>" class="btn btn-danger faupload" data-input-id="c-image<%=index%>" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-multiple="false" data-preview-id="p-image<%=index%>"><i class="fa fa-upload"></i> {:__('Upload')}</button></span>
+                    <span><button type="button" id="fachoose-image<%=index%>" class="btn btn-primary fachoose" data-input-id="c-image<%=index%>" data-mimetype="image/*" data-multiple="false"><i class="fa fa-list"></i> {:__('Choose')}</button></span>
+                </div>
+                <span class="msg-box n-right" for="c-image<%=index%>"></span>
+            </div>
+            <ul class="row list-inline faupload-preview" id="p-image<%=index%>"></ul>
+        </ins>
+        <!--下面的两个按钮务必保留-->
+        <span class="btn btn-sm btn-danger btn-remove"><i class="fa fa-times"></i></span>
+        <span class="btn btn-sm btn-primary btn-dragsort"><i class="fa fa-arrows"></i></span>
+    </dd>
+< /script>
+
+</textarea>动态规格</textarea>
+< div class="control-group">
+    <label class="control-label"> </label>
+    <div class="controls">
+        <button id="add_lv1" class="btn btn-primary" type="button">添加规格项</button>
+        <button id="update_table" class="btn btn-danger" type="button">刷新规格项目表</button>
+    </div>
+< /div>
+< div id="lv_table_con" class="control-group" style="display: none;">
+    <label class="control-label">规格项目表</label>
+    <div class="controls">
+        <div id="lv_table"></div>
+    </div>
+< /div>
+< script src="http://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+< script>
+    $(document).ready(function() {
+        var current_lv1 = current_lv2 = 0;
+
+        $('#add_lv1').on('click', function() {
+            var last = $('.control-group.lv1:last');
+
+            var lv1HTML = `<div class="control-group lv1">
+                    <label class="control-label" style="font-weight:bold;">规格名称</label>
+                    <div class="controls">
+                        <input type="text" class='lv1_class' name="row[spec_name][${current_lv1}]" data-lv1="${current_lv1}" placeholder="规格名称">
+                        <button class="btn btn-danger remove_lv1" type="button">X</button>
+                        <button class="btn btn-primary add_lv2" type="button">添加参数</button>
+                    </div>
+                    <div class="controls lv2s"></div>
+                </div>`;
+
+            if (!last || last.length == 0) {
+                $(this).parents('.control-group').eq(0).after(lv1HTML);
+            } else {
+                last.after(lv1HTML);
+            }
+            current_lv1++;
+        });
+
+        $(document).on('click', '.remove_lv1', function() {
+            $(this).parents('.lv1').remove();
+        });
+
+        $(document).on('click', '.add_lv2', function() {
+            var tmp_lv1 = $(this).siblings('input').data("lv1");
+            var lv2HTML = `<div style="margin-top: 5px;display: inline-block;margin-right: 10px;">
+                    <input type="text" class='lv2_class' name="row[spec_value][${tmp_lv1}][]" placeholder="参数名称">
+                    <button class="btn remove_lv2" type="button">X</button>
+                </div>`;
+
+            $(this).parents('.lv1').find('.lv2s').append(lv2HTML);
+        });
+
+        $(document).on('click', '.remove_lv2', function() {
+            $(this).parent().remove();
+        });
+
+        // 刷新规格项目表
+        $('#update_table').on('click', function() {
+            var lv1Arr = $('input[class="lv1_class"]');
+            if (!lv1Arr || lv1Arr.length == 0) {
+                $('#lv_table_con').hide();
+                $('#lv_table').html('');
+                return;
+            }
+            for (var i = 0; i < lv1Arr.length; i++) {
+                var lv2Arr = $(lv1Arr[i]).parents('.lv1').find('input[class="lv2_class"]');
+                if (!lv2Arr || lv2Arr.length == 0) {
+                    alert('请先删除无参数的规格项！');
+                    return;
+                }
+            }
+
+            var tableHTML = '';
+            tableHTML += '<table class="table table-striped table-bordered table-hover table-nowrap">';
+            tableHTML += '    <thead>';
+            tableHTML += '        <tr>';
+            for (var i = 0; i < lv1Arr.length; i++) {
+                tableHTML += '<th>' + $(lv1Arr[i]).val() + '</th>';
+            }
+            tableHTML += '            <th>直购价</th>';
+            tableHTML += '            <th>兑换价</th>';
+            tableHTML += '            <th>消耗积分</th>';
+            tableHTML += '            <th>补贴</th>';
+            tableHTML += '            <th>库存</th>';
+            tableHTML += '        </tr>';
+            tableHTML += '    </thead>';
+            tableHTML += '    <tbody>';
+             
+            var numsArr = new Array();
+            var idxArr = new Array();
+            for (var i = 0; i < lv1Arr.length; i++) {
+                numsArr.push($(lv1Arr[i]).parents('.lv1').find('input[class="lv2_class"]').length);
+                idxArr[i] = 0;
+            }
+             
+            var len = 1;
+            var rowsArr = new Array();
+            for (var i = 0; i < numsArr.length; i++) {
+                len = len * numsArr[i];
+                 
+                var tmpnum = 1;
+                for (var j = numsArr.length - 1; j > i; j--) {
+                    tmpnum = tmpnum * numsArr[j];
+                }
+                rowsArr.push(tmpnum);
+            }
+             
+            for (var i = 0; i < len; i++) {
+                tableHTML += '        <tr data-row="' + (i+1) + '">';
+                 
+                var name = '';
+                for (var j = 0; j < lv1Arr.length; j++) {
+                    var n = parseInt(i / rowsArr[j]);
+                    if (j == 0) {
+                    } else if (j == lv1Arr.length - 1) {
+                        n = idxArr[j];
+                        if (idxArr[j] + 1 >= numsArr[j]) {
+                            idxArr[j] = 0;
+                        } else {
+                            idxArr[j]++;
+                        }
+                    } else {
+                        var m = parseInt(i / rowsArr[j]);
+                        n = m % numsArr[j];
+                    }
+                     
+                    var text = $(lv1Arr[j]).parents('.lv1').find('input[class="lv2_class"]').eq(n).val();
+                    if (j != lv1Arr.length - 1) {
+                        name += text + ',';
+                    } else {
+                        name += text;
+                    }
+                     
+                    if (i % rowsArr[j] == 0) {
+                        tableHTML += '<td rowspan="' + rowsArr[j] + '" data-rc="' + (i+1) + '_' + (j+1) + '">' + text + '</td>';
+                    }
+                }
+                
+                
+                tableHTML += '<td><input type="text" name="row[buy_money][]" /></td>';
+                tableHTML += '<td><input type="text" name="row[exchange_money][]" /></td>';
+                tableHTML += '<td><input type="text" name="row[point][]" /></td>';
+                tableHTML += '<td><input type="text" name="row[subsidy][]" /></td>';
+                tableHTML += '<td><input type="text" name="row[stock][]" /></td>';
+                tableHTML += '</tr>';
+            }
+            tableHTML += '</tbody>';
+            tableHTML += '</table>';
+             
+            $('#lv_table_con').show();
+            $('#lv_table').html(tableHTML);
+        });
+    });
+</script>
+
 </textarea><pre>
 表格组件的formatter属性
 fastadmin前端表格组件使用的是bootstrap-table,如果我们想要自定义表格的内容,可以使用formatter属性。最常规的用法如下：
@@ -41228,6 +41436,37 @@ fastadmin为了方便大家快速开发封装了一些常见的formatter供大�
     custom: {0: 'success', 1: 'error'},   // 扩展额外的颜色success、warning、danger、info
     searchList: {0: '启用', 1: '禁用'}
  }
+
+</textarea><pre>
+fastadmin下拉选择selectpage组件自定义参数查询
+1.定义查询过滤条件，查询指定数据用于选择
+(1)定义data-params单种类条件
+data-params='{"custom[type_pid]":"0"}'
+(2)定义data-params查询判断语法条件
+data-params='{"custom[type_pid][0]":"not in","custom[type_pid][1]":"0"}'
+(3)定义非默认主键值
+data-primary-key="type_id"
+完整示例：
+< input id="c-type_id" data-rule="required" data-source="mac_type/index" data-field="type_name" data-params='{"custom[type_pid][0]":"not in","custom[type_pid][1]":"0"}' data-primary-key="type_id" class="form-control selectpage" name="row[type_id]" type="text" value="{$row.type_id|htmlentities}">
+
+</pre>自定义查询参数和动态修改selectpage的data-source<textarea>
+edit: function () {
+    $("#c-use_goods").data("params", function(){
+        return {custom: {use_goods_type: $("input[type=radio]:checked").val()}};
+    });
+
+    $(document).on("change", "input[type=radio]", function () {
+        if($("input[type=radio]:checked").val() == 1){
+            $("#c-use_goods_text").data("selectPageObject").option.data = "point_good/index";
+        }else if($("input[type=radio]:checked").val() == 2){
+            $("#c-use_goods_text").data("selectPageObject").option.data = "good/index";
+        }else if($("input[type=radio]:checked").val() == 3){
+            $("#c-use_goods_text").data("selectPageObject").option.data = "mall_good/index";
+        }
+    })
+
+    Controller.api.bindevent();
+},
 
 </textarea><pre>
 1、每条记录后面增加操作按钮
