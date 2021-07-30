@@ -41199,7 +41199,7 @@ public function index(){
         <ins>主图</ins>
     </dd>
     <dd><a href="javascript:;" class="btn btn-sm btn-success btn-append"><i class="fa fa-plus"></i> {:__('Append')}</a></dd>
-    <!--请注意 dd和textarea间不能存在其它任何元素，实际开发中textarea应该添加个hidden进行隐藏-->
+    <!--请注意 dd和textarea间不能存在其它任何元素,实际开发中textarea应该添加个hidden进行隐藏-->
     < textarea name="row[spec]" class="form-control hidden" cols="30" rows="5">[]</textarea>
 </dl>
 < script id="basictpl" type="text/html">
@@ -41439,7 +41439,7 @@ fastadmin为了方便大家快速开发封装了一些常见的formatter供大�
 
 </textarea><pre>
 fastadmin下拉选择selectpage组件自定义参数查询
-1.定义查询过滤条件，查询指定数据用于选择
+1.定义查询过滤条件,查询指定数据用于选择
 (1)定义data-params单种类条件
 data-params='{"custom[type_pid]":"0"}'
 (2)定义data-params查询判断语法条件
@@ -41546,36 +41546,6 @@ table.bootstrapTable({
         ]
     ]
 });
-
-</textarea>表格按钮的显示与否<textarea>
-方法一
-{
-    field: 'operate', title: '', table: table, buttons: [ //修改自带控件
-        {
-            name: 'fh',
-            text: '发货',
-            title: '发货',
-            icon: 'fa fa-flash',
-            classname: 'btn btn-xs btn-primary btn-dialog',
-            url: 'order/order/fh'
-        }
-    ],
-    events: Table . api . events . operate, formatter: function (value, row, index) {
-        var that = $.extend({}, this);
-        var table = $(that . table) . clone(true);
-        if (row . order_status == 2) { //判断条件
-            $(table) . data("operate-fh", null); //隐藏控件
-        }
-        that . table = table;
-        return Table . api . formatter . operate . call(that, value, row, index);
-    }
-}
-
-方法二
-直接在buttons控件中追加visible属性
-visible: function (row) { //返回true时按钮显示,返回false隐藏
-    return row.status==='in';
-}
 
 </textarea><textarea>
 {field: 'uid', title: __('解绑'), table: table, buttons: [
@@ -42269,6 +42239,50 @@ data-operate-del="{:$auth->check('menu/del')}"
     }
 }
 
+</textarea>表格按钮的显示与否<textarea>
+方法一
+{
+    field: 'operate', title: '', table: table, buttons: [ //修改自带控件
+        {
+            name: 'fh',
+            text: '发货',
+            title: '发货',
+            icon: 'fa fa-flash',
+            classname: 'btn btn-xs btn-primary btn-dialog',
+            url: 'order/order/fh'
+        }
+    ],
+    events: Table.api.events.operate, formatter: function (value, row, index) {
+        var that = $.extend({}, this);
+        var table = $(that.table).clone(true);
+        if (row.order_status == 2) {           //判断条件
+            $(table).data("operate-fh", null); //隐藏控件
+        }
+        that.table = table;
+        return Table.api.formatter.operate.call(that, value, row, index);
+    }
+}
+
+方法二
+直接在buttons控件中追加visible属性
+visible: function (row) { //返回true时按钮显示,返回false隐藏
+    return row.status === 'in';
+}
+
+可以在JS中对operate一列修改它的formatter来实现这个功能,具体可以参考public/assets/js/backend/auth/admin.js中的代码,如果想要实现只隐藏其中的编辑按钮,可以使用如下的代码
+{field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: function (value, row, index) {
+    var that = $.extend({}, this);
+    if (row.id == Config.admin.id) {
+        return '';
+    }
+    var table = $(that.table).clone(true);
+    if (row.id == 5)
+        $(table).data("operate-edit", null);
+    that.table = table;
+    return Table.api.formatter.operate.call(that, value, row, index);
+}}
+这段代码的意思是如果id=5则把编辑按钮隐藏掉,实现原理就是我们复制当前的this对象,同时克隆一个表格,再修改表格的data-operate-edit的值为null,这样即达到隐藏的目的
+    
 </textarea>导出Excel<textarea>
 < a href="javascript:;" class="btn btn-success btn-export {:$auth->check('stock/stockin/export')?'':'hide'}" title="{:__('Export')}" id="btn-export-file">< i class="fa fa-download">< /i> {:__('Export')}< /a>
 
@@ -42493,7 +42507,7 @@ public function export() {
             ->setCellValue('H1', '状态')
             ->setCellValue('I1', '更新时间');
         /*--------------开始从数据库提取信息插入Excel表中------------------*/
-        //$i=2;  //定义一个i变量，目的是在循环输出数据是控制行数
+        //$i=2;  //定义一个i变量,目的是在循环输出数据是控制行数
         $count = count($sql);  //计算有多少条数据
 
         for ($i = 2; $i <= $count+1; $i++) {
@@ -42619,7 +42633,7 @@ public function export() {
         //设置过滤方法
         $this->request->filter(['strip_tags']);
 
-        //如果发送的来源是Selectpage，则转发到Selectpage
+        //如果发送的来源是Selectpage,则转发到Selectpage
         if ($this->request->request('keyField')) {
             return $this->selectpage();
         }
