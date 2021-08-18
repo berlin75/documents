@@ -16528,6 +16528,12 @@ date '+%x'        // 06/14/2018
 date '+%T'        // 20:52:49
 date '+%X'        // 08:52:49 PM
 
+获取当前的时间
+date=date "+%Y-%m-%d %H:%M:%S"  // 2021-08-17 10:11:20
+
+获取前一天的时间
+date=date -d yesterday "+%Y%m%d"
+
 echo 按格式输出
 date '+user_time: $1:%M %P -hey'   // user_time: $1:52 pm -hey
 
@@ -24194,6 +24200,35 @@ crontab -e
 i < 60; 就要改成 i < 420
 同时crontab -e 中也要改成
 */7 * * * * /bin/bash sh脚本绝对路径
+
+宝塔面板计划任务自定义任意周期
+任务类型选择shell脚本
+周期选择N分钟（1分钟）
+
+#!/bin/bash
+PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
+export PATH
+step=1
+for (( i = 0; i < 60; i=(i+step) )); 
+do
+php /www/wwwroot/a.php
+sleep $step
+done
+exit 0
+shell里有个循环,循环60次,每次延时step=1s,刚好1分钟。
+也就是1秒执行 /www/wwwroot/test.php
+需要其他运行周期可以配置
+
+2分钟执行一次,测试结果显示执行时间不准确
+执行周期 N小时 1时
+
+#!/bin/bash
+step=2 #间隔的分钟数,不能大于60
+for (( i = 0; i < 60; i=(i+step) )); do
+date +"%d-%m-%Y--%H:%M:%S"
+sleep `expr $step \* 60`
+done
+exit 0
 
 【 Cron配置类型 】
 Cron有两种配置文件类型用于调度自动化任务。
